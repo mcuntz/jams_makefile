@@ -131,7 +131,7 @@ ifeq (intel11,$(compiler))
         # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
         F90FLAGS  = $(opti) -vec-report0 -override-limits
     endif
-    F90FLAGS += -cpp -fp-model precise $(parall) -m64 -module $(OBJPATH)
+    F90FLAGS += -assume byterecl -cpp -fp-model precise $(parall) -m64 -module $(OBJPATH)
     LDFLAGS  += -openmp
     DEFINES  += -DINTEL
     #
