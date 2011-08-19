@@ -31,10 +31,15 @@ release  = release
 netcdf   = netcdf3
 # Possible linking: static, shared, dynamic (last two are equal)
 static   = shared
+# Possible proj: true, false
+proj     = false
 
+$(info $(Stephan))
+$(info 'CMD:'$(MAKECMDGOALS))
+#$(info 'Var:'$(.VARIABLES))
 # --- CHECKS ---------------------------------------------------
 # check input
-ifneq ($(MAKECMDGOALS),$(findstring $(MAKECMDGOALS),clean cleanclean))
+#ifneq ($(MAKECMDGOALS),$(findstring $(MAKECMDGOALS),clean cleanclean))
     ifeq (,$(findstring $(release),debug release))
         $(error Error: release '$(release)' not found; must be in 'debug release')
     endif
@@ -44,9 +49,12 @@ ifneq ($(MAKECMDGOALS),$(findstring $(MAKECMDGOALS),clean cleanclean))
         endif
     endif
     ifeq (,$(findstring $(static),static shared dynamic))
-        $(static Error: static '$(static)' not found; must be in 'static shared dynamic')
+        $(error Error: static '$(static)' not found; must be in 'static shared dynamic')
     endif
-endif
+    ifeq (,$(findstring $(proj),true false))
+        $(error Error: proj '$(proj)' not found; must be in 'true false')
+    endif
+#endif
 
 OBJPATH = $(strip $(SRCPATH))/.$(strip $(release))
 
@@ -127,11 +135,35 @@ ifneq ($(netcdf),)
         ifeq ($(netcdf),netcdf4)
             SZLIB     = /usr/local/szip/2.1/lib
             HDF5LIB   = /usr/local/hdf5/1.8.6/lib
-            LIBS     += -lz -L$(SZLIB) -lsz -L$(HDF5ZLIB) -lhdf5 -lhdf5_hl
+            LIBS     += -lz -L$(SZLIB) -lsz -L$(HDF5LIB) -lhdf5 -lhdf5_hl
             RPATH    += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
         endif
     endif
 endif
+
+# --- PROJ --------------------------------------------------
+# ifneq ($(proj),)
+#     ifeq ($(proj),$(findstring $(proj),true false))
+#         PROJDIR =
+#	  ifeq ($(proj),true)
+# 	      PROJDIR=/usr/local/fproj/4.7.0_intel11.1.075
+#	  endif
+#         NCINC = $(strip $(NCDIR))/include
+#         NCLIB = $(strip $(NCDIR))/lib
+
+#         INCLUDES += -I$(NCINC)
+#         LIBS     += -L$(NCLIB) -lproj -lprojf
+#         RPATH    += -Wl,-rpath,$(NCLIB)
+
+#         # libraries for proj4, ignored for proj3
+#         ifeq ($(proj),proj4)
+#             SZLIB     = /usr/local/szip/2.1/lib
+#             HDF5LIB   = /usr/local/hdf5/1.8.6/lib
+#             LIBS     += -lz -L$(SZLIB) -lsz -L$(HDF5LIB) -lhdf5 -lhdf5_hl
+#             RPATH    += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
+#         endif
+#     endif
+# endif
 
 # --- MKL ---------------------------------------------------
 MKL       = /usr/local/intel/composerxe-2011.4.191/mkl
