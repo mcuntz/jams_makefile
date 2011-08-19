@@ -21,8 +21,13 @@ MAKEPATH = . # where are the make files (. is current directory, .. is parent di
 #SRCPATH  = . # where are the source files; use fortran_test to run test directory
 SRCPATH  = ./fortran_test
 PROGPATH = . # where shall be the executable
-
-PROGNAME = canveg # Name of executable
+#
+# check for f90 files
+ifeq (,$(wildcard $(strip $(SRCPATH))/*.f90))
+    $(error Error: no f90 files in SourcePath "$(SRCPATH)")
+endif
+#
+PROGNAME = Prog # Name of executable
 
 # Switches
 # Possible releases: release, debug
@@ -45,9 +50,6 @@ opti     = -O3
 parall   =
 # Possible cdi: true false
 cdi      = false
-
-$(info 'imsl'$(imsl))
-#$(info 'CMD:'$(MAKECMDGOALS))
 
 # --- CHECKS ---------------------------------------------------
 # check input
@@ -245,10 +247,14 @@ ifeq ($(cdi),true)
     #
     CDIDIR   = /usr/local/src/sci-libs/cdo-1.4.7/libcdi/src/.libs
     #
-    LIBS  += -L$(CDI) -lcdi 
+    LIBS  += -L$(CDIDIR) -lcdi 
     #
     ifeq (,$(findstring mo_cdi.f90,$(wildcard $(strip $(SRCPATH))/*.f90)))
          $(error Error: The file mo_cdi.f90 must be in Sourcepath: $(SRCPATH)!)
+    endif
+    #
+    ifneq (netcdf4,$(netcdf))
+         $(error Error: cdi requires netcdf4: set 'netcdf=netcdf4'!)
     endif
     #
 endif
