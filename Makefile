@@ -163,8 +163,8 @@ ifneq ($(imsl),)
      IMSLINC = $(IMSLDIR)/include
      IMSLLIB = $(IMSLDIR)/lib
      #
-     INCLUDE += -I$(IMSLINC)
-     LIBS    += -z muldefs
+     INCLUDES += -I$(IMSLINC)
+     LIBS     += -z muldefs
      #
      ifneq ($(static),static)
         LIBS += -i_dynamic
