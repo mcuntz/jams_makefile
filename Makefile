@@ -39,40 +39,66 @@ imsl     =
 mkl      = false
 # Possible compiler: intel11
 compiler = intel11
+# Possible Optimization: -O0, -O1, -O2, -O3, -O4, -O5
+opti     = -O3
+# Possible Parallelization: -openmp, ""
+parall   =
+# Possible cdi: true false
+cdi      = false
 
 $(info 'imsl'$(imsl))
 #$(info 'CMD:'$(MAKECMDGOALS))
 
 # --- CHECKS ---------------------------------------------------
 # check input
-#ifneq ($(MAKECMDGOALS),$(findstring $(MAKECMDGOALS),clean cleanclean))
-    ifeq (,$(findstring $(release),debug release))
-        $(error Error: release '$(release)' not found; must be in 'debug release')
+#
+ifeq (,$(findstring $(release),debug release))
+    $(error Error: release '$(release)' not found; must be in 'debug release')
+endif
+#
+ifneq ($(netcdf),)
+    ifeq (,$(findstring $(netcdf),netcdf3 netcdf4))
+        $(error Error: netcdf '$(netcdf)' not found; must be in 'netcdf3 netcdf4 ""')
     endif
-    ifneq ($(netcdf),)
-        ifeq (,$(findstring $(netcdf),netcdf3 netcdf4))
-            $(error Error: netcdf '$(netcdf)' not found; must be in 'netcdf3 netcdf4')
-        endif
+endif
+#
+ifeq (,$(findstring $(static),static shared dynamic))
+    $(error Error: static '$(static)' not found; must be in 'static shared dynamic')
+endif
+#
+ifeq (,$(findstring $(proj),true false))
+    $(error Error: proj '$(proj)' not found; must be in 'true false')
+endif
+#
+ifneq ($(imsl),)
+    ifeq (,$(findstring $(imsl),vendor imsl))
+        $(error Error: imsl '$(imsl)' not found; must be in 'vendor imsl')
     endif
-    ifeq (,$(findstring $(static),static shared dynamic))
-        $(error Error: static '$(static)' not found; must be in 'static shared dynamic')
+endif
+#
+ifeq (,$(findstring $(mkl),true false))
+    $(error Error: mkl '$(mkl)' not found; must be in 'true false')
+endif
+#
+ifeq (,$(findstring $(compiler),intel11))
+    $(error Error: compiler '$(compiler)' not found; must be in 'intel11')
+endif
+#
+ifeq (,$(findstring $(opti),-O0 -O1 -O2 -O3 -O4 -O5))
+    $(error Error: opti '$(opti)' not found; must be in '-O0 -O1 -O2 -O3 -O4 -O5')
+endif
+#
+ifneq ($(parall),)
+    ifeq (,$(findstring $(parall),-openmp))
+        $(error Error: parall '$(parall)' not found; must be in '-openmp ""')
     endif
-    ifeq (,$(findstring $(proj),true false))
-        $(error Error: proj '$(proj)' not found; must be in 'true false')
-    endif
-    ifneq ($(imsl),)
-        ifeq (,$(findstring $(imsl),vendor imsl))
-            $(error Error: imsl '$(imsl)' not found; must be in 'vendor imsl')
-        endif
-    endif
-    ifeq (,$(findstring $(mkl),true false))
-        $(error Error: mkl '$(mkl)' not found; must be in 'true false')
-    endif
-    ifeq (,$(findstring $(compiler),intel11))
-        $(error Error: compiler '$(compiler)' not found; must be in 'intel11')
-    endif
-#endif
-
+endif
+#
+ifeq (,$(findstring $(cdi),true false))
+    $(error Error: cdi '$(cdi)' not found; must be in 'true false')
+endif
+#
+# --- OBJECT PATH ------------------------------------------------
 OBJPATH = $(strip $(SRCPATH))/.$(strip $(release))
 
 # --- DEFAULTS ---------------------------------------------------
@@ -101,9 +127,9 @@ ifeq (intel11,$(compiler))
         F90FLAGS = -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
     else
         # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
-        F90FLAGS  = -O3 -vec-report0 -override-limits
+        F90FLAGS  = $(opti) -vec-report0 -override-limits
     endif
-    F90FLAGS += -cpp -fp-model precise -openmp -m64 -module $(OBJPATH)
+    F90FLAGS += -cpp -fp-model precise $(parall) -m64 -module $(OBJPATH)
     LDFLAGS  += -openmp
     DEFINES  += -DINTEL
     #
@@ -127,9 +153,9 @@ endif
 # --- IMSL ---------------------------------------------------
 ifneq ($(imsl),)
      #
-     # ifneq (,$(findstring $(compiler),intel11))
-     #      $(error Error: imsl vendor needs mkl, set 'mkl=true')
-     # endif
+     ifneq ($(compiler),intel11)
+           $(error Error: imsl needs intel11.0.075, set 'compiler=intel11')
+     endif
      #
      IMSLDIR = /usr/local/imsl/imsl/fnl700/rdhin111e64
      IMSLINC = $(IMSLDIR)/include
@@ -214,7 +240,22 @@ ifeq ($(proj),true)
     #
 endif
 
+# --- CDI ----------------------------------------------------
+ifeq ($(cdi),true)
+    #
+    CDIDIR   = /usr/local/src/sci-libs/cdo-1.4.7/libcdi/src/.libs
+    #
+    LIBS  += -L$(CDI) -lcdi 
+    #
+    ifeq (,$(findstring mo_cdi.f90,$(wildcard $(strip $(SRCPATH))/*.f90)))
+         $(error Error: The file mo_cdi.f90 must be in Sourcepath: $(SRCPATH)!)
+    endif
+    #
+endif
+
 # --- LAPACK ---------------------------------------------------
+# TO BE INCLUDED BY PERSONS WHO NEED IT
+#
 # LAPACK    = /usr
 # LAPACKLIB = $(LAPACK)/lib64
 # LIBS     += -L$(LAPACKLIB) -lblas -llapack
