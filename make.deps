@@ -1,0 +1,7 @@
+# -*- Makefile -*- 
+# Generated automatically by makedeps.pl
+ 
+./.release/main.o: ./.release/mo1.o ./.release/mo2.o ./.release/mo_kind.o
+./.release/mo1.o: ./.release/mo2.o ./.release/mo_kind.o
+./.release/mo2.o: ./.release/mo_kind.o
+./.release/mo_kind.o:
