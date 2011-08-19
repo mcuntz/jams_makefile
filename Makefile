@@ -18,8 +18,8 @@ SHELL = /bin/bash
 
 # --- SWITCHES -------------------------------------------------------
 MAKEPATH = . # where are the make files (. is current directory, .. is parent directory)
-SRCPATH  = . # where are the source files; use fortran_test to run test directory
-#SRCPATH  = fortran_test
+#SRCPATH  = . # where are the source files; use fortran_test to run test directory
+SRCPATH  = ./fortran_test
 PROGPATH = . # where shall be the executable
 
 PROGNAME = canveg # Name of executable
@@ -31,12 +31,18 @@ release  = release
 netcdf   = netcdf3
 # Possible linking: static, shared, dynamic (last two are equal)
 static   = shared
-# Possible proj: true, false
+# Possible proj (coordinate Transformation): true, false
 proj     = false
+# Possible imsl: vendor, imsl or ""
+imsl     = 
+# Possible mkl: true, false
+mkl      = false
+# Possible compiler: intel11
+compiler = intel11
 
-$(info $(Stephan))
-$(info 'CMD:'$(MAKECMDGOALS))
-#$(info 'Var:'$(.VARIABLES))
+$(info 'imsl'$(imsl))
+#$(info 'CMD:'$(MAKECMDGOALS))
+
 # --- CHECKS ---------------------------------------------------
 # check input
 #ifneq ($(MAKECMDGOALS),$(findstring $(MAKECMDGOALS),clean cleanclean))
@@ -54,6 +60,17 @@ $(info 'CMD:'$(MAKECMDGOALS))
     ifeq (,$(findstring $(proj),true false))
         $(error Error: proj '$(proj)' not found; must be in 'true false')
     endif
+    ifneq ($(imsl),)
+        ifeq (,$(findstring $(imsl),vendor imsl))
+            $(error Error: imsl '$(imsl)' not found; must be in 'vendor imsl')
+        endif
+    endif
+    ifeq (,$(findstring $(mkl),true false))
+        $(error Error: mkl '$(mkl)' not found; must be in 'true false')
+    endif
+    ifeq (,$(findstring $(compiler),intel11))
+        $(error Error: compiler '$(compiler)' not found; must be in 'intel11')
+    endif
 #endif
 
 OBJPATH = $(strip $(SRCPATH))/.$(strip $(release))
@@ -70,48 +87,87 @@ LDFLAGS  =
 LIBS     =
 
 # --- COMPILER ---------------------------------------------------
-# v12
-# INTEL = /usr/local/intel/composerxe-2011.4.191
-# INTELLIB = $(INTEL)/compiler/lib/intel64
-# v11
-INTEL    = /opt/intel/Compiler/11.1/075
-INTELBIN = $(INTEL)/bin/intel64
-INTELLIB = /usr/local/intel/11.1.075
-
-F90 = $(INTELBIN)/ifort
-ifeq ($(release),debug)
-    F90FLAGS = -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
-else
-    # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
-    F90FLAGS  = -O3 -vec-report0 -override-limits
+ifeq (intel11,$(compiler))
+    # v12
+    # INTEL = /usr/local/intel/composerxe-2011.4.191
+    # INTELLIB = $(INTEL)/compiler/lib/intel64
+    # v11
+    INTEL    = /opt/intel/Compiler/11.1/075
+    INTELBIN = $(INTEL)/bin/intel64
+    INTELLIB = /usr/local/intel/11.1.075
+    #
+    F90 = $(INTELBIN)/ifort
+    ifeq ($(release),debug)
+        F90FLAGS = -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
+    else
+        # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
+        F90FLAGS  = -O3 -vec-report0 -override-limits
+    endif
+    F90FLAGS += -cpp -fp-model precise -openmp -m64 -module $(OBJPATH)
+    LDFLAGS  += -openmp
+    DEFINES  += -DINTEL
+    #
+    ifeq ($(static),static)
+        LIBS += -static-intel -Bstatic -Wl,--start-group
+    else
+        LIBS += -Bdynamic
+    endif
+    #
+    LIBS += -L$(INTELLIB) -limf -lm -lsvml
+    #
+    ifneq ($(static),static)
+         LIBS += -lintlc
+    endif
+    RPATH += -Wl,-rpath,$(INTELLIB)
+    #
 endif
-F90FLAGS += -cpp -fp-model precise -openmp -m64 -module $(OBJPATH)
-LDFLAGS  += -openmp
-DEFINES  += -DINTEL
-
-ifeq ($(static),static)
-    LIBS += -static-intel -Bstatic -Wl,--start-group
-else
-    LIBS += -Bdynamic
-endif
-LIBS += -L$(INTELLIB) -limf -lm -lsvml
-ifneq ($(static),static)
-    LIBS += -lintlc
-endif
-RPATH += -Wl,-rpath,$(INTELLIB)
-
+#
+# additional compilers to be included here, BE AWARE OF DEPENDENCIES!!!
+#
 # --- IMSL ---------------------------------------------------
-IMSL    = /usr/local/imsl/imsl/fnl700/rdhin111e64
-IMSLINC = $(IMSL)/include
-IMSLLIB = $(IMSL)/lib
-
-LIBS += -z muldefs
-ifneq ($(static),static)
-    LIBS += -i_dynamic
+ifneq ($(imsl),)
+     #
+     # ifneq (,$(findstring $(compiler),intel11))
+     #      $(error Error: imsl vendor needs mkl, set 'mkl=true')
+     # endif
+     #
+     IMSLDIR = /usr/local/imsl/imsl/fnl700/rdhin111e64
+     IMSLINC = $(IMSLDIR)/include
+     IMSLLIB = $(IMSLDIR)/lib
+     #
+     INCLUDE += -I$(IMSLINC)
+     LIBS    += -z muldefs
+     #
+     ifneq ($(static),static)
+        LIBS += -i_dynamic
+     endif
+     #
+     ifeq ($(imsl),imsl)
+         LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu
+     else
+         LIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
+	 #$(info 'mkl'$(mkl))
+         ifneq (${mkl},true)
+            $(error Error: imsl vendor needs mkl, set 'mkl=true')
+         endif
+     endif
+     #
+     RPATH += -Wl,-rpath,$(IMSLLIB)
+     #
 endif
-#LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
-LIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
-RPATH += -Wl,-rpath,$(IMSLLIB)
+
+# --- MKL ---------------------------------------------------
+ifneq (,$(findstring $(mkl),true))
+    #
+    MKLDIR    = /usr/local/intel/composerxe-2011.4.191/mkl
+    MKLINC    = $(MKLDIR)/include
+    MKLLIB    = $(MKLDIR)/lib/intel64
+    #
+    INCLUDES += -I$(MKLINC)
+    LIBS     += -L$(MKLLIB) -lmkl_intel_lp64 -lmkl_core -lmkl_sequential # -lmkl_intel_thread
+    RPATH    += -Wl,-rpath,$(MKLLIB)
+    #
+endif
 
 # --- NETCDF ---------------------------------------------------
 ifneq ($(netcdf),)
@@ -142,36 +198,21 @@ ifneq ($(netcdf),)
 endif
 
 # --- PROJ --------------------------------------------------
-# ifneq ($(proj),)
-#     ifeq ($(proj),$(findstring $(proj),true false))
-#         PROJDIR =
-#	  ifeq ($(proj),true)
-# 	      PROJDIR=/usr/local/fproj/4.7.0_intel11.1.075
-#	  endif
-#         NCINC = $(strip $(NCDIR))/include
-#         NCLIB = $(strip $(NCDIR))/lib
-
-#         INCLUDES += -I$(NCINC)
-#         LIBS     += -L$(NCLIB) -lproj -lprojf
-#         RPATH    += -Wl,-rpath,$(NCLIB)
-
-#         # libraries for proj4, ignored for proj3
-#         ifeq ($(proj),proj4)
-#             SZLIB     = /usr/local/szip/2.1/lib
-#             HDF5LIB   = /usr/local/hdf5/1.8.6/lib
-#             LIBS     += -lz -L$(SZLIB) -lsz -L$(HDF5LIB) -lhdf5 -lhdf5_hl
-#             RPATH    += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
-#         endif
-#     endif
-# endif
-
-# --- MKL ---------------------------------------------------
-MKL       = /usr/local/intel/composerxe-2011.4.191/mkl
-MKLINC    = $(MKL)/include
-MKLLIB    = $(MKL)/lib/intel64
-INCLUDES += -I$(MKLINC)
-LIBS     += -L$(MKLLIB) -lmkl_intel_lp64 -lmkl_core -lmkl_sequential # -lmkl_intel_thread
-RPATH    += -Wl,-rpath,$(MKLLIB)
+ifeq ($(proj),true)
+    #
+    PROJ4    = /usr/local/proj/4.7.0/lib
+    LIBS     += -L$(PROJ4) -lproj    
+    RPATH    += -Wl,-rpath=$(PROJ4)
+    #
+    FPROJDIR = /usr/local/fproj/4.7.0_intel11.1.075
+    FPROJINC = $(FPROJDIR)/include
+    FPROJLIB = $(FPROJDIR)/lib
+    #
+    INCLUDES += -I$(FPROJINC)
+    LIBS     += -L$(FPROJLIB) -lfproj4 $(FPROJLIB)/proj4.o
+    RPATH    += -Wl,-rpath,$(FPROJLIB)
+    #
+endif
 
 # --- LAPACK ---------------------------------------------------
 # LAPACK    = /usr
