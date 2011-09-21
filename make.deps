@@ -1,8 +1,0 @@
-# -*- Makefile -*- 
-# Generated automatically by makedeps.pl
- 
-./fortran_test/.release/main.o: ./fortran_test/.release/mo1.o ./fortran_test/.release/mo2.o \
-	./fortran_test/.release/mo_kind.o
-./fortran_test/.release/mo1.o: ./fortran_test/.release/mo2.o ./fortran_test/.release/mo_kind.o
-./fortran_test/.release/mo2.o: ./fortran_test/.release/mo_kind.o
-./fortran_test/.release/mo_kind.o:
