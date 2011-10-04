@@ -1,0 +1,32 @@
+Configurations for the netcdf writing routine bin2netCDF
+&MainConfig ! start namelist
+!select_data_format_bin_or_binP 
+DataFormat       = "binP"
+!name of the header (bin) or mask file (binP)  file        
+headerName       = "test_netcdf_imsl_proj/mask.asc"
+!Path_of_the_input_data         
+DataPath1        = "test_netcdf_imsl_proj/"
+!Path_name_of_the_outputfile    
+fName_netCDF_Out = "test_netcdf_imsl_proj/test.nc"
+!starting_year                  
+yStart           = 1950
+!ending_year                    
+yEnd             = 1951
+!time_attribute_unit_since please always choose the day before the day of the first dataset 
+time_unit_since  = "days since 1949-12-31 0:0:0"
+!name_of_variable               
+VarAttr_name     = "daily_avg_SM"
+!var_attribute_unit             
+VarAttr_unit     = "mm/mm"
+!var_attribute_long_name        
+VarAttr_longName = "daily_avg_of_SoilMoisture"
+!var_attribute_valid_range      
+VarAttr_range    = "0.  1."
+!file_attribute_title_of_file   
+FileAttr_title   = "Daily average of soil moisture over Germany 4 x 4 km"
+!file_attribute_history         
+FileAttr_hist    = "mHM v5, proceceed by L. Samaniego M. Zink."
+/ ! end of namelist MainConfig
+
+name_of_the_header_file        "/data/stohyd/data/processed/Germany/DWD/pre/merge/header.txt"
+Path_of_the_input_data        "/data/stohyd/data/processed/Germany/DWD/tavg/merge/"

@@ -19,7 +19,7 @@ SHELL = /bin/bash
 # --- SWITCHES -------------------------------------------------------
 MAKEPATH = . # where are the make files (. is current directory, .. is parent directory)
 #SRCPATH  = . # where are the source files; use fortran_test to run test directory
-SRCPATH  = ./fortran_test
+SRCPATH  = ./test_imsl
 PROGPATH = . # where shall be the executable
 #
 # check for f90 files
@@ -33,15 +33,15 @@ PROGNAME = Prog # Name of executable
 # Possible releases: release, debug
 release  = release
 # Possible netcdf versions: netcdf3, netcdf4
-netcdf   = netcdf3
+netcdf   = netcdf4
 # Possible linking: static, shared, dynamic (last two are equal)
 static   = shared
 # Possible proj (coordinate Transformation): true, false
-proj     = false
+proj     = true
 # Possible imsl: vendor, imsl or ""
-imsl     = 
+imsl     = vendor
 # Possible mkl: true, false
-mkl      = false
+mkl      = true
 # Possible compiler: intel11
 compiler = intel11
 # Possible Optimization: -O0, -O1, -O2, -O3, -O4, -O5
@@ -311,6 +311,9 @@ makedirs:
 
 clean:
 	rm -f $(OBJPATH)/*.o $(OBJPATH)/*.mod make.deps $(PROG)
+	if [ -f ./test_netcdf_imsl_proj/test.nc ] ; then rm -i ./test_netcdf_imsl_proj/test.nc ; fi
 
-cleanclean: clean
+cleanclean:
+	rm -f $(OBJPATH)/*.o $(OBJPATH)/*.mod make.deps $(PROG)
 	rm -rf $(strip $(SRCPATH))/.release $(strip $(SRCPATH))/.debug $(PROG).dSYM
+	if [ -f ./test_netcdf_imsl_proj/test.nc ] ; then rm -f ./test_netcdf_imsl_proj/test.nc ; fi
