@@ -19,7 +19,7 @@ SHELL = /bin/bash
 # --- SWITCHES -------------------------------------------------------
 MAKEPATH = . # where are the make files (. is current directory, .. is parent directory)
 #SRCPATH  = . # where are the source files; use fortran_test to run test directory
-SRCPATH  = ./test_imsl
+SRCPATH  = ./test_mkl
 PROGPATH = . # where shall be the executable
 #
 # check for f90 files
@@ -39,15 +39,17 @@ static   = shared
 # Possible proj (coordinate Transformation): true, false
 proj     = true
 # Possible imsl: vendor, imsl or ""
-imsl     = vendor
+imsl     = 
 # Possible mkl: true, false
 mkl      = true
+# Possible lapack: true, false
+lapack   = false
 # Possible compiler: intel11
 compiler = intel11
 # Possible Optimization: -O0, -O1, -O2, -O3, -O4, -O5
 opti     = -O3
 # Possible Parallelization: -openmp, ""
-parall   =
+parallel =
 # Possible cdi: true false
 cdi      = false
 
@@ -74,12 +76,23 @@ endif
 #
 ifneq ($(imsl),)
     ifeq (,$(findstring $(imsl),vendor imsl))
-        $(error Error: imsl '$(imsl)' not found; must be in 'vendor imsl')
+        $(error Error: IMSL '$(imsl)' not found; must be in 'vendor imsl')
+    endif
+    ifneq ($(compiler),intel11)
+        $(error Error: IMSL needs intel11.0.075, set 'compiler=intel11')
+    endif
+    ifeq ($(lapack),true)
+        $(error Error: IMSL does not work with LAPACK. Use MKL instead of LAPACK. Set 'lapack=false mkl=true')
+    endif
+    ifeq ($(imsl),vendor)
+        ifneq ($(mkl),true)
+            $(error Error: IMSL vendor needs MKL, set 'mkl=true')
+        endif
     endif
 endif
 #
 ifeq (,$(findstring $(mkl),true false))
-    $(error Error: mkl '$(mkl)' not found; must be in 'true false')
+    $(error Error: MKL '$(mkl)' not found; must be in 'true false')
 endif
 #
 ifeq (,$(findstring $(compiler),intel11))
@@ -90,14 +103,17 @@ ifeq (,$(findstring $(opti),-O0 -O1 -O2 -O3 -O4 -O5))
     $(error Error: opti '$(opti)' not found; must be in '-O0 -O1 -O2 -O3 -O4 -O5')
 endif
 #
-ifneq ($(parall),)
-    ifeq (,$(findstring $(parall),-openmp))
-        $(error Error: parall '$(parall)' not found; must be in '-openmp ""')
+ifneq ($(parallel),)
+    ifeq (,$(findstring $(parallel),-openmp))
+        $(error Error: parallel '$(parallel)' not found; must be in '-openmp ""')
     endif
 endif
 #
 ifeq (,$(findstring $(cdi),true false))
     $(error Error: cdi '$(cdi)' not found; must be in 'true false')
+    ifeq (,$(findstring $(netcdf),netcdf4))
+        $(error Error: CDI needs netcdf4. Set 'netcdf=netcdf4')
+    endif
 endif
 #
 # --- OBJECT PATH ------------------------------------------------
@@ -131,7 +147,7 @@ ifeq (intel11,$(compiler))
         # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
         F90FLAGS  = $(opti) -vec-report0 -override-limits
     endif
-    F90FLAGS += -assume byterecl -cpp -fp-model precise $(parall) -m64 -module $(OBJPATH)
+    F90FLAGS += -assume byterecl -cpp -fp-model precise $(parallel) -m64 -module $(OBJPATH)
     LDFLAGS  += -openmp
     DEFINES  += -DINTEL
     #
@@ -147,18 +163,12 @@ ifeq (intel11,$(compiler))
          LIBS += -lintlc
     endif
     RPATH += -Wl,-rpath,$(INTELLIB)
-    #
 endif
 #
 # additional compilers to be included here, BE AWARE OF DEPENDENCIES!!!
 #
 # --- IMSL ---------------------------------------------------
 ifneq ($(imsl),)
-     #
-     ifneq ($(compiler),intel11)
-           $(error Error: imsl needs intel11.0.075, set 'compiler=intel11')
-     endif
-     #
      IMSLDIR = /usr/local/imsl/imsl/fnl700/rdhin111e64
      IMSLINC = $(IMSLDIR)/include
      IMSLLIB = $(IMSLDIR)/lib
@@ -174,19 +184,13 @@ ifneq ($(imsl),)
          LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu
      else
          LIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
-	 #$(info 'mkl'$(mkl))
-         ifneq (${mkl},true)
-            $(error Error: imsl vendor needs mkl, set 'mkl=true')
-         endif
      endif
      #
      RPATH += -Wl,-rpath,$(IMSLLIB)
-     #
 endif
 
 # --- MKL ---------------------------------------------------
 ifneq (,$(findstring $(mkl),true))
-    #
     MKLDIR    = /usr/local/intel/composerxe-2011.4.191/mkl
     MKLINC    = $(MKLDIR)/include
     MKLLIB    = $(MKLDIR)/lib/intel64
@@ -194,7 +198,6 @@ ifneq (,$(findstring $(mkl),true))
     INCLUDES += -I$(MKLINC)
     LIBS     += -L$(MKLLIB) -lmkl_intel_lp64 -lmkl_core -lmkl_sequential # -lmkl_intel_thread
     RPATH    += -Wl,-rpath,$(MKLLIB)
-    #
 endif
 
 # --- NETCDF ---------------------------------------------------
@@ -227,7 +230,6 @@ endif
 
 # --- PROJ --------------------------------------------------
 ifeq ($(proj),true)
-    #
     PROJ4    = /usr/local/proj/4.7.0/lib
     LIBS     += -L$(PROJ4) -lproj    
     RPATH    += -Wl,-rpath=$(PROJ4)
@@ -239,14 +241,11 @@ ifeq ($(proj),true)
     INCLUDES += -I$(FPROJINC)
     LIBS     += -L$(FPROJLIB) -lfproj4 $(FPROJLIB)/proj4.o
     RPATH    += -Wl,-rpath,$(FPROJLIB)
-    #
 endif
 
 # --- CDI ----------------------------------------------------
 ifeq ($(cdi),true)
-    #
     CDIDIR   = /usr/local/src/sci-libs/cdo-1.4.7/libcdi/src/.libs
-    #
     LIBS  += -L$(CDIDIR) -lcdi 
     #
     ifeq (,$(findstring mo_cdi.f90,$(wildcard $(strip $(SRCPATH))/*.f90)))
@@ -256,16 +255,15 @@ ifeq ($(cdi),true)
     ifneq (netcdf4,$(netcdf))
          $(error Error: cdi requires netcdf4: set 'netcdf=netcdf4'!)
     endif
-    #
 endif
 
 # --- LAPACK ---------------------------------------------------
-# TO BE INCLUDED BY PERSONS WHO NEED IT
-#
-# LAPACK    = /usr
-# LAPACKLIB = $(LAPACK)/lib64
-# LIBS     += -L$(LAPACKLIB) -lblas -llapack
-# RPATH    += -Wl,-rpath,$(LAPACKLIB)
+ifeq ($(lapack),true)
+    LAPACK    = /usr
+    LAPACKLIB = $(LAPACK)/lib64
+    LIBS     += -L$(LAPACKLIB) -lblas -llapack
+    RPATH    += -Wl,-rpath,$(LAPACKLIB)
+endif
 
 # --- FINISH SETUP ---------------------------------------------------
 ifeq ($(release),debug)
