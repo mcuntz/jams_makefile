@@ -19,7 +19,7 @@ SHELL = /bin/bash
 # --- SWITCHES -------------------------------------------------------
 MAKEPATH = . # where are the make files (. is current directory, .. is parent directory)
 #SRCPATH  = . # where are the source files; use fortran_test to run test directory
-SRCPATH  = ./test_mkl
+SRCPATH  = ./test_cdi_imsl
 PROGPATH = . # where shall be the executable
 #
 # check for f90 files
@@ -39,7 +39,7 @@ static   = shared
 # Possible proj (coordinate Transformation): true, false
 proj     = true
 # Possible imsl: vendor, imsl or ""
-imsl     = 
+imsl     = imsl
 # Possible mkl: true, false
 mkl      = true
 # Possible lapack: true, false
@@ -51,7 +51,7 @@ opti     = -O3
 # Possible Parallelization: -openmp, ""
 parallel =
 # Possible cdi: true false
-cdi      = false
+cdi      = true
 
 # --- CHECKS ---------------------------------------------------
 # check input
