@@ -12,19 +12,23 @@
 program main
 !
 ! integrate modules
+
 use mo_ReadData,     only: ReadData
-use mo_GridStat,     only: GridStat
-use mo_WriteResults, only: WriteResults
+
+!use mo_GridStat,     only: GridStat
+!use mo_WriteResults, only: WriteResults
 ! Variables
 !    
 implicit none
 !
 ! procedure
-! 
-call ReadData
 !
-call GridStat
-call writeresults
+
+call ReadData
+
+!
+!call GridStat
+!call writeresults
 !
 stop 'DONE!'
 !

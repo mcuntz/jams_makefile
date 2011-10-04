@@ -1,6 +1,6 @@
 >Grid Stat Config File first 27 spaces are reserved for names
-Input_path                 /data/stohyd/WG/ENSEMBLES_Stephan/processed/C4IRCA3/pr/pr_1961-2000.nc
-Ouput_path                 /work/thober/GridStat/RCM_TEST/
+Input_path                 test_cdi_imsl/pr_1961-2000.nc
+Ouput_path                 test_cdi/imsl/
 Read_File_type             nc
 Long_Variable_name         Precipitation
 Variable                   Pre
