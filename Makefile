@@ -1,15 +1,25 @@
 #
-# Makefile for Eve
+# Makefile for CHS projects on eve.ufz.de
 #
 # Usage
-#    make
-# Variables can be set as command line input or in the --- SWITCHES --- section below
+#    make [option=option] [all] [clean] [clean]
+# Options can be set as command line input or in the --- SWITCHES --- section below
 #
-# make targets are: all, clean, cleanclean
+# Targets: all, clean, cleanclean
 # 
-# Releases are:        release=release debug
-# Netcdf is:           netcdf=netcdf3, netcdf4 or ""
-# Static is:           static=static, shared, dynamic
+# Options: see individual options in switch section below
+#          options can be empty (same as any garbage value)
+#          e.g. do not use IMSL:  imsl=  or  imsl=no
+#
+# Links providing documentation:
+#    GNU Make:       http://www.gnu.org/software/make/
+#    NETCDF:         http://www.unidata.ucar.edu/software/netcdf/
+#    PROJ4:          http://trac.osgeo.org/proj/
+#    IMSL:           http://www.roguewave.com/products/imsl-numerical-libraries.aspx
+#    MKL:            http://software.intel.com/en-us/articles/intel-mkl/
+#    LAPACK:         http://www.netlib.org/lapack/
+#    INTEL Compiler: http://software.intel.com/en-us/articles/intel-parallel-studio-xe/
+#    CDI:            https://code.zmaw.de/projects/cdi/
 #
 # Written Matthias Cuntz & Juliane Mai, UFZ Leipzig, Germany, Aug. 2011 - matthias.cuntz@ufz.de
 
@@ -18,39 +28,39 @@ SHELL = /bin/bash
 
 # --- SWITCHES -------------------------------------------------------
 MAKEPATH = . # where are the make files (. is current directory, .. is parent directory)
-#SRCPATH  = . # where are the source files; use fortran_test to run test directory
+#SRCPATH  = . # where are the source files; use test_??? to run a test directory
 SRCPATH  = ./test_cdi_imsl
 PROGPATH = . # where shall be the executable
+#
+PROGNAME = Prog # Name of executable
 #
 # check for f90 files
 ifeq (,$(wildcard $(strip $(SRCPATH))/*.f90))
     $(error Error: no f90 files in SourcePath "$(SRCPATH)")
 endif
-#
-PROGNAME = Prog # Name of executable
 
-# Switches
-# Possible releases: release, debug
+# Options
+# Releases: debug, release
 release  = release
-# Possible netcdf versions: netcdf3, netcdf4
+# Netcdf versions (Network Common Data Form): netcdf3, netcdf4
 netcdf   = netcdf4
-# Possible linking: static, shared, dynamic (last two are equal)
+# Linking: static, shared, dynamic (last two are equal)
 static   = shared
-# Possible proj (coordinate Transformation): true, false
+# Proj4 (Cartographic Projections Library): true, [anything else]
 proj     = true
-# Possible imsl: vendor, imsl or ""
+# IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
 imsl     = imsl
-# Possible mkl: true, false
+# MKL (Intel's Math Kernel Library): true, [anything else]
 mkl      = true
-# Possible lapack: true, false
+# LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   = false
-# Possible compiler: intel11
+# Compiler: intel11
 compiler = intel11
-# Possible Optimization: -O0, -O1, -O2, -O3, -O4, -O5
+# Optimization: -O0, -O1, -O2, -O3, -O4, -O5
 opti     = -O3
-# Possible Parallelization: -openmp, ""
+# Parallelization: -openmp, [anything else]
 parallel =
-# Possible cdi: true false
+# CDI (Interface to Climate & NWP model Data): true, [anything else]
 cdi      = true
 
 # --- CHECKS ---------------------------------------------------
@@ -70,14 +80,7 @@ ifeq (,$(findstring $(static),static shared dynamic))
     $(error Error: static '$(static)' not found; must be in 'static shared dynamic')
 endif
 #
-ifeq (,$(findstring $(proj),true false))
-    $(error Error: proj '$(proj)' not found; must be in 'true false')
-endif
-#
-ifneq ($(imsl),)
-    ifeq (,$(findstring $(imsl),vendor imsl))
-        $(error Error: IMSL '$(imsl)' not found; must be in 'vendor imsl')
-    endif
+ifeq ($(imsl),$(findstring $(imsl),vendor imsl))
     ifneq ($(compiler),intel11)
         $(error Error: IMSL needs intel11.0.075, set 'compiler=intel11')
     endif
@@ -91,10 +94,6 @@ ifneq ($(imsl),)
     endif
 endif
 #
-ifeq (,$(findstring $(mkl),true false))
-    $(error Error: MKL '$(mkl)' not found; must be in 'true false')
-endif
-#
 ifeq (,$(findstring $(compiler),intel11))
     $(error Error: compiler '$(compiler)' not found; must be in 'intel11')
 endif
@@ -103,16 +102,18 @@ ifeq (,$(findstring $(opti),-O0 -O1 -O2 -O3 -O4 -O5))
     $(error Error: opti '$(opti)' not found; must be in '-O0 -O1 -O2 -O3 -O4 -O5')
 endif
 #
-ifneq ($(parallel),)
-    ifeq (,$(findstring $(parallel),-openmp))
-        $(error Error: parallel '$(parallel)' not found; must be in '-openmp ""')
-    endif
+ifeq ($(parallel),$(findstring $(parallel),-openmp))
+    parallelit = $(parallel)
+else
+    parallelit =
 endif
 #
-ifeq (,$(findstring $(cdi),true false))
-    $(error Error: cdi '$(cdi)' not found; must be in 'true false')
+ifeq ($(cdi),true)
     ifeq (,$(findstring $(netcdf),netcdf4))
         $(error Error: CDI needs netcdf4. Set 'netcdf=netcdf4')
+    endif
+    ifeq (,$(findstring mo_cdi.f90,$(wildcard $(strip $(SRCPATH))/*.f90)))
+         $(error Error: The file mo_cdi.f90 must be in Sourcepath: $(SRCPATH)!)
     endif
 endif
 #
@@ -147,7 +148,7 @@ ifeq (intel11,$(compiler))
         # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
         F90FLAGS  = $(opti) -vec-report0 -override-limits
     endif
-    F90FLAGS += -assume byterecl -cpp -fp-model precise $(parallel) -m64 -module $(OBJPATH)
+    F90FLAGS += -assume byterecl -cpp -fp-model precise $(parallelit) -m64 -module $(OBJPATH)
     LDFLAGS  += -openmp
     DEFINES  += -DINTEL
     #
@@ -190,7 +191,7 @@ ifneq ($(imsl),)
 endif
 
 # --- MKL ---------------------------------------------------
-ifneq (,$(findstring $(mkl),true))
+ifeq ($(mkl),true)
     MKLDIR    = /usr/local/intel/composerxe-2011.4.191/mkl
     MKLINC    = $(MKLDIR)/include
     MKLLIB    = $(MKLDIR)/lib/intel64
@@ -246,15 +247,7 @@ endif
 # --- CDI ----------------------------------------------------
 ifeq ($(cdi),true)
     CDIDIR   = /usr/local/src/sci-libs/cdo-1.4.7/libcdi/src/.libs
-    LIBS  += -L$(CDIDIR) -lcdi 
-    #
-    ifeq (,$(findstring mo_cdi.f90,$(wildcard $(strip $(SRCPATH))/*.f90)))
-         $(error Error: The file mo_cdi.f90 must be in Sourcepath: $(SRCPATH)!)
-    endif
-    #
-    ifneq (netcdf4,$(netcdf))
-         $(error Error: cdi requires netcdf4: set 'netcdf=netcdf4'!)
-    endif
+    LIBS  += -L$(CDIDIR) -lcdi
 endif
 
 # --- LAPACK ---------------------------------------------------
