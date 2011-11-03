@@ -8,11 +8,14 @@ VPATH = $(SRCPATH)
 
 all: $(PROG)
 
-$(PROG): $(OBJS)
-	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(LIBS)
+$(PROG): $(OBJS) $(FOROBJS)
+	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(LIBS)
 
-$(OBJPATH)/%.o: %.f90
+$(OBJS): $(OBJPATH)/%.o: %.f90
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $< -o $@
+
+$(FOROBJS): $(OBJPATH)/%.o: %.for
+	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $< -o $@
 
 # All dependencies create by perl script makedeps.pl
 include make.deps

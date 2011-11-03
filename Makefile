@@ -34,11 +34,11 @@ PROGPATH = . # where shall be the executable
 #
 PROGNAME = Prog # Name of executable
 #
-# check for f90 files
-ifeq (,$(wildcard $(strip $(SRCPATH))/*.f90))
-    $(error Error: no f90 files in SourcePath "$(SRCPATH)")
+# check for files
+ifeq (,$(wildcard $(strip $(SRCPATH))/*.f90 ) $(wildcard $(strip $(SRCPATH))/*.for ))
+        $(error Error: no fortran files in SourcePath "$(SRCPATH)")
 endif
-
+#
 # Options
 # Releases: debug, release
 release  = release
@@ -122,6 +122,8 @@ OBJPATH = $(strip $(SRCPATH))/.$(strip $(release))
 
 # --- DEFAULTS ---------------------------------------------------
 # These variables will be used to compile
+FC       =
+FCFLAGS  =
 F90      =
 F90FLAGS =
 DEFINES  =
@@ -142,13 +144,17 @@ ifeq (intel11,$(compiler))
     INTELLIB = /usr/local/intel/11.1.075
     #
     F90 = $(INTELBIN)/ifort
+    FC  = $(F90)
     ifeq ($(release),debug)
         F90FLAGS = -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
+        FCFLAGS  = -g -debug -traceback -fp-stack-check -O0 -debug
     else
         # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
         F90FLAGS  = $(opti) -vec-report0 -override-limits
+        FCFLAGS   = $(opti) -vec-report0 -override-limits
     endif
     F90FLAGS += -assume byterecl -cpp -fp-model precise $(parallelit) -m64 -module $(OBJPATH)
+    FCFLAGS  += -assume byterecl -cpp -fp-model precise $(parallelit) -m64 -module $(OBJPATH) -fixed
     LDFLAGS  += -openmp
     DEFINES  += -DINTEL
     #
@@ -277,15 +283,23 @@ MAKEDEPSPROG  = $(strip $(MAKEPATH))/makedeps.pl
 # --- TARGETS ---------------------------------------------------
 LD       := $(F90)
 # A vars contain source dir informations
-ASRCS    := $(wildcard $(strip $(SRCPATH))/*.f90)
-SRCS     := $(notdir $(ASRCS))
-AOBJS    := $(SRCS:.f90=.o)
+ASRCS := $(wildcard $(strip $(SRCPATH))/*.f90)
+SRCS  := $(notdir $(ASRCS))
+AOBJS := $(SRCS:.f90=.o)
+FORASRCS := $(wildcard $(strip $(SRCPATH))/*.for)
+FORSRCS  := $(notdir $(FORASRCS))
+FORAOBJS := $(FORSRCS:.for=.o)
+# 
 # main driver routines can be excluded and added at targets in $(MAKEPROG)
 EXCL     := 
+#
 FAOBJS   := $(filter-out $(EXCL), $(AOBJS))
 OBJS     := $(addprefix $(OBJPATH)/, $(FAOBJS))
+#
+FFORAOBJS := $(filter-out $(EXCL), $(FORAOBJS))
+FOROBJS   := $(addprefix $(OBJPATH)/, $(FFORAOBJS))
 
-.SUFFIXES: .f90 .o
+.SUFFIXES: .f90 .for .o
 
 # targets for executables
 all: makedeps makedirs
