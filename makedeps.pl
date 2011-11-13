@@ -13,10 +13,6 @@ $PROG=`basename "$0"`;
 #
 # Create Makefile
 #
-open(MAKEFILE, "> make.deps");
-print "create new make.deps\n";
-print MAKEFILE "# -*- Makefile -*- \n";
-print MAKEFILE "# Generated automatically by $PROG \n";
 # Dependency listings
 $objpath = "";
 $srcpath = ".";
@@ -26,6 +22,10 @@ if (@ARGV >= 1) {
 if (@ARGV >= 2) {
   $srcpath = "$ARGV[1]/";
 }
+open(MAKEFILE, "> $objpath/make.deps");
+print "create new $objpath/make.deps\n";
+print MAKEFILE "# -*- Makefile -*- \n";
+print MAKEFILE "# Generated automatically by $PROG \n";
 &MakeDependsf90($ARGV[2]);
 #
 exit;

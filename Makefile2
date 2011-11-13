@@ -2,8 +2,6 @@
 
 SHELL = /bin/bash
 
-VPATH = $(SRCPATH)
-
 .SUFFIXES: .f90 .o
 
 all: $(PROG)
@@ -18,4 +16,4 @@ $(FOROBJS): $(OBJPATH)/%.o: %.for
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $< -o $@
 
 # All dependencies create by perl script makedeps.pl
-include make.deps
+include $(OBJPATH)/make.deps

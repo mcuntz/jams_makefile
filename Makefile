@@ -36,7 +36,7 @@ PROGNAME = Prog # Name of executable
 #
 # check for files
 ifeq (,$(wildcard $(strip $(SRCPATH))/*.f90 ) $(wildcard $(strip $(SRCPATH))/*.for ))
-        $(error Error: no fortran files in SourcePath "$(SRCPATH)")
+        $(error Error: no fortran files in source path: "$(SRCPATH)")
 endif
 #
 # Options
@@ -113,12 +113,33 @@ ifeq ($(cdi),true)
         $(error Error: CDI needs netcdf4. Set 'netcdf=netcdf4')
     endif
     ifeq (,$(findstring mo_cdi.f90,$(wildcard $(strip $(SRCPATH))/*.f90)))
-         $(error Error: The file mo_cdi.f90 must be in Sourcepath: $(SRCPATH)!)
+         $(error Error: The file mo_cdi.f90 must be in source path: $(SRCPATH))
     endif
 endif
 #
-# --- OBJECT PATH ------------------------------------------------
-OBJPATH = $(strip $(SRCPATH))/.$(strip $(release))
+# --- PATHS ------------------------------------------------
+
+# Progs include absolute paths
+ifeq ($(findstring '//','/'$(PROGPATH)),)
+    PROG = $(CURDIR)/$(strip $(PROGPATH))/$(strip $(PROGNAME))
+else
+    PROG = $(strip $(PROGPATH))/$(strip $(PROGNAME))
+endif
+ifeq ($(findstring '//','/'$(MAKEPATH)),)
+    MAKEPROG     = $(CURDIR)/$(strip $(MAKEPATH))/Makefile2
+    MAKEDEPSPROG = $(CURDIR)/$(strip $(MAKEPATH))/makedeps.pl
+else
+    MAKEPROG     = $(strip $(MAKEPATH))/Makefile2
+    MAKEDEPSPROG = $(strip $(MAKEPATH))/makedeps.pl
+endif
+# Make source path absolute
+ifeq ($(findstring '//','/'$(SRCPATH)),)
+    SOURCEPATH = $(CURDIR)/$(strip $(SRCPATH))
+else
+    SOURCEPATH = $(strip $(SRCPATH))
+endif
+
+OBJPATH = $(SOURCEPATH)/.$(strip $(release))
 
 # --- DEFAULTS ---------------------------------------------------
 # These variables will be used to compile
@@ -275,18 +296,13 @@ else
     LIBS += $(RPATH)
 endif
 
-# Progs
-PROG          = $(strip $(PROGPATH))/$(strip $(PROGNAME))
-MAKEPROG      = $(strip $(MAKEPATH))/Makefile2
-MAKEDEPSPROG  = $(strip $(MAKEPATH))/makedeps.pl
-
 # --- TARGETS ---------------------------------------------------
 LD       := $(F90)
 # A vars contain source dir informations
-ASRCS := $(wildcard $(strip $(SRCPATH))/*.f90)
+ASRCS := $(wildcard $(SOURCEPATH)/*.f90)
 SRCS  := $(notdir $(ASRCS))
 AOBJS := $(SRCS:.f90=.o)
-FORASRCS := $(wildcard $(strip $(SRCPATH))/*.for)
+FORASRCS := $(wildcard $(SOURCEPATH)/*.for)
 FORSRCS  := $(notdir $(FORASRCS))
 FORAOBJS := $(FORSRCS:.for=.o)
 # 
@@ -302,23 +318,23 @@ FOROBJS   := $(addprefix $(OBJPATH)/, $(FFORAOBJS))
 .SUFFIXES: .f90 .for .o
 
 # targets for executables
-all: makedeps makedirs
-	$(MAKE) -f $(MAKEPROG)
+all: makedirs makedeps
+	cd $(SOURCEPATH) ; $(MAKE) -f $(MAKEPROG)
 
 # helper targets
 makedeps:
-	rm -f make.deps
+	rm -f $(OBJPATH)/make.deps
 	rm -f tmp.gf3.*
-	$(MAKEDEPSPROG) $(OBJPATH) $(SRCPATH)
+	$(MAKEDEPSPROG) $(OBJPATH) $(SOURCEPATH)
 
 makedirs:
 	if [ ! -d $(OBJPATH) ] ; then mkdir $(OBJPATH) ; fi
 
 clean:
-	rm -f $(OBJPATH)/*.o $(OBJPATH)/*.mod make.deps $(PROG)
+	rm -f $(OBJPATH)/*.o $(OBJPATH)/*.mod $(OBJPATH)/make.deps $(PROG)
+ifeq ($(findstring test_netcdf_imsl_proj, $(SRCPATH)),test_netcdf_imsl_proj)
 	if [ -f ./test_netcdf_imsl_proj/test.nc ] ; then rm -i ./test_netcdf_imsl_proj/test.nc ; fi
+endif
 
-cleanclean:
-	rm -f $(OBJPATH)/*.o $(OBJPATH)/*.mod make.deps $(PROG)
-	rm -rf $(strip $(SRCPATH))/.release $(strip $(SRCPATH))/.debug $(PROG).dSYM
-	if [ -f ./test_netcdf_imsl_proj/test.nc ] ; then rm -f ./test_netcdf_imsl_proj/test.nc ; fi
+cleanclean: clean
+	rm -rf $(SOURCEPATH)/.release $(SOURCEPATH)/.debug $(PROG).dSYM
