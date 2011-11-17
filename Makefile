@@ -174,8 +174,8 @@ ifeq (intel11,$(compiler))
         F90FLAGS  = $(opti) -vec-report0 -override-limits
         FCFLAGS   = $(opti) -vec-report0 -override-limits
     endif
-    F90FLAGS += -assume byterecl -cpp -fp-model precise $(parallelit) -m64 -module $(OBJPATH)
-    FCFLAGS  += -assume byterecl -cpp -fp-model precise $(parallelit) -m64 -module $(OBJPATH) -fixed
+    F90FLAGS += -assume byterecl -cpp -fp-model precise $(parallelit) -m64 -module "$(OBJPATH)"
+    FCFLAGS  += -assume byterecl -cpp -fp-model precise $(parallelit) -m64 -module "$(OBJPATH)" -fixed
     LDFLAGS  += -openmp
     DEFINES  += -DINTEL
     #
@@ -299,10 +299,10 @@ endif
 # --- TARGETS ---------------------------------------------------
 LD       := $(F90)
 # A vars contain source dir informations
-ASRCS := $(wildcard $(SOURCEPATH)/*.f90)
+ASRCS := $(wildcard "$(SOURCEPATH)"/*.f90)
 SRCS  := $(notdir $(ASRCS))
 AOBJS := $(SRCS:.f90=.o)
-FORASRCS := $(wildcard $(SOURCEPATH)/*.for)
+FORASRCS := $(wildcard "$(SOURCEPATH)"/*.for)
 FORSRCS  := $(notdir $(FORASRCS))
 FORAOBJS := $(FORSRCS:.for=.o)
 # 
@@ -310,31 +310,31 @@ FORAOBJS := $(FORSRCS:.for=.o)
 EXCL     := 
 #
 FAOBJS   := $(filter-out $(EXCL), $(AOBJS))
-OBJS     := $(addprefix $(OBJPATH)/, $(FAOBJS))
+OBJS     := $(addprefix "$(OBJPATH)"/, $(FAOBJS))
 #
 FFORAOBJS := $(filter-out $(EXCL), $(FORAOBJS))
-FOROBJS   := $(addprefix $(OBJPATH)/, $(FFORAOBJS))
+FOROBJS   := $(addprefix "$(OBJPATH)"/, $(FFORAOBJS))
 
 .SUFFIXES: .f90 .for .o
 
 # targets for executables
 all: makedirs makedeps
-	cd $(SOURCEPATH) ; $(MAKE) -f $(MAKEPROG)
+	cd "$(SOURCEPATH)" ; $(MAKE) -f "$(MAKEPROG)"
 
 # helper targets
 makedeps:
-	rm -f $(OBJPATH)/make.deps
+	rm -f "$(OBJPATH)"/make.deps
 	rm -f tmp.gf3.*
-	$(MAKEDEPSPROG) $(OBJPATH) $(SOURCEPATH)
+	"$(MAKEDEPSPROG)" "$(OBJPATH)" "$(SOURCEPATH)"
 
 makedirs:
-	if [ ! -d $(OBJPATH) ] ; then mkdir $(OBJPATH) ; fi
+	if [ ! -d "$(OBJPATH)" ] ; then mkdir "$(OBJPATH)" ; fi
 
 clean:
-	rm -f $(OBJPATH)/*.o $(OBJPATH)/*.mod $(OBJPATH)/make.deps $(PROG)
+	rm -f "$(OBJPATH)"/*.o "$(OBJPATH)"/*.mod "$(OBJPATH)"/make.deps "$(PROG)"
 ifeq ($(findstring test_netcdf_imsl_proj, $(SRCPATH)),test_netcdf_imsl_proj)
 	if [ -f ./test_netcdf_imsl_proj/test.nc ] ; then rm -i ./test_netcdf_imsl_proj/test.nc ; fi
 endif
 
 cleanclean: clean
-	rm -rf $(SOURCEPATH)/.release $(SOURCEPATH)/.debug $(PROG).dSYM
+	rm -rf "$(SOURCEPATH)"/.release "$(SOURCEPATH)"/.debug "$(PROG)".dSYM
