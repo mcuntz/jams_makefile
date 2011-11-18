@@ -36,7 +36,7 @@ PROGNAME = Prog # Name of executable
 #
 # check for files
 ifeq (,$(wildcard $(strip $(SRCPATH))/*.f90 ) $(wildcard $(strip $(SRCPATH))/*.for ))
-        $(error Error: no fortran files in source path: "$(SRCPATH)")
+        $(error Error: no fortran files in source path: $(SRCPATH))
 endif
 #
 # Options
@@ -61,7 +61,7 @@ opti     = -O3
 # Parallelization: -openmp, [anything else]
 parallel =
 # CDI (Interface to Climate & NWP model Data): true, [anything else]
-cdi      = true
+cdi      =
 
 # --- CHECKS ---------------------------------------------------
 # check input
@@ -72,7 +72,7 @@ endif
 #
 ifneq ($(netcdf),)
     ifeq (,$(findstring $(netcdf),netcdf3 netcdf4))
-        $(error Error: netcdf '$(netcdf)' not found; must be in 'netcdf3 netcdf4 ""')
+        $(error Error: netcdf '$(netcdf)' not found; must be in 'netcdf3 netcdf4')
     endif
 endif
 #
@@ -299,10 +299,10 @@ endif
 # --- TARGETS ---------------------------------------------------
 LD       := $(F90)
 # A vars contain source dir informations
-ASRCS := $(wildcard "$(SOURCEPATH)"/*.f90)
+ASRCS := $(wildcard $(SOURCEPATH)/*.f90)
 SRCS  := $(notdir $(ASRCS))
 AOBJS := $(SRCS:.f90=.o)
-FORASRCS := $(wildcard "$(SOURCEPATH)"/*.for)
+FORASRCS := $(wildcard $(SOURCEPATH)/*.for)
 FORSRCS  := $(notdir $(FORASRCS))
 FORAOBJS := $(FORSRCS:.for=.o)
 # 
@@ -310,10 +310,10 @@ FORAOBJS := $(FORSRCS:.for=.o)
 EXCL     := 
 #
 FAOBJS   := $(filter-out $(EXCL), $(AOBJS))
-OBJS     := $(addprefix "$(OBJPATH)"/, $(FAOBJS))
+OBJS     := $(addprefix $(OBJPATH)/, $(FAOBJS))
 #
 FFORAOBJS := $(filter-out $(EXCL), $(FORAOBJS))
-FOROBJS   := $(addprefix "$(OBJPATH)"/, $(FFORAOBJS))
+FOROBJS   := $(addprefix $(OBJPATH)/, $(FFORAOBJS))
 
 .SUFFIXES: .f90 .for .o
 
@@ -325,7 +325,7 @@ all: makedirs makedeps
 makedeps:
 	rm -f "$(OBJPATH)"/make.deps
 	rm -f tmp.gf3.*
-	"$(MAKEDEPSPROG)" "$(OBJPATH)" "$(SOURCEPATH)"
+	$(MAKEDEPSPROG) "$(OBJPATH)" "$(SOURCEPATH)"
 
 makedirs:
 	if [ ! -d "$(OBJPATH)" ] ; then mkdir "$(OBJPATH)" ; fi
@@ -333,7 +333,7 @@ makedirs:
 clean:
 	rm -f "$(OBJPATH)"/*.o "$(OBJPATH)"/*.mod "$(OBJPATH)"/make.deps "$(PROG)"
 ifeq ($(findstring test_netcdf_imsl_proj, $(SRCPATH)),test_netcdf_imsl_proj)
-	if [ -f ./test_netcdf_imsl_proj/test.nc ] ; then rm -i ./test_netcdf_imsl_proj/test.nc ; fi
+	if [ -f ./test_netcdf_imsl_proj/test.nc ] ; then rm ./test_netcdf_imsl_proj/test.nc ; fi
 endif
 
 cleanclean: clean
