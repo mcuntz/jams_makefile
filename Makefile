@@ -29,7 +29,7 @@ SHELL = /bin/bash
 # --- SWITCHES -------------------------------------------------------
 MAKEPATH = . # where are the make files (. is current directory, .. is parent directory)
 #SRCPATH  = . # where are the source files; use test_??? to run a test directory
-SRCPATH  = ./test_cdi_imsl
+SRCPATH  = ./test_imsl_lapack
 PROGPATH = . # where shall be the executable
 #
 PROGNAME = Prog # Name of executable
@@ -43,23 +43,23 @@ endif
 # Releases: debug, release
 release  = release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
-netcdf   = netcdf4
+netcdf   =
 # Linking: static, shared, dynamic (last two are equal)
-static   = shared
+static   = static
 # Proj4 (Cartographic Projections Library): true, [anything else]
-proj     = true
+proj     = 
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
-imsl     = imsl
+imsl     = vendor
 # MKL (Intel's Math Kernel Library): true, [anything else]
-mkl      = true
+mkl      =
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   = false
+lapack   = true
 # Compiler: intel11
 compiler = intel11
 # Optimization: -O0, -O1, -O2, -O3, -O4, -O5
 opti     = -O3
 # Parallelization: -openmp, [anything else]
-parallel =
+parallel = 
 # CDI (Interface to Climate & NWP model Data): true, [anything else]
 cdi      =
 
@@ -80,7 +80,7 @@ ifeq (,$(findstring $(static),static shared dynamic))
     $(error Error: static '$(static)' not found; must be in 'static shared dynamic')
 endif
 #
-ifeq ($(imsl),$(findstring $(imsl),vendor imsl))
+ifneq (,$(findstring $(imsl),vendor imsl))
     ifneq ($(compiler),intel11)
         $(error Error: IMSL needs intel11.0.075, set 'compiler=intel11')
     endif
@@ -176,7 +176,13 @@ ifeq (intel11,$(compiler))
     endif
     F90FLAGS += -assume byterecl -cpp -fp-model precise $(parallelit) -m64 -module "$(OBJPATH)"
     FCFLAGS  += -assume byterecl -cpp -fp-model precise $(parallelit) -m64 -module "$(OBJPATH)" -fixed
-    LDFLAGS  += -openmp
+    ifeq ($(parallelit),-openmp)
+        LDFLAGS  += -openmp
+    else
+        ifneq (,$(findstring $(imsl),vendor imsl))
+            LDFLAGS  += -openmp
+        endif
+    endif
     DEFINES  += -DINTEL
     #
     ifeq ($(static),static)
@@ -196,7 +202,8 @@ endif
 # additional compilers to be included here, BE AWARE OF DEPENDENCIES!!!
 #
 # --- IMSL ---------------------------------------------------
-ifneq ($(imsl),)
+#ifeq ($(imsl),$(findstring $(imsl),vendor imsl))
+ifneq (,$(findstring $(imsl),vendor imsl))
      IMSLDIR = /usr/local/imsl/imsl/fnl700/rdhin111e64
      IMSLINC = $(IMSLDIR)/include
      IMSLLIB = $(IMSLDIR)/lib
@@ -220,17 +227,33 @@ endif
 # --- MKL ---------------------------------------------------
 ifeq ($(mkl),true)
     MKLDIR    = /usr/local/intel/composerxe-2011.4.191/mkl
-    MKLINC    = $(MKLDIR)/include
+    MKLINC    = $(MKLDIR)/include/intel64/lp64
     MKLLIB    = $(MKLDIR)/lib/intel64
     #
     INCLUDES += -I$(MKLINC)
-    LIBS     += -L$(MKLLIB) -lmkl_intel_lp64 -lmkl_core -lmkl_sequential # -lmkl_intel_thread
+    #
+    # according to MKL Link-Line Advisor: http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
+    #
+    LIBS += -L$(MKLLIB) -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core #-lpthread
+    ifneq (,$(findstring $(imsl),vendor imsl))
+       # imsl needs threading
+       LIBS += -lmkl_intel_thread #-lpthread
+    else
+       ifneq (,$(findstring $(parallel),-openmp))
+           # -openmp needs threading
+           LIBS += -lmkl_intel_thread #-lpthread
+       else
+           # all others use sequential version of MKL
+           LIBS += -lmkl_sequential #-lpthread
+       endif
+    endif
+    
     RPATH    += -Wl,-rpath,$(MKLLIB)
 endif
 
 # --- NETCDF ---------------------------------------------------
 ifneq ($(netcdf),)
-    ifeq ($(netcdf),$(findstring $(netcdf),netcdf3 netcdf4))
+    ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
         NCDIR =
         ifeq ($(netcdf),netcdf3)
             #NCDIR = /usr/local/netcdf/3.6.3_intel_12.0.4
@@ -283,6 +306,10 @@ ifeq ($(lapack),true)
     LAPACKLIB = $(LAPACK)/lib64
     LIBS     += -L$(LAPACKLIB) -lblas -llapack
     RPATH    += -Wl,-rpath,$(LAPACKLIB)
+    GFORTRAN    = /usr
+    GFORTRANLIB = $(GFORTRAN)/lib64
+    LIBS       += -L$(GFORTRANLIB) -lgfortran
+    RPATH    += -Wl,-rpath,$(GFORTRANLIB)
 endif
 
 # --- FINISH SETUP ---------------------------------------------------
