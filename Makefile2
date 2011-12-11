@@ -2,17 +2,21 @@
 
 SHELL = /bin/bash
 
-.SUFFIXES: .f90 .o
+.SUFFIXES:
+.SUFFIXES: .f90 .o .for .f
 
 all: $(PROG)
 
-$(PROG): $(OBJS) $(FOROBJS)
-	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(LIBS)
+$(PROG): $(OBJS) $(FOROBJS) $(FOBJS)
+	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(LIBS)
 
 $(OBJS): $(OBJPATH)/%.o: %.f90
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $< -o $@
 
 $(FOROBJS): $(OBJPATH)/%.o: %.for
+	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $< -o $@
+
+$(FOBJS): $(OBJPATH)/%.o: %.f
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $< -o $@
 
 # All dependencies create by perl script makedeps.pl
