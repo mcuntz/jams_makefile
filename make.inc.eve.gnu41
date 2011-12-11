@@ -1,0 +1,65 @@
+# -*- Makefile -*-
+
+#
+# Setup file for gnu compiler 4.1 at eve.ufz.de
+#
+
+# 
+# The Makefile assumes the standard bin, include and lib directories
+# i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# Define subirectories ianother structure
+
+# Paths
+GNU41DIR := /usr
+GNU41LIB := /usr/lib64
+GNU41BIN := $(GNU41DIR)/bin
+
+# Compiling
+F90 := $(GNU41BIN)/gfortran
+FC  := $(F90)
+ifeq ($(release),debug)
+    F90FLAGS := -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
+    FCFLAGS  := -pedantic-errors -ffixed-form -ffixed-line-length-132 -Wall -W -O -g
+else
+    F90FLAGS := -O3
+    FCFLAGS  := -ffixed-form -O3
+endif
+F90FLAGS += -J$(OBJPATH) -I$(OBJPATH)
+
+DEFINES  += -DGFORTRAN
+
+# Linking
+ifeq ($(static),static)
+    LIBS += -Bstatic -Wl,--start-group
+else
+    LIBS += -Bdynamic
+endif
+LIBS += -L$(GNU41LIB)
+RPATH += -Wl,-rpath,$(GNU41LIB)
+
+# IMSL
+IMSLDIR :=
+
+# MKL
+MKLDIR :=
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR := /usr/local/netcdf/3.6.3_gcc41
+else
+    NCDIR   := /usr/local/netcdf/4.1.1_gcc41
+    SZLIB   := /usr/local/szip/2.1/lib
+    HDF5LIB := /usr/local/hdf5/1.8.6/lib
+endif
+
+# PROJ
+PROJ4DIR := /usr/local/proj/4.7.0
+FPROJDIR := /usr/local/fproj/4.7.0_gcc41
+
+# LAPACK
+LAPACKDIR   := /usr
+LAPACKLIB   := $(LAPACKDIR)/lib64
+GFORTRANDIR := /usr
+GFORTRANLIB := $(GFORTRANDIR)/lib64

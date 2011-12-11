@@ -1,24 +1,67 @@
+# -*- Makefile -*-
 #
-# Makefile for CHS projects on eve.ufz.de
+# PURPOSE
+#     Makefile for CHS projects on eve.ufz.de
 #
-# Usage
-#    make [option=option] [VAR=VAR] [target]
-# Variables can be set on the command line [VAR=VAR] or in the --- SWITCHES --- section below
+# CALLING SEQUENCE
+#     make [options] [VARIABLE=VARIABLE ...] [targets]
 #
-# Targets: all, clean, cleanclean
-# 
-# Options: see individual options in switch section below
-#          options can be empty (same as any "garbage" value)
-#          e.g. if you do not want use IMSL, set:  imsl=  or  imsl=no
+#     Variables can be set on the command line [VAR=VAR] or in the SWITCHES section in this file.
 #
-# Links providing documentation:
-#    GNU Make:       http://www.gnu.org/software/make/
-#    NETCDF:         http://www.unidata.ucar.edu/software/netcdf/
-#    PROJ4:          http://trac.osgeo.org/proj/
-#    IMSL:           http://www.roguewave.com/products/imsl-numerical-libraries.aspx
-#    MKL:            http://software.intel.com/en-us/articles/intel-mkl/
-#    LAPACK:         http://www.netlib.org/lapack/
-#    INTEL Compiler: http://software.intel.com/en-us/articles/intel-parallel-studio-xe/
+# INPUTS
+#     targets    all (default), clean, cleanclean
+#
+# OPTIONS
+#     All make options such as -f makefile. See 'man make'. 
+#
+# VARIABLES
+#     All variables defined in this makefile.
+#     This makefile has lots of conditional statements depending on variables.
+#     If the variable functions as a switch then the condition checks for variable = true,
+#     otherwise the variable can have different values.
+#     See individual variables in SWITCHES section below.
+#
+#     Variables can be empty for disabling a certain behaviour,
+#     e.g. if you do not want to use IMSL, set:  imsl=no  or  imsl=
+#
+#     Current variables are
+#         system      eve
+#         release     debug, release
+#         netcdf      netcdf3, netcdf4
+#         static      static, shared, dynamic (last two are equal)
+#         proj        true, [anything else]
+#         imsl        vendor, imsl, [anything else]
+#         mkl         true, [anything else]
+#         lapack      true, [anything else]
+#         compiler    intel11, intel12, gnu41, gnu44
+#                     alternative names are:
+#                     intel, ifort, ifort11=intel11
+#                     ifort12=intel12
+#                     gnu, gfortran, gcc, gfortran44, gcc44=gnu44
+#                     gfortran41, gcc41=gnu41
+#         opti        -O, -O0, -O1, -O2, -O3, -O4, -O5, [anything else]
+#         openmp      true, [anything else]
+#
+# DEPENDENCIES
+#    This make file uses the following files:
+#        Makefile2, makedeps.pl, make.inc.$(system).$(compiler) 
+#
+# RESTRICTIONS
+#    Not all packages work with or are compiled for all compilers.
+#    The script does checksome but not all of these dependencies.
+#
+# EXAMPLE
+#    make release=debug compiler=intel11 imsl=imsl mkl=true
+#
+# LITERATURE
+#    The following links provide documentation:
+#        GNU Make:       http://www.gnu.org/software/make/
+#        INTEL Compiler: http://software.intel.com/en-us/articles/intel-parallel-studio-xe/
+#        MKL:            http://software.intel.com/en-us/articles/intel-mkl/
+#        IMSL:           http://www.roguewave.com/products/imsl-numerical-libraries.aspx
+#        NETCDF:         http://www.unidata.ucar.edu/software/netcdf/
+#        PROJ4:          http://trac.osgeo.org/proj/
+#        LAPACK:         http://www.netlib.org/lapack/
 #
 # Written Matthias Cuntz & Juliane Mai, UFZ Leipzig, Germany, Aug. 2011 - matthias.cuntz@ufz.de
 
@@ -36,11 +79,13 @@ PROGPATH := . # where shall be the executable
 PROGNAME := Prog # Name of executable
 #
 # check f77 files
-ifeq (,$(wildcard $(strip $(SRCPATH))/*.f90 ) $(wildcard $(strip $(SRCPATH))/*.for ) $(wildcard $(strip $(SRCPATH))/*.f ))
+ifeq (,$(wildcard $(SRCPATH)/*.f90) $(wildcard $(SRCPATH)/*.for) $(wildcard $(SRCPATH)/*.f))
         $(error Error: no fortran files in source path: $(SRCPATH))
 endif
 #
 # Options
+# Systems: eve
+system   := eve
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
@@ -52,19 +97,61 @@ proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
 imsl     :=
 # MKL (Intel's Math Kernel Library): true, [anything else]
-mkl      := true
+mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   :=
-# Compiler: intel11
+lapack   := true
+# Compiler: intel11, intel12, gnu41, gnu44
 compiler := intel11
 # Optimization: -O, -O0, -O1, -O2, -O3, -O4, -O5
 opti     := -O3
 # OpenMP parallelization: true, [anything else]
-openmp := 
+openmp   := 
+
+#
+# --- DEFAULTS ---------------------------------------------------
+#
+
+ifeq ($(compiler),intel)
+    compiler := intel11
+endif
+ifeq ($(compiler),ifort)
+    compiler := intel11
+endif
+ifeq ($(compiler),ifort11)
+    compiler := intel11
+endif
+ifeq ($(compiler),ifort12)
+    compiler := intel12
+endif
+ifeq ($(compiler),gnu)
+    compiler := gnu44
+endif
+ifeq ($(compiler),gfortran)
+    compiler := gnu44
+endif
+ifeq ($(compiler),gcc)
+    compiler := gnu44
+endif
+ifeq ($(compiler),gfortran44)
+    compiler := gnu44
+endif
+ifeq ($(compiler),gcc44)
+    compiler := gnu44
+endif
+ifeq ($(compiler),gfortran41)
+    compiler := gnu41
+endif
+ifeq ($(compiler),gcc41)
+    compiler := gnu41
+endif
 
 #
 # --- CHECKS ---------------------------------------------------
 #
+
+ifeq (,$(findstring $(system),eve))
+    $(error Error: system '$(eve)' not found; must be in 'eve')
+endif
 
 ifeq (,$(findstring $(release),debug release))
     $(error Error: release '$(release)' not found; must be in 'debug release')
@@ -94,8 +181,8 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     endif
 endif
 
-ifeq (,$(findstring $(compiler),intel11))
-    $(error Error: compiler '$(compiler)' not found; must be in 'intel11')
+ifeq (,$(findstring $(compiler),intel11 intel12 gnu41 gnu44))
+    $(error Error: compiler '$(compiler)' not found; must be in 'intel11 intel12 gnu41 gnu44')
 endif
 
 ifeq ($(openmp),true)
@@ -108,12 +195,13 @@ endif
 # --- PATHS ------------------------------------------------
 #
 
-# Progs include absolute paths
+# Make absolute pathes
 ifeq ($(findstring '//','/'$(PROGPATH)),)
     PROG := $(CURDIR)/$(strip $(PROGPATH))/$(strip $(PROGNAME))
 else
     PROG := $(strip $(PROGPATH))/$(strip $(PROGNAME))
 endif
+
 ifeq ($(findstring '//','/'$(MAKEPATH)),)
     MAKEPROG     := $(CURDIR)/$(strip $(MAKEPATH))/Makefile2
     MAKEDEPSPROG := $(CURDIR)/$(strip $(MAKEPATH))/makedeps.pl
@@ -121,14 +209,23 @@ else
     MAKEPROG     := $(strip $(MAKEPATH))/Makefile2
     MAKEDEPSPROG := $(strip $(MAKEPATH))/makedeps.pl
 endif
-# Make source path absolute
+ifneq (exists, $(shell if [ -f $(MAKEPROG) ] ; then echo 'exists' ; fi))
+    $(error Error: '$(MAKEPROG)' not found.)
+endif
+ifneq (exists, $(shell if [ -f $(MAKEDEPSPROG) ] ; then echo 'exists' ; fi))
+    $(error Error: '$(MAKEDEPSPROG)' not found.)
+endif
+
 ifeq ($(findstring '//','/'$(SRCPATH)),)
     SOURCEPATH := $(CURDIR)/$(strip $(SRCPATH))
 else
     SOURCEPATH := $(strip $(SRCPATH))
 endif
+ifneq (exists, $(shell if [ -d $(SOURCEPATH) ] ; then echo 'exists' ; fi))
+    $(error Error: path '$(SOURCEPATH)' not found.)
+endif
 
-OBJPATH := $(SOURCEPATH)/.$(strip $(release))
+OBJPATH := $(SOURCEPATH)/.$(strip $(compiler)).$(strip $(release))
 
 #
 # --- DEFAULTS ---------------------------------------------------
@@ -149,146 +246,110 @@ LIBS     :=
 #
 # --- COMPILER / MACHINE SPECIFIC --------------------------------
 #
-
-#ifeq (intel11,$(compiler))
-#    include make.inc.intel11
-#endif
+MAKEINC := make.inc.$(system).$(compiler)
+ifneq (exists, $(shell if [ -f $(MAKEINC) ] ; then echo 'exists' ; fi))
+    $(error Error: '$(MAKEINC)' not found.)
+endif
+include $(MAKEINC)
 
 # --- COMPILER ---------------------------------------------------
-ifeq (intel11,$(compiler))
-    # v12
-    # INTEL := /usr/local/intel/composerxe-2011.4.191
-    # INTELLIB := $(INTEL)/compiler/lib/intel64
-    # v11
-    INTEL    := /opt/intel/Compiler/11.1/075
-    INTELBIN := $(INTEL)/bin/intel64
-    INTELLIB := /usr/local/intel/11.1.075
-    #
-    F90 := $(INTELBIN)/ifort
-    FC  := $(F90)
-    ifeq ($(release),debug)
-        F90FLAGS := -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
-        FCFLAGS  := -g -debug -traceback -fp-stack-check -O0 -debug
-    else
-        # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
-        F90FLAGS  := $(opti) -vec-report0 -override-limits
-        FCFLAGS   := $(opti) -vec-report0 -override-limits
+ifneq (,$(findstring $(compiler),gnu41 gnu44))
+    ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
+        $(error Error: '$(GFORTRANDIR)' not found.)
     endif
-    F90FLAGS += -assume byterecl -cpp -fp-model precise $(iopenmp) -m64 -module "$(OBJPATH)"
-    FCFLAGS  += -assume byterecl -cpp -fp-model precise $(iopenmp) -m64 -module "$(OBJPATH)" -fixed
-    ifeq ($(openmp),true)
-        LDFLAGS  += $(iopenmp)
-    else
-        ifneq (,$(findstring $(imsl),vendor imsl))
-            LDFLAGS  += -openmp
-        endif
-    endif
-    DEFINES  += -DINTEL
-    #
-    ifeq ($(static),static)
-        LIBS += -static-intel -Bstatic -Wl,--start-group
-    else
-        LIBS += -Bdynamic
-    endif
-    #
-    LIBS += -L$(INTELLIB) -limf -lm -lsvml
-    #
-    ifneq ($(static),static)
-         LIBS += -lintlc
-    endif
-    RPATH += -Wl,-rpath,$(INTELLIB)
+    GFORTRANLIB ?= $(GFORTRANDIR)/lib64
+    LIBS        += -L$(GFORTRANLIB) -lgfortran
+    RPATH       += -Wl,-rpath,$(GFORTRANLIB)
 endif
-#
-# additional compilers to be included here, BE AWARE OF DEPENDENCIES!!!
-#
+
+# --- OPENMP -----------------------------------------------------
+ifeq ($(openmp),true)
+    LDFLAGS  += $(iopenmp)
+else
+    ifneq (,$(findstring $(imsl),vendor imsl))
+        LDFLAGS  += -openmp
+    endif
+endif
 
 # --- IMSL ---------------------------------------------------
 ifneq (,$(findstring $(imsl),vendor imsl))
-     IMSLDIR := /usr/local/imsl/imsl/fnl700/rdhin111e64
-     IMSLINC := $(IMSLDIR)/include
-     IMSLLIB := $(IMSLDIR)/lib
-     #
-     INCLUDES += -I$(IMSLINC)
-     LIBS     += -z muldefs
-     #
-     ifneq ($(static),static)
-        LIBS += -i_dynamic
-     endif
-     #
-     ifeq ($(imsl),imsl)
-         LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu
-     else
-         LIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
-     endif
-     #
-     RPATH += -Wl,-rpath,$(IMSLLIB)
+    ifneq (exists, $(shell if [ -d $(IMSLDIR) ] ; then echo 'exists' ; fi))
+        $(error Error: '$(IMSLDIR)' not found.)
+    endif
+    IMSLINC ?= $(IMSLDIR)/include
+    IMSLLIB ?= $(IMSLDIR)/lib
+
+    INCLUDES += -I$(IMSLINC)
+
+    LIBS     += -z muldefs
+    ifneq ($(static),static)
+       LIBS += -i_dynamic
+    endif
+
+    ifeq ($(imsl),imsl)
+        LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu
+    else
+        LIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
+    endif
+    RPATH += -Wl,-rpath,$(IMSLLIB)
 endif
 
 # --- MKL ---------------------------------------------------
 ifeq ($(mkl),true)
-    MKLDIR    := /usr/local/intel/composerxe-2011.4.191/mkl
-    MKLINC    := $(MKLDIR)/include/intel64/lp64
-    MKLLIB    := $(MKLDIR)/lib/intel64
-    #
+    ifneq (exists, $(shell if [ -d $(MKLDIR) ] ; then echo 'exists' ; fi))
+        $(error Error: '$(MKLDIR)' not found.)
+    endif
+    MKLINC ?= $(MKLDIR)/include/intel64/lp64
+    MKLLIB ?= $(MKLDIR)/lib/intel64
+
     INCLUDES += -I$(MKLINC)
-    #
-    # according to MKL Link-Line Advisor: http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
-    #
+
     LIBS += -L$(MKLLIB) -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core #-lpthread
     ifneq (,$(findstring $(imsl),vendor imsl))
-       # imsl needs threading
+       LIBS += -lmkl_intel_thread #-lpthread
+    else ifeq ($(openmp),true)
        LIBS += -lmkl_intel_thread #-lpthread
     else
-       ifeq ($(openmp),true)
-           # -openmp needs threading
-           LIBS += -lmkl_intel_thread #-lpthread
-       else
-           # all others use sequential version of MKL
-           LIBS += -lmkl_sequential #-lpthread
-       endif
+       LIBS += -lmkl_sequential #-lpthread
     endif
-
-    RPATH    += -Wl,-rpath,$(MKLLIB)
+    RPATH += -Wl,-rpath,$(MKLLIB)
 endif
 
 # --- NETCDF ---------------------------------------------------
-ifneq ($(netcdf),)
-    ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
-        NCDIR :=
-        ifeq ($(netcdf),netcdf3)
-            #NCDIR := /usr/local/netcdf/3.6.3_intel_12.0.4
-            NCDIR := /usr/local/netcdf/3.6.3_intel11.1.075
-        else
-            #NCDIR := /usr/local/netcdf/4.1.1_intel_12.0.4
-            NCDIR := /usr/local/netcdf/4.1.1_intel11.1.075
-        endif
-        NCINC := $(strip $(NCDIR))/include
-        NCLIB := $(strip $(NCDIR))/lib
+ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
+    ifneq (exists, $(shell if [ -d $(NCDIR) ] ; then echo 'exists' ; fi))
+        $(error Error: '$(NCDIR)' not found.)
+    endif
+    NCINC ?= $(strip $(NCDIR))/include
+    NCLIB ?= $(strip $(NCDIR))/lib
 
-        INCLUDES += -I$(NCINC)
-        LIBS     += -L$(NCLIB) -lnetcdf -lnetcdff
-        RPATH    += -Wl,-rpath,$(NCLIB)
+    INCLUDES += -I$(NCINC)
 
-        # libraries for netcdf4, ignored for netcdf3
-        ifeq ($(netcdf),netcdf4)
-            SZLIB     := /usr/local/szip/2.1/lib
-            HDF5LIB   := /usr/local/hdf5/1.8.6/lib
-            LIBS     += -lz -L$(SZLIB) -lsz -L$(HDF5LIB) -lhdf5 -lhdf5_hl
-            RPATH    += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
-        endif
+    LIBS     += -L$(NCLIB) -lnetcdf -lnetcdff
+    RPATH    += -Wl,-rpath,$(NCLIB)
+
+    # libraries for netcdf4, ignored for netcdf3
+    ifeq ($(netcdf),netcdf4)
+        LIBS  += -lz -L$(SZLIB) -lsz -L$(HDF5LIB) -lhdf5 -lhdf5_hl
+        RPATH += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
     endif
 endif
 
 # --- PROJ --------------------------------------------------
 ifeq ($(proj),true)
-    PROJ4    := /usr/local/proj/4.7.0/lib
-    LIBS     += -L$(PROJ4) -lproj    
-    RPATH    += -Wl,-rpath=$(PROJ4)
-    #
-    FPROJDIR := /usr/local/fproj/4.7.0_intel11.1.075
-    FPROJINC := $(FPROJDIR)/include
-    FPROJLIB := $(FPROJDIR)/lib
-    #
+    ifneq (exists, $(shell if [ -d $(PROJ4DIR) ] ; then echo 'exists' ; fi))
+        $(error Error: '$(PROJ4DIR)' not found.)
+    endif
+    PROJ4LIB ?= $(PROJ4DIR)/lib
+    LIBS     += -L$(PROJ4LIB) -lproj    
+    RPATH    += -Wl,-rpath=$(PROJ4LIB)
+
+    ifneq (exists, $(shell if [ -d $(FPROJDIR) ] ; then echo 'exists' ; fi))
+        $(error Error: '$(FPROJDIR)' not found.)
+    endif
+    FPROJINC ?= $(FPROJDIR)/include
+    FPROJLIB ?= $(FPROJDIR)/lib
+
     INCLUDES += -I$(FPROJINC)
     LIBS     += -L$(FPROJLIB) -lfproj4 $(FPROJLIB)/proj4.o
     RPATH    += -Wl,-rpath,$(FPROJLIB)
@@ -296,14 +357,21 @@ endif
 
 # --- LAPACK ---------------------------------------------------
 ifeq ($(lapack),true)
-    LAPACK    := /usr
-    LAPACKLIB := $(LAPACK)/lib64
-    LIBS     += -L$(LAPACKLIB) -lblas -llapack
-    RPATH    += -Wl,-rpath,$(LAPACKLIB)
-    GFORTRAN    := /usr
-    GFORTRANLIB := $(GFORTRAN)/lib64
-    LIBS       += -L$(GFORTRANLIB) -lgfortran
-    RPATH    += -Wl,-rpath,$(GFORTRANLIB)
+    ifneq (exists, $(shell if [ -d $(LAPACKDIR) ] ; then echo 'exists' ; fi))
+        $(error Error: '$(LAPACKDIR)' not found.)
+    endif
+    LAPACKLIB ?= $(LAPACKDIR)/lib
+    LIBS      += -L$(LAPACKLIB) -lblas -llapack
+    RPATH     += -Wl,-rpath,$(LAPACKLIB)
+
+    ifeq (,$(findstring $(compiler),gnu41 gnu44))
+        ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
+            $(error Error: '$(GFORTRANDIR)' not found.)
+        endif
+        GFORTRANLIB ?= $(GFORTRANDIR)/lib64
+        LIBS        += -L$(GFORTRANLIB) -lgfortran
+        RPATH       += -Wl,-rpath,$(GFORTRANLIB)
+    endif
 endif
 
 #
@@ -388,4 +456,4 @@ ifeq ($(findstring test_netcdf_imsl_proj, $(SRCPATH)),test_netcdf_imsl_proj)
 endif
 
 cleanclean: clean
-	rm -rf "$(SOURCEPATH)"/.release "$(SOURCEPATH)"/.debug "$(PROG)".dSYM
+	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* $(PROG).dSYM

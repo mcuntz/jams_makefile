@@ -1,0 +1,65 @@
+# -*- Makefile -*-
+
+#
+# Setup file for gnu compiler 4.4 at eve.ufz.de
+#
+
+# 
+# The Makefile assumes the standard bin, include and lib directories
+# i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# Define subirectories ianother structure
+
+# Paths
+GNU44DIR := /usr
+GNU44LIB := /usr/lib64
+GNU44BIN := $(GNU44DIR)/bin
+
+# Compiling
+F90 := $(GNU44BIN)/gfortran44
+FC  := $(F90)
+# GNU Fortran version >= 4.4
+ifeq ($(release),debug)
+    F90FLAGS := -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
+    FCFLAGS  := -pedantic-errors -ffixed-form -ffixed-line-length-132 -Wall -W -O -g
+else
+    F90FLAGS := -O3
+    FCFLAGS  := -ffixed-form -O3
+endif
+F90FLAGS += -cpp -J$(OBJPATH)
+DEFINES  += -DGFORTRAN
+
+# Linking
+ifeq ($(static),static)
+    LIBS += -Bstatic -Wl,--start-group
+else
+    LIBS += -Bdynamic
+endif
+LIBS += -L$(GNU44LIB)
+RPATH += -Wl,-rpath,$(GNU44LIB)
+
+# IMSL
+IMSLDIR :=
+
+# MKL
+MKLDIR :=
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR := /usr/local/netcdf/3.6.3_gcc44
+else
+    NCDIR   := /usr/local/netcdf/4.1.1_gcc44
+    SZLIB   := /usr/local/szip/2.1/lib
+    HDF5LIB := /usr/local/hdf5/1.8.6/lib
+endif
+
+# PROJ
+PROJ4DIR := /usr/local/proj/4.7.0
+FPROJDIR := /usr/local/fproj/4.7.0_gcc44
+
+# LAPACK
+LAPACKDIR   := /usr
+LAPACKLIB   := $(LAPACKDIR)/lib64
+GFORTRANDIR := /usr
+GFORTRANLIB := $(GFORTRANDIR)/lib64
