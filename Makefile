@@ -29,7 +29,7 @@ SHELL = /bin/bash
 # --- SWITCHES -------------------------------------------------------
 MAKEPATH = . # where are the make files (. is current directory, .. is parent directory)
 #SRCPATH  = . # where are the source files; use test_??? to run a test directory
-SRCPATH  = ./test_imsl_lapack
+SRCPATH  = ./test_mkl
 PROGPATH = . # where shall be the executable
 #
 PROGNAME = Prog # Name of executable
