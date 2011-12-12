@@ -47,7 +47,7 @@ endif
 RPATH += -Wl,-rpath,$(INTELLIB)
 
 # IMSL
-IMSLDIR := /usr/local/imsl/imsl/fnl700/rdhin111e64
+IMSLDIR :=
 
 # MKL
 MKLDIR := $(INTEL)/mkl

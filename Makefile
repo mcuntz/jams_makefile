@@ -281,6 +281,7 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     IMSLLIB ?= $(IMSLDIR)/lib
 
     INCLUDES += -I$(IMSLINC)
+    DEFINES  += -DIMSL
 
     LIBS     += -z muldefs
     ifneq ($(static),static)
@@ -300,10 +301,11 @@ ifeq ($(mkl),true)
     ifneq (exists, $(shell if [ -d $(MKLDIR) ] ; then echo 'exists' ; fi))
         $(error Error: '$(MKLDIR)' not found.)
     endif
-    MKLINC ?= $(MKLDIR)/include/intel64/lp64
-    MKLLIB ?= $(MKLDIR)/lib/intel64
+    MKLINC ?= $(MKLDIR)/include
+    MKLLIB ?= $(MKLDIR)/lib
 
     INCLUDES += -I$(MKLINC)
+    DEFINES  += -DMKL
 
     LIBS += -L$(MKLLIB) -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core #-lpthread
     ifneq (,$(findstring $(imsl),vendor imsl))
@@ -325,6 +327,7 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
     NCLIB ?= $(strip $(NCDIR))/lib
 
     INCLUDES += -I$(NCINC)
+    DEFINES  += -DNETCDF
 
     LIBS     += -L$(NCLIB) -lnetcdf -lnetcdff
     RPATH    += -Wl,-rpath,$(NCLIB)
@@ -352,6 +355,7 @@ ifeq ($(proj),true)
     FPROJLIB ?= $(FPROJDIR)/lib
 
     INCLUDES += -I$(FPROJINC)
+    DEFINES  += -DFPROJ
     LIBS     += -L$(FPROJLIB) -lfproj4 $(FPROJLIB)/proj4.o
     RPATH    += -Wl,-rpath,$(FPROJLIB)
 endif
@@ -364,6 +368,7 @@ ifeq ($(lapack),true)
     LAPACKLIB ?= $(LAPACKDIR)/lib
     LIBS      += -L$(LAPACKLIB) -lblas -llapack
     RPATH     += -Wl,-rpath,$(LAPACKLIB)
+    DEFINES  += -DLAPACK
 
     ifeq (,$(findstring $(icompiler),gnu41 gnu44))
         ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
