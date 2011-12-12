@@ -35,13 +35,11 @@ FCFLAGS  += -assume byterecl -cpp -fp-model precise $(iopenmp) -m64 -module "$(O
 DEFINES  += -DINTEL
 
 # Linking
-ifeq ($(static),static)
-    LIBS += -static-intel -Bstatic -Wl,--start-group
-else
-    LIBS += -Bdynamic
+ifeq ($(istatic),static)
+    LIBS += -static-intel
 endif
 LIBS += -L$(INTELLIB) -limf -lm -lsvml
-ifneq ($(static),static)
+ifneq ($(istatic),static)
      LIBS += -lintlc
 endif
 RPATH += -Wl,-rpath,$(INTELLIB)
@@ -53,6 +51,9 @@ IMSLDIR :=
 MKLDIR := $(INTEL)/mkl
 MKLINC := $(MKLDIR)/include/intel64/lp64
 MKLLIB := $(MKLDIR)/lib/intel64
+MKL95DIR := $(MKLDIR)
+MKL95INC := $(MKL95DIR)/include/intel64/lp64
+MKL95LIB := $(MKL95DIR)/lib/intel64
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)

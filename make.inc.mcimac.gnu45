@@ -1,10 +1,10 @@
 # -*- Makefile -*-
 
 #
-# Setup file for gnu compiler 4.4 at eve.ufz.de
+# Setup file for gnu compiler 4.5 at eve.ufz.de
 #
 
-# 
+#
 # The Makefile assumes the standard bin, include and lib directories
 # i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
 #   SOMEINC ?= SOMEDIR/include
@@ -12,12 +12,12 @@
 # Define subirectories ianother structure
 
 # Paths
-GNU44DIR := /usr
-GNU44LIB := /usr/lib64
-GNU44BIN := $(GNU44DIR)/bin
+GNUDIR := /usr/local
+GNULIB := $(GNUDIR)/lib
+GNUBIN := $(GNUDIR)/bin
 
 # Compiling
-F90 := $(GNU44BIN)/gfortran44
+F90 := $(GNUBIN)/gfortran
 FC  := $(F90)
 # GNU Fortran version >= 4.4
 ifeq ($(release),debug)
@@ -31,30 +31,34 @@ F90FLAGS += -cpp -J$(OBJPATH)
 DEFINES  += -DGFORTRAN
 
 # Linking
-LIBS += -L$(GNU44LIB)
-RPATH += -Wl,-rpath,$(GNU44LIB)
+LIBS += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
 
 # IMSL
 IMSLDIR :=
 
 # MKL
-MKLDIR :=
+MKLDIR := /opt/intel/composerxe-2011.4.184/mkl
+MKLINC := $(MKLDIR)/include/intel64/lp64
+MKLLIB := $(MKLDIR)/lib
+MKL95DIR := /opt/lib/mkl95_lapack/gfortran45
+MKL95INC := $(MKL95DIR)/include/intel64/lp64
+MKL95LIB := $(MKL95DIR)/lib/intel64
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR := /usr/local/netcdf/3.6.3_gcc44
+    NCDIR := /opt/lib/netcdf3_gfortran_static
 else
-    NCDIR   := /usr/local/netcdf/4.1.1_gcc44
-    SZLIB   := /usr/local/szip/2.1/lib
-    HDF5LIB := /usr/local/hdf5/1.8.6/lib
+    NCDIR    = /usr/local
+    CURLLIB := /opt/lib/curl/lib
+    SZLIB   := /usr/local/lib
+    HDF5LIB := /usr/local/lib
 endif
 
 # PROJ
-PROJ4DIR := /usr/local/proj/4.7.0
-FPROJDIR := /usr/local/fproj/4.7.0_gcc44
+PROJ4DIR := /usr/local/
+FPROJDIR := 
 
 # LAPACK
-LAPACKDIR   := /usr
-LAPACKLIB   := $(LAPACKDIR)/lib64
-GFORTRANDIR := /usr
-GFORTRANLIB := $(GFORTRANDIR)/lib64
+LAPACKDIR   := 
+GFORTRANDIR := /usr/local

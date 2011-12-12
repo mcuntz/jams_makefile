@@ -31,11 +31,6 @@ F90FLAGS += -J$(OBJPATH) -I$(OBJPATH)
 DEFINES  += -DGFORTRAN
 
 # Linking
-ifeq ($(static),static)
-    LIBS += -Bstatic -Wl,--start-group
-else
-    LIBS += -Bdynamic
-endif
 LIBS += -L$(GNU41LIB)
 RPATH += -Wl,-rpath,$(GNU41LIB)
 

@@ -1,7 +1,6 @@
 program mlr
 
   use number_precision,     only: i4, dp
-  use mkl95_lapack,         only: gels
 
   implicit none 
 
@@ -12,7 +11,7 @@ program mlr
   integer(i4)                            :: nVar = 3
   integer(i4)                            :: ierr  
   character(len=1)                       :: string1
-  character(len=256),parameter           :: fileName='test_lapack/example.txt'
+  character(len=256),parameter           :: fileName='test_mkl/example.txt'
   real(dp), dimension(:,:), allocatable  :: X
   real(dp), dimension(:), allocatable    :: Y
   ! for IMSL
@@ -59,14 +58,6 @@ program mlr
   print *, 'LAPACK2 OK '
   print *, B_LAPACK
 
-  A(:,1)        = 1.0_dp
-  A(:,2:nVar+1) = X
-  Yold          = Y
-  call GELS(A, Yold)
-  B_LAPACK = Yold(1:nVar+1)
-  print *, 'LAPACK3 OK '
-  print *, B_LAPACK
-  !B_LAPACK =  B_IMSL ! temporary!!!!
   !
   ! statistics
   !
