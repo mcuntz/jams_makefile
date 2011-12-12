@@ -73,7 +73,7 @@ SHELL = /bin/bash
 
 MAKEPATH := . # where are the make files (. is current directory, .. is parent directory)
 #SRCPATH  := . # where are the source files; use test_??? to run a test directory
-SRCPATH  := ./test_mkl
+SRCPATH  := ./test_lapack
 PROGPATH := . # where shall be the executable
 #
 PROGNAME := Prog # Name of executable
@@ -111,38 +111,39 @@ openmp   :=
 # --- DEFAULTS ---------------------------------------------------
 #
 
+icompiler := $(compiler)
 ifeq ($(compiler),intel)
-    compiler := intel11
+    icompiler := intel11
 endif
 ifeq ($(compiler),ifort)
-    compiler := intel11
+    icompiler := intel11
 endif
 ifeq ($(compiler),ifort11)
-    compiler := intel11
+    icompiler := intel11
 endif
 ifeq ($(compiler),ifort12)
-    compiler := intel12
+    icompiler := intel12
 endif
 ifeq ($(compiler),gnu)
-    compiler := gnu44
+    icompiler := gnu44
 endif
 ifeq ($(compiler),gfortran)
-    compiler := gnu44
+    icompiler := gnu44
 endif
 ifeq ($(compiler),gcc)
-    compiler := gnu44
+    icompiler := gnu44
 endif
 ifeq ($(compiler),gfortran44)
-    compiler := gnu44
+    icompiler := gnu44
 endif
 ifeq ($(compiler),gcc44)
-    compiler := gnu44
+    icompiler := gnu44
 endif
 ifeq ($(compiler),gfortran41)
-    compiler := gnu41
+    icompiler := gnu41
 endif
 ifeq ($(compiler),gcc41)
-    compiler := gnu41
+    icompiler := gnu41
 endif
 
 #
@@ -168,7 +169,7 @@ ifeq (,$(findstring $(static),static shared dynamic))
 endif
 
 ifneq (,$(findstring $(imsl),vendor imsl))
-    ifneq ($(compiler),intel11)
+    ifneq ($(icompiler),intel11)
         $(error Error: IMSL needs intel11.0.075, set 'compiler=intel11')
     endif
     ifeq ($(lapack),true)
@@ -181,8 +182,8 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     endif
 endif
 
-ifeq (,$(findstring $(compiler),intel11 intel12 gnu41 gnu44))
-    $(error Error: compiler '$(compiler)' not found; must be in 'intel11 intel12 gnu41 gnu44')
+ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu44))
+    $(error Error: compiler '$(icompiler)' not found; must be in 'intel11 intel12 gnu41 gnu44')
 endif
 
 ifeq ($(openmp),true)
@@ -225,7 +226,7 @@ ifneq (exists, $(shell if [ -d $(SOURCEPATH) ] ; then echo 'exists' ; fi))
     $(error Error: path '$(SOURCEPATH)' not found.)
 endif
 
-OBJPATH := $(SOURCEPATH)/.$(strip $(compiler)).$(strip $(release))
+OBJPATH := $(SOURCEPATH)/.$(strip $(icompiler)).$(strip $(release))
 
 #
 # --- DEFAULTS ---------------------------------------------------
@@ -246,14 +247,14 @@ LIBS     :=
 #
 # --- COMPILER / MACHINE SPECIFIC --------------------------------
 #
-MAKEINC := make.inc.$(system).$(compiler)
+MAKEINC := make.inc.$(system).$(icompiler)
 ifneq (exists, $(shell if [ -f $(MAKEINC) ] ; then echo 'exists' ; fi))
     $(error Error: '$(MAKEINC)' not found.)
 endif
 include $(MAKEINC)
 
 # --- COMPILER ---------------------------------------------------
-ifneq (,$(findstring $(compiler),gnu41 gnu44))
+ifneq (,$(findstring $(icompiler),gnu41 gnu44))
     ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
         $(error Error: '$(GFORTRANDIR)' not found.)
     endif
@@ -364,7 +365,7 @@ ifeq ($(lapack),true)
     LIBS      += -L$(LAPACKLIB) -lblas -llapack
     RPATH     += -Wl,-rpath,$(LAPACKLIB)
 
-    ifeq (,$(findstring $(compiler),gnu41 gnu44))
+    ifeq (,$(findstring $(icompiler),gnu41 gnu44))
         ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
             $(error Error: '$(GFORTRANDIR)' not found.)
         endif
