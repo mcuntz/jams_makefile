@@ -1,0 +1,57 @@
+# -*- Makefile -*-
+
+#
+# Setup file for Gnu compiler 4.2 at Matthias' PowerBook G4
+#
+
+# The Makefile assumes the standard bin, include and lib directories
+# i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# Define subirectories if another structure
+
+# Paths
+GNUDIR := /usr/local
+GNULIB := $(GNUDIR)/lib
+GNUBIN := $(GNUDIR)/bin
+
+# Compiling
+F90 := $(GNUBIN)/gfortran
+FC  := $(F90)
+ifeq ($(release),debug)
+    F90FLAGS := -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
+    FCFLAGS  := -pedantic-errors -ffixed-form -ffixed-line-length-132 -Wall -W -O -g
+else
+    F90FLAGS := -O3
+    FCFLAGS  := -ffixed-form -O3
+endif
+F90FLAGS += -J$(OBJPATH) -I$(OBJPATH)
+
+DEFINES  += -DGFORTRAN
+
+# Linking
+LIBS += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
+
+# IMSL
+IMSLDIR :=
+
+# MKL
+MKLDIR :=
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR := /usr/local
+else
+    NCDIR   :=
+    SZLIB   :=
+    HDF5LIB :=
+endif
+
+# PROJ
+PROJ4DIR :=
+FPROJDIR :=
+
+# LAPACK
+LAPACKDIR   :=
+GFORTRANDIR := /usr/local
