@@ -74,7 +74,7 @@ SHELL = /bin/bash
 
 MAKEPATH := . # where are the make files (. is current directory, .. is parent directory)
 #SRCPATH  := . # where are the source files; use test_??? to run a test directory
-SRCPATH  := ./test_mkl95
+SRCPATH  := ./test_imsl_mkl95
 PROGPATH := . # where shall be the executable
 #
 PROGNAME := Prog # Name of executable
@@ -92,11 +92,11 @@ release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
 netcdf   :=
 # Linking: static, shared, dynamic (last two are equal)
-static   := static
+static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
-proj     := 
+proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
-imsl     :=
+imsl     := imsl
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      := mkl95
 # LAPACK (Linear Algebra Pack): true, [anything else]
