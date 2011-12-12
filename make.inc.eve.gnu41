@@ -11,12 +11,12 @@
 # Define subirectories if another structure
 
 # Paths
-GNU41DIR := /usr
-GNU41LIB := /usr/lib64
-GNU41BIN := $(GNU41DIR)/bin
+GNUDIR := /usr
+GNULIB := /usr/lib64
+GNUBIN := $(GNUDIR)/bin
 
 # Compiling
-F90 := $(GNU41BIN)/gfortran
+F90 := $(GNUBIN)/gfortran
 FC  := $(F90)
 ifeq ($(release),debug)
     F90FLAGS := -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
@@ -30,8 +30,8 @@ F90FLAGS += -J$(OBJPATH) -I$(OBJPATH)
 DEFINES  += -DGFORTRAN
 
 # Linking
-LIBS += -L$(GNU41LIB)
-RPATH += -Wl,-rpath,$(GNU41LIB)
+LIBS += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
 
 # IMSL
 IMSLDIR :=

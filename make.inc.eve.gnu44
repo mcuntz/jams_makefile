@@ -11,12 +11,12 @@
 # Define subirectories if another structure
 
 # Paths
-GNU44DIR := /usr
-GNU44LIB := /usr/lib64
-GNU44BIN := $(GNU44DIR)/bin
+GNUDIR := /usr
+GNULIB := /usr/lib64
+GNUBIN := $(GNUDIR)/bin
 
 # Compiling
-F90 := $(GNU44BIN)/gfortran44
+F90 := $(GNUBIN)/gfortran44
 FC  := $(F90)
 # GNU Fortran version >= 4.4
 ifeq ($(release),debug)
@@ -30,8 +30,8 @@ F90FLAGS += -cpp -J$(OBJPATH)
 DEFINES  += -DGFORTRAN
 
 # Linking
-LIBS += -L$(GNU44LIB)
-RPATH += -Wl,-rpath,$(GNU44LIB)
+LIBS += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
 
 # IMSL
 IMSLDIR :=

@@ -25,7 +25,7 @@
 #     e.g. if you do not want to use IMSL, set:  imsl=no  or  imsl=
 #
 #     Current variables are
-#         system      eve, mcimac
+#         system      eve, mcimac, mcpowerbook
 #         release     debug, release
 #         netcdf      netcdf3, netcdf4
 #         static      static, shared, dynamic (last two are equal)
@@ -33,12 +33,13 @@
 #         imsl        vendor, imsl, [anything else]
 #         mkl         mkl, mkl95, [anything else]
 #         lapack      true, [anything else]
-#         compiler    intel11, intel12, gnu41, gnu44, gnu45, absoft
+#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag
 #                     alternative names are:
 #                     intel, ifort, ifort11=intel11
 #                     ifort12=intel12
 #                     gnu, gfortran, gcc, gfortran44, gcc44=gnu44 for eve
 #                     gnu, gfortran, gcc, gfortran45, gcc44=gnu45 for mcimac
+#                     gnu, gfortran, gcc, gfortran42, gcc42=gnu42 for mcpowerbook
 #                     gfortran41, gcc41=gnu41
 #         opti        -O, -O0, -O1, -O2, -O3, -O4, -O5, [anything else]
 #         openmp      true, [anything else]
@@ -74,7 +75,7 @@ SHELL = /bin/bash
 
 MAKEPATH := . # where are the make files (. is current directory, .. is parent directory)
 #SRCPATH  := . # where are the source files; use test_??? to run a test directory
-SRCPATH  := ./test_imsl_mkl
+SRCPATH  := ./test_standard
 PROGPATH := . # where shall be the executable
 #
 PROGNAME := Prog # Name of executable
@@ -85,7 +86,7 @@ ifeq (,$(wildcard $(SRCPATH)/*.f90) $(wildcard $(SRCPATH)/*.for) $(wildcard $(SR
 endif
 #
 # Options
-# Systems: eve, mcimac
+# Systems: eve, mcimac, mcpowerbook
 system   := eve
 # Releases: debug, release
 release  := release
@@ -96,12 +97,12 @@ static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
 proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
-imsl     := vendor
+imsl     :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
-mkl      := mkl
+mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
-# Compiler: intel11, intel12, gnu41, gnu44, gnu45, absoft
+# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag
 compiler := ifort
 # Optimization: -O, -O0, -O1, -O2, -O3, -O4, -O5
 opti     := -O3
@@ -109,7 +110,7 @@ opti     := -O3
 openmp   := 
 
 #
-# --- DEFAULTS ---------------------------------------------------
+# --- ALIASES ---------------------------------------------------
 #
 
 icompiler := $(compiler)
@@ -135,27 +136,32 @@ ifeq ($(system),mcimac)
         icompiler := gnu45
     endif
 endif
+ifeq ($(system),mcpowerbook)
+    ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran42 gcc42))
+        icompiler := gnu42
+    endif
+endif
 
 #
 # --- CHECKS ---------------------------------------------------
 #
 
-ifeq (,$(findstring $(system),eve mcimac))
-    $(error Error: system '$(system)' not found; must be in 'eve mcimac')
+ifeq (,$(findstring $(system),eve mcimac mcpowerbook))
+    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook')
 endif
 
 ifeq (,$(findstring $(release),debug release))
-    $(error Error: release '$(release)' not found; must be in 'debug release')
+    $(error Error: release '$(release)' not found: must be in 'debug release')
 endif
 
 ifneq ($(netcdf),)
     ifeq (,$(findstring $(netcdf),netcdf3 netcdf4))
-        $(error Error: netcdf '$(netcdf)' not found; must be in 'netcdf3 netcdf4')
+        $(error Error: netcdf '$(netcdf)' not found: must be in 'netcdf3 netcdf4')
     endif
 endif
 
 ifeq (,$(findstring $(static),static shared dynamic))
-    $(error Error: static '$(static)' not found; must be in 'static shared dynamic')
+    $(error Error: static '$(static)' not found: must be in 'static shared dynamic')
 endif
 
 ifneq (,$(findstring $(imsl),vendor imsl))
@@ -172,8 +178,8 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     endif
 endif
 
-ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu44 gnu45 absoft))
-    $(error Error: compiler '$(icompiler)' not found; must be in 'intel11 intel12 gnu41 gnu44 gnu45 absoft')
+ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft nag))
+    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft nag')
 endif
 
 ifeq ($(openmp),true)
@@ -237,14 +243,15 @@ LIBS     :=
 #
 # --- COMPILER / MACHINE SPECIFIC --------------------------------
 #
+
 istatic := $(static)
-ifeq ($(system),mcimac)
+ifneq (,$(findstring $(system),mcimac mcpowerbook))
     istatic := dynamic
 endif
 ifeq ($(istatic),static)
     LIBS += -Bstatic -Wl,--start-group
 else
-    ifeq ($(system),mcimac)
+    ifneq (,$(findstring $(system),mcimac mcpowerbook))
         LIBS += -Wl,-dynamic
     else
         LIBS += -Bdynamic
@@ -257,7 +264,7 @@ endif
 include $(MAKEINC)
 
 # --- COMPILER ---------------------------------------------------
-ifneq (,$(findstring $(icompiler),gnu41 gnu44 gnu45))
+ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45))
     ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
         $(error Error: '$(GFORTRANDIR)' not found.)
     endif
@@ -330,10 +337,12 @@ ifneq (,$(findstring $(mkl),mkl mkl95))
     LIBS += -L$(MKLLIB) -lmkl_intel_lp64 -lmkl_core #-lpthread
     ifneq (,$(findstring $(imsl),vendor imsl))
        LIBS += -lmkl_intel_thread #-lpthread
-    else ifeq ($(openmp),true)
-       LIBS += -lmkl_intel_thread #-lpthread
     else
-       LIBS += -lmkl_sequential #-lpthread
+        ifeq ($(openmp),true)
+            LIBS += -lmkl_intel_thread #-lpthread
+        else
+            LIBS += -lmkl_sequential #-lpthread
+        endif
     endif
     RPATH += -Wl,-rpath,$(MKLLIB)
 endif
@@ -386,7 +395,7 @@ endif
 
 # --- LAPACK ---------------------------------------------------
 ifeq ($(lapack),true)
-    ifneq (,$(findstring $(system),mcimac))
+    ifneq (,$(findstring $(system),mcimac mcpowerbook))
         LIBS += -framework veclib
     else
         ifneq (exists, $(shell if [ -d $(LAPACKDIR) ] ; then echo 'exists' ; fi))
@@ -399,7 +408,7 @@ ifeq ($(lapack),true)
     DEFINES += -DLAPACK
 
     ifneq (,$(findstring $(system),eve))
-        ifeq (,$(findstring $(icompiler),gnu41 gnu44 gnu45))
+        ifeq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45))
             ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
                 $(error Error: '$(GFORTRANDIR)' not found.)
             endif
@@ -421,7 +430,7 @@ endif
 ifeq ($(istatic),static)
     LIBS += -Wl,--end-group
 else
-    ifneq ($(system),mcimac)
+    ifeq (,$(findstring $(system),mcimac mcpowerbook))
         LIBS += $(RPATH)
     endif
 endif
@@ -480,7 +489,7 @@ endif
 # targets for executables
 all: makedirs makedeps
 	cd "$(SOURCEPATH)" ; $(MAKE) -f "$(MAKEPROG)"
-        ifeq ($(system),mcimac)
+        ifneq (,$(findstring $(system),mcimac mcpowerbook))
             ifeq (${DYLD_LIBRARY_PATH},)
 	        @echo
                 ifeq ($(static),static)
@@ -488,7 +497,7 @@ all: makedirs makedeps
                 else
 	            @echo "WARNING: MAC OS X does not work with -rpath"
                 endif
-	        @echo "         Set DYLD_LIBRARY_PATH."
+	        @echo "         Set DYLD_LIBRARY_PATH if needed."
 	        @echo
             endif
         endif
