@@ -1,15 +1,14 @@
 # -*- Makefile -*-
 
 #
-# Setup file for gnu compiler 4.1 at eve.ufz.de
+# Setup file for Gnu compiler 4.1 at eve.ufz.de
 #
 
-# 
 # The Makefile assumes the standard bin, include and lib directories
 # i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
 #   SOMEINC ?= SOMEDIR/include
 #   SOMELIB ?= SOMEDIR/lib
-# Define subirectories ianother structure
+# Define subirectories if another structure
 
 # Paths
 GNU41DIR := /usr

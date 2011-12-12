@@ -1,0 +1,69 @@
+# -*- Makefile -*-
+
+#
+# Setup file for Absoft compiler at Matthias' iMac
+#
+
+# The Makefile assumes the standard bin, include and lib directories
+# i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# Define subirectories if another structure
+
+# Paths
+ABSOFT := /Applications/Absoft11.1
+ABSOFTBIN := $(ABSOFT)/bin
+ABSOFTINC := $(ABSOFT)/f90includes64
+ABSOFTLIB := $(ABSOFT)/lib64
+
+# Compiling
+F90 := $(ABSOFTBIN)/f90
+FC  := $(F90)
+ifeq ($(release),debug)
+    # -s for initialize to 0;
+    # -Znnn suppress message number: 399 - Generic subroutine; 938 - real division in int; 1610 - generic-spec end interface
+    # Vectorisation: -YLOOP_ANALYZER -LNO:simd_verbose=on -LNO:simd=2 (1: default; 2: aggressive)
+    F90FLAGS := -g -en -Ra -Rb -Rc -Rn -Rp -Rs -YNDFP=1 -O0 -z0
+    #F90FLAGS := -g -en     -Rb -Rc     -Rp -Rs -YNDFP=1 -O0 -z0
+    FCFLAGS  := $(F90FLAGS)
+else
+    F90FLAGS = -O3
+    FCFLAGS  := $(F90FLAGS)
+endif
+F90FLAGS += -m64 -cpp -f free -YMOD_OUT_DIR=$(OBJPATH) -I$(OBJPATH) -p $(OBJPATH) -safefp -OPT:roundoff=0 #-stack:1f40000
+# -Znnn suppress message number: 399 - Generic subroutine; 938 - real division in int; 1610 - generic-spec end F90FLAGS += -Z399
+FCFLAGS := $(F90FLAGS)
+DEFINES += -DABSOFT
+LDFLAGS += -m64
+
+# IMSL
+IMSLDIR := /opt/imsl/fnl600/macab110e64
+
+# MKL
+MKLDIR := /opt/intel/composerxe-2011.4.184/mkl
+MKLINC := $(MKLDIR)/include/intel64/lp64
+MKLLIB := $(MKLDIR)/lib
+MKL95DIR := /opt/lib/mkl95_lapack/absoft
+MKL95INC := $(MKL95DIR)/include/intel64/lp64
+MKL95LIB := $(MKL95DIR)/lib/intel64
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR := $(ABSOFT)
+    NCINC := $(ABSOFTINC)
+    NCLIB := $(ABSOFTLIB)
+else
+    NCDIR   := $(ABSOFT)
+    NCINC   := $(ABSOFTINC)
+    NCLIB   := $(ABSOFTLIB)
+    SZLIB   := /usr/local
+    HDF5LIB := $(ABSOFTLIB)
+endif
+
+# PROJ
+PROJ4DIR := /usr/local
+FPROJDIR := 
+
+# LAPACK
+LAPACKDIR   :=
+GFORTRANDIR := /usr/local
