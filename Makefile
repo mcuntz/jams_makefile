@@ -74,7 +74,7 @@ SHELL = /bin/bash
 
 MAKEPATH := . # where are the make files (. is current directory, .. is parent directory)
 #SRCPATH  := . # where are the source files; use test_??? to run a test directory
-SRCPATH  := ./test_imsl_mkl95
+SRCPATH  := ./test_imsl_mkl
 PROGPATH := . # where shall be the executable
 #
 PROGNAME := Prog # Name of executable
@@ -96,9 +96,9 @@ static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
 proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
-imsl     := imsl
+imsl     := vendor
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
-mkl      := mkl95
+mkl      := mkl
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # Compiler: intel11, intel12, gnu41, gnu44, gnu45, absoft
