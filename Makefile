@@ -41,7 +41,6 @@
 #                     gnu, gfortran, gcc, gfortran45, gcc44=gnu45 for mcimac
 #                     gnu, gfortran, gcc, gfortran42, gcc42=gnu42 for mcpowerbook
 #                     gfortran41, gcc41=gnu41
-#         opti        -O, -O0, -O1, -O2, -O3, -O4, -O5, [anything else]
 #         openmp      true, [anything else]
 #
 # DEPENDENCIES
@@ -106,8 +105,6 @@ mkl      :=
 lapack   :=
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag
 compiler := ifort
-# Optimization: -O, -O0, -O1, -O2, -O3, -O4, -O5
-opti     := -O3
 # OpenMP parallelization: true, [anything else]
 openmp   := 
 
