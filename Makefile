@@ -46,7 +46,7 @@
 #
 # DEPENDENCIES
 #    This make file uses the following files:
-#        Makefile2, makedeps.pl, make.inc.$(system).$(compiler) 
+#        Makefile2, makedeps.pl, $(CONFIGPATH)/make.inc.$(system).$(compiler) 
 #
 # RESTRICTIONS
 #    Not all packages work with or are compiled for all compilers.
@@ -73,10 +73,12 @@ SHELL = /bin/bash
 # --- SWITCHES -------------------------------------------------------
 #
 
-MAKEPATH := . # where are the make files (. is current directory, .. is parent directory)
-#SRCPATH  := . # where are the source files; use test_??? to run a test directory
-SRCPATH  := ./test_standard
-PROGPATH := . # where shall be the executable
+# . is current directory, .. is parent directory
+MAKEPATH   := .      # where is the second make file and the makedeps.pl script
+#SRCPATH    := .      # where are the source files; use test_??? to run a test directory
+SRCPATH    := ./test_standard
+PROGPATH   := .      # where shall be the executable
+CONFIGPATH := config # where are the make.inc.$(system).$(compiler) files
 #
 PROGNAME := Prog # Name of executable
 #
@@ -113,6 +115,7 @@ openmp   :=
 # --- ALIASES ---------------------------------------------------
 #
 
+# Set aliases so that one can, for example, say ifort to invoke standard intel11 on eve
 icompiler := $(compiler)
 ifeq ($(system),eve)
     ifneq (,$(findstring $(compiler),intel ifort ifort11))
@@ -146,6 +149,7 @@ endif
 # --- CHECKS ---------------------------------------------------
 #
 
+# Check some dependices, e.g. IMSL needs intel11 on eve
 ifeq (,$(findstring $(system),eve mcimac mcpowerbook))
     $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook')
 endif
@@ -182,17 +186,11 @@ ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft 
     $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft nag')
 endif
 
-ifeq ($(openmp),true)
-    iopenmp := -openmp
-else
-    iopenmp :=
-endif
-
 #
 # --- PATHS ------------------------------------------------
 #
 
-# Make absolute pathes
+# Make absolute pathes from relative pathes
 ifeq ($(findstring '//','/'$(PROGPATH)),)
     PROG := $(CURDIR)/$(strip $(PROGPATH))/$(strip $(PROGNAME))
 else
@@ -222,6 +220,7 @@ ifneq (exists, $(shell if [ -d $(SOURCEPATH) ] ; then echo 'exists' ; fi))
     $(error Error: path '$(SOURCEPATH)' not found.)
 endif
 
+# Path where all the .mod, .o, etc. files will be written
 OBJPATH := $(SOURCEPATH)/.$(strip $(icompiler)).$(strip $(release))
 
 #
@@ -244,6 +243,7 @@ LIBS     :=
 # --- COMPILER / MACHINE SPECIFIC --------------------------------
 #
 
+# Mac OS X is special, there is (almost) no static linking
 istatic := $(static)
 ifneq (,$(findstring $(system),mcimac mcpowerbook))
     istatic := dynamic
@@ -257,7 +257,9 @@ else
         LIBS += -Bdynamic
     endif
 endif
-MAKEINC := make.inc.$(system).$(icompiler)
+
+# Include the individual configuration files
+MAKEINC := $(strip $(CONFIGPATH))/make.inc.$(system).$(icompiler)
 ifneq (exists, $(shell if [ -f $(MAKEINC) ] ; then echo 'exists' ; fi))
     $(error Error: '$(MAKEINC)' not found.)
 endif
@@ -275,7 +277,7 @@ endif
 
 # --- OPENMP -----------------------------------------------------
 ifeq ($(openmp),true)
-    LDFLAGS  += $(iopenmp)
+    LDFLAGS  += -openmp
 else
     ifneq (,$(findstring $(imsl),vendor imsl))
         LDFLAGS  += -openmp
@@ -361,7 +363,7 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
     LIBS     += -L$(NCLIB) -lnetcdf -lnetcdff
     RPATH    += -Wl,-rpath,$(NCLIB)
 
-    # libraries for netcdf4, ignored for netcdf3
+    # other libraries for netcdf4, ignored for netcdf3
     ifeq ($(netcdf),netcdf4)
         LIBS  += -lz -L$(SZLIB) -lsz -L$(HDF5LIB) -lhdf5 -lhdf5_hl
         RPATH += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
@@ -395,6 +397,7 @@ endif
 
 # --- LAPACK ---------------------------------------------------
 ifeq ($(lapack),true)
+    # Mac OS X uses frameworks
     ifneq (,$(findstring $(system),mcimac mcpowerbook))
         LIBS += -framework veclib
     else
@@ -407,6 +410,7 @@ ifeq ($(lapack),true)
     endif
     DEFINES += -DLAPACK
 
+    # Lapack on Eve needs libgfortran
     ifneq (,$(findstring $(system),eve))
         ifeq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45))
             ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
@@ -427,9 +431,11 @@ ifeq ($(release),debug)
     DEFINES += -DDEBUG
 endif
 
+# Mac OS X is special, there is (almost) no static linking
 ifeq ($(istatic),static)
     LIBS += -Wl,--end-group
 else
+    # Only Linux and Solaris can use -rpath in executable
     ifeq (,$(findstring $(system),mcimac mcpowerbook))
         LIBS += $(RPATH)
     endif
@@ -450,13 +456,14 @@ OAOBJS    := $(filter-out $(EXCL), $(AOBJS))
 # objects with full dir path
 OBJS      := $(addprefix $(OBJPATH)/, $(OAOBJS))
 
+# Same for Fortran77 files with ending .for
 FORASRCS  := $(wildcard $(SOURCEPATH)/*.for)
 FORSRCS   := $(notdir $(FORASRCS))
 FORAOBJS  := $(FORSRCS:.for=.o)
 FOREXCL   :=
 OFORAOBJS := $(filter-out $(FOREXCL), $(FORAOBJS))
 FOROBJS   := $(addprefix $(OBJPATH)/, $(OFORAOBJS))
-
+# Same for Fortran77 files with ending .f
 FASRCS    := $(wildcard $(SOURCEPATH)/*.f)
 FSRCS     := $(notdir $(FASRCS))
 FAOBJS    := $(FSRCS:.f=.o)
@@ -464,6 +471,7 @@ FEXCL     :=
 OFAOBJS   := $(filter-out $(FEXCL), $(FAOBJS))
 FOBJS     := $(addprefix $(OBJPATH)/, $(OFAOBJS))
 
+# Export the variables that are used in Makefile2
 export PROG
 export OBJS 
 export FOROBJS
@@ -478,6 +486,8 @@ export INCLUDES
 export F90FLAGS
 export FC
 export FCFLAGS
+export icompiler
+# The Absoft compiler needs that ABSOFT is set to the Abost base path
 ifneq ($(ABSOFT),)
     export ABSOFT
 endif
@@ -486,7 +496,7 @@ endif
 # --- TARGETS ---------------------------------------------------
 #
 
-# targets for executables
+# target for executables
 all: makedirs makedeps
 	cd "$(SOURCEPATH)" ; $(MAKE) -f "$(MAKEPROG)"
         ifneq (,$(findstring $(system),mcimac mcpowerbook))
@@ -513,8 +523,8 @@ makedirs:
 
 clean:
 	rm -f "$(OBJPATH)"/*.o "$(OBJPATH)"/*.mod "$(OBJPATH)"/make.deps "$(PROG)"
-        ifeq ($(findstring test_netcdf_imsl_proj, $(SRCPATH)),test_netcdf_imsl_proj)
-	    if [ -f ./test_netcdf_imsl_proj/test.nc ] ; then rm ./test_netcdf_imsl_proj/test.nc ; fi
+        ifneq (,$(findstring $(SRCPATH),test_netcdf_imsl_proj))
+	    if [ -f $(SRCPATH)/test.nc ] ; then rm $(SRCPATH)/test.nc ; fi
         endif
 
 cleanclean: clean

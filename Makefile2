@@ -11,7 +11,7 @@ $(PROG): $(OBJS) $(FOROBJS) $(FOBJS)
 	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(LIBS)
 
 $(OBJS): $(OBJPATH)/%.o: %.f90
-ifeq ($(compiler),gnu41)
+ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $< > $(OBJPATH)/tmp.gf3.$(notdir $<)
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
 	rm -r $(OBJPATH)/tmp.gf3.$(notdir $<)
@@ -20,7 +20,7 @@ else
 endif
 
 $(FOROBJS): $(OBJPATH)/%.o: %.for
-ifeq ($(compiler),gnu41)
+ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< > $(OBJPATH)/tmp.gf3.$(notdir $<)
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
 	rm -r $(OBJPATH)/tmp.gf3.$(notdir $<)
@@ -29,7 +29,7 @@ else
 endif
 
 $(FOBJS): $(OBJPATH)/%.o: %.f
-ifeq ($(compiler),gnu41)
+ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< > $(OBJPATH)/tmp.gf3.$(notdir $<)
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
 	rm -r $(OBJPATH)/tmp.gf3.$(notdir $<)
