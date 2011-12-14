@@ -33,7 +33,7 @@
 #         imsl        vendor, imsl, [anything else]
 #         mkl         mkl, mkl95, [anything else]
 #         lapack      true, [anything else]
-#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag
+#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag51, nag52
 #                     alternative names are:
 #                     intel, ifort, ifort11=intel11
 #                     ifort12=intel12
@@ -103,10 +103,10 @@ imsl     :=
 mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
-# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag
+# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag51, nag52
 compiler := ifort
 # OpenMP parallelization: true, [anything else]
-openmp   := 
+openmp   :=
 
 #
 # --- ALIASES ---------------------------------------------------
@@ -139,6 +139,9 @@ endif
 ifeq ($(system),mcpowerbook)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran42 gcc42))
         icompiler := gnu42
+    endif
+    ifneq (,$(findstring $(compiler),nag))
+        icompiler := nag52
     endif
 endif
 
@@ -179,8 +182,8 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     endif
 endif
 
-ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft nag))
-    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft nag')
+ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft nag51 nag52))
+    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft nag51 nag52')
 endif
 
 #

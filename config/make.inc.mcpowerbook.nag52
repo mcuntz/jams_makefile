@@ -1,0 +1,57 @@
+# -*- Makefile -*-
+
+#
+# Setup file for NAG compiler 5.2 at Matthias' PowerBook G4
+#
+
+# The Makefile assumes the standard bin, include and lib directories
+# i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# Define subirectories if another structure
+
+# Paths
+NAGDIR := /usr/local
+NAGLIB := $(NAGDIR)/lib/NAG_Fortran
+NAGBIN := $(NAGDIR)/bin
+
+# Compiling
+F90 := $(NAGBIN)/nagfor
+FC  := $(F90)
+ifeq ($(release),debug)
+    F90FLAGS := -C=all -g -gline -nan -O0 -strict95
+    FCFLAGS  := $(F90FLAGS)
+else
+    F90FLAGS := -O3
+    FCFLAGS  := $(F90FLAGS)
+endif
+# -mismatch-all
+F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=full
+DEFINES  += -DNAG
+
+# Linking
+LIBS += -L$(NAGLIB) $(NAGLIB)/thsafe.o
+RPATH += -Wl,-rpath,$(NAGLIB)
+
+# IMSL
+IMSLDIR :=
+
+# MKL
+MKLDIR :=
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR :=
+else
+    NCDIR   :=
+    SZLIB   :=
+    HDF5LIB :=
+endif
+
+# PROJ
+PROJ4DIR :=
+FPROJDIR :=
+
+# LAPACK
+LAPACKDIR   :=
+GFORTRANDIR := /usr/local
