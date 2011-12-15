@@ -19,7 +19,7 @@ NAGBIN := $(NAGDIR)/bin
 F90 := $(NAGBIN)/nagfor
 FC  := $(F90)
 ifeq ($(release),debug)
-    F90FLAGS := -C=all -g -gline -nan -O0 -strict95
+    F90FLAGS := -C=all -g -gline -nan -O0 -strict95 -g90
     FCFLAGS  := $(F90FLAGS)
 else
     F90FLAGS := -O3
@@ -27,6 +27,7 @@ else
 endif
 # -mismatch-all
 F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=full
+LDFLAGS  += -g90
 DEFINES  += -DNAG
 
 # Linking
