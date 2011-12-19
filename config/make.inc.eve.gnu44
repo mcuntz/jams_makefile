@@ -37,7 +37,9 @@ RPATH += -Wl,-rpath,$(GNULIB)
 IMSLDIR :=
 
 # MKL
-MKLDIR :=
+MKLDIR := $(INTEL)/mkl
+MKLINC := $(MKLDIR)/include/intel64/lp64
+MKLLIB := $(MKLDIR)/lib/intel64
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
