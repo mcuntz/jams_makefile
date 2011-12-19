@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for NAG compiler 5.2 at Matthias' PowerBook G4
+# Setup file for NAG compiler 5.2 at Matthias' iMac
 #
 
 # The Makefile assumes the standard bin, include and lib directories
@@ -13,7 +13,7 @@
 # Paths
 NAGDIR := /usr/local
 NAGLIB := $(NAGDIR)/lib/NAG_Fortran
-NAGBIN := $(NAGDIR)/bin
+NAGBIN := /usr/bin
 
 # Compiling
 F90 := $(NAGBIN)/nagfor
@@ -31,14 +31,19 @@ F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -
 DEFINES  += -DNAG
 
 # Linking
-LIBS += -L$(NAGLIB) $(NAGLIB)/thsafe.o
+LIBS += -L$(NAGLIB) #$(NAGLIB)/thsafe.o
 RPATH += -Wl,-rpath,$(NAGLIB)
 
 # IMSL
 IMSLDIR :=
 
 # MKL
-MKLDIR :=
+MKLDIR := /opt/intel/composerxe-2011.4.184/mkl
+MKLINC := $(MKLDIR)/include/intel64/lp64
+MKLLIB := $(MKLDIR)/lib
+MKL95DIR := /opt/lib/mkl95_lapack/nag
+MKL95INC := $(MKL95DIR)/include/intel64/lp64
+MKL95LIB := $(MKL95DIR)/lib/intel64
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)

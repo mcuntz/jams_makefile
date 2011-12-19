@@ -41,6 +41,7 @@
 #                     gnu, gfortran, gcc, gfortran45, gcc44=gnu45 for mcimac
 #                     gnu, gfortran, gcc, gfortran42, gcc42=gnu42 for mcpowerbook
 #                     gfortran41, gcc41=gnu41
+#                     nag=nag52
 #         openmp      true, [anything else]
 #
 # DEPENDENCIES
@@ -56,13 +57,20 @@
 #
 # LITERATURE
 #    The following links provide documentation:
-#        GNU Make:       http://www.gnu.org/software/make/
-#        INTEL Compiler: http://software.intel.com/en-us/articles/intel-parallel-studio-xe/
-#        MKL:            http://software.intel.com/en-us/articles/intel-mkl/
-#        IMSL:           http://www.roguewave.com/products/imsl-numerical-libraries.aspx
-#        NETCDF:         http://www.unidata.ucar.edu/software/netcdf/
-#        PROJ4:          http://trac.osgeo.org/proj/
-#        LAPACK:         http://www.netlib.org/lapack/
+#        Make
+#          GNU           http://www.gnu.org/s/make/
+#        Compiler
+#          GFORTRAN      http://gcc.gnu.org/fortran/
+#          INTEL         http://software.intel.com/en-us/articles/intel-composer-xe/
+#          NAG           http://www.nag.co.uk/nagware/np.asp
+#                        http://www.nag.co.uk/nagware/np/doc_index.asp
+#          ABSOFT        http://www.absoft.com/Support/Documentation/fortran_documentation.html
+#        Libraries
+#          MKL           http://software.intel.com/en-us/articles/intel-mkl/
+#          IMSL          http://www.roguewave.com/products/imsl-numerical-libraries.aspx
+#          NETCDF        http://www.unidata.ucar.edu/software/netcdf/
+#          PROJ4         http://trac.osgeo.org/proj/
+#          LAPACK        http://www.netlib.org/lapack/
 #
 # Written Matthias Cuntz & Juliane Mai, UFZ Leipzig, Germany, Aug. 2011 - matthias.cuntz@ufz.de
 
@@ -75,7 +83,7 @@ SHELL = /bin/bash
 # . is current directory, .. is parent directory
 MAKEPATH   := .      # where is the second make file and the makedeps.pl script
 #SRCPATH    := .      # where are the source files; use test_??? to run a test directory
-SRCPATH    := ./test_standard
+SRCPATH    := ./test_mkl95
 PROGPATH   := .      # where shall be the executable
 CONFIGPATH := config # where are the make.inc.$(system).$(compiler) files
 TESTPATH   := .      # where are all the test directories
@@ -89,7 +97,7 @@ endif
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook
-system   := eve
+system   := mcimac
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
@@ -101,11 +109,11 @@ proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
 imsl     :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
-mkl      :=
+mkl      := mkl95
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag51, nag52
-compiler := ifort
+compiler := nag
 # OpenMP parallelization: true, [anything else]
 openmp   :=
 
@@ -138,6 +146,9 @@ ifeq ($(system),mcimac)
     endif
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran45 gcc45))
         icompiler := gnu45
+    endif
+    ifneq (,$(findstring $(compiler),nag))
+        icompiler := nag52
     endif
 endif
 ifeq ($(system),mcpowerbook)
