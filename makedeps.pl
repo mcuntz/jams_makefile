@@ -23,7 +23,7 @@ if (@ARGV >= 2) {
   $srcpath = "$ARGV[1]/";
 }
 open(MAKEFILE, "> $objpath/make.deps");
-print "create new $objpath/make.deps\n";
+#print "create new $objpath/make.deps\n";
 print MAKEFILE "# -*- Makefile -*- \n";
 print MAKEFILE "# Generated automatically by $PROG \n";
 &MakeDependsf90($ARGV[2]);

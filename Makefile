@@ -9,7 +9,7 @@
 #     Variables can be set on the command line [VAR=VAR] or in the SWITCHES section in this file.
 #
 # INPUTS
-#     targets    all (default), clean, cleanclean
+#     targets    all (default), check, clean, cleanclean, cleantest
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'. 
@@ -500,7 +500,7 @@ endif
 # --- TARGETS ---------------------------------------------------
 #
 
-.PHONY: clean cleanclean
+.PHONY: clean cleanclean cleantest
 
 # target for executables
 all: makedirs makedeps
@@ -537,6 +537,11 @@ clean:
 
 cleanclean: clean
 	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* $(PROG).dSYM
+
+cleantest:
+	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
+	    make SRCPATH=$$i cleanclean ; \
+	done
 
 check:
 	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
