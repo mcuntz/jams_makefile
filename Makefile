@@ -33,7 +33,7 @@
 #         imsl        vendor, imsl, [anything else]
 #         mkl         mkl, mkl95, [anything else]
 #         lapack      true, [anything else]
-#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag51, nag52
+#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52
 #                     alternative names are:
 #                     intel, ifort, ifort11=intel11
 #                     ifort12=intel12
@@ -97,11 +97,11 @@ endif
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook
-system   := mcimac
+system   := eve
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
-netcdf   :=
+netcdf   := netcdf4
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -111,9 +111,9 @@ imsl     :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      := mkl95
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   :=
-# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, absoft, nag51, nag52
-compiler := nag
+lapack   := true
+# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52
+compiler := ifort
 # OpenMP parallelization: true, [anything else]
 openmp   :=
 
@@ -135,6 +135,12 @@ ifeq ($(system),eve)
     endif
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran44 gcc44))
         icompiler := gnu44
+    endif
+    ifneq (,$(findstring $(compiler),gfortran45 gcc45))
+        icompiler := gnu45
+    endif
+    ifneq (,$(findstring $(compiler),gfortran46 gcc46))
+        icompiler := gnu46
     endif
     ifneq (,$(findstring $(compiler),gfortran41 gcc41))
         icompiler := gnu41
@@ -197,8 +203,8 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     endif
 endif
 
-ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft nag51 nag52))
-    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 absoft nag51 nag52')
+ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52))
+    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52')
 endif
 
 #
@@ -281,7 +287,7 @@ endif
 include $(MAKEINC)
 
 # --- COMPILER ---------------------------------------------------
-ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45))
+ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
     ifneq (exists, $(shell if [ -d "$(GFORTRANDIR)" ] ; then echo 'exists' ; fi))
         $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
     endif
@@ -427,7 +433,7 @@ ifeq ($(lapack),true)
 
     # Lapack on Eve needs libgfortran
     ifneq (,$(findstring $(system),eve))
-        ifeq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45))
+        ifeq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
             ifneq (exists, $(shell if [ -d "$(GFORTRANDIR)" ] ; then echo 'exists' ; fi))
                 $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
             endif
@@ -505,6 +511,9 @@ export icompiler
 # The Absoft compiler needs that ABSOFT is set to the Abost base path
 ifneq ($(ABSOFT),)
     export ABSOFT
+endif
+ifneq ($(LDPATH),)
+    export LD_LIBRARY_PATH=$(LDPATH)
 endif
 
 #
