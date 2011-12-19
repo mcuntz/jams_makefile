@@ -78,6 +78,7 @@ MAKEPATH   := .      # where is the second make file and the makedeps.pl script
 SRCPATH    := ./test_standard
 PROGPATH   := .      # where shall be the executable
 CONFIGPATH := config # where are the make.inc.$(system).$(compiler) files
+TESTPATH   := .      # where are all the test directories
 #
 PROGNAME := Prog # Name of executable
 #
@@ -107,6 +108,9 @@ lapack   :=
 compiler := ifort
 # OpenMP parallelization: true, [anything else]
 openmp   :=
+
+# Write out warning/reminder if compiled on Mac OS X. If NOMACWARN=true then no warning is written out: true, [anything else]
+NOMACWARN = no
 
 #
 # --- ALIASES ---------------------------------------------------
@@ -496,19 +500,23 @@ endif
 # --- TARGETS ---------------------------------------------------
 #
 
+.PHONY: clean cleanclean
+
 # target for executables
 all: makedirs makedeps
 	cd "$(SOURCEPATH)" ; $(MAKE) -f "$(MAKEPROG)"
         ifneq (,$(findstring $(system),mcimac mcpowerbook))
-            ifeq (${DYLD_LIBRARY_PATH},)
-	        @echo
-                ifeq ($(static),static)
-	            @echo "WARNING: MAC OS X does only link dynamically and does not work with -rpath"
-                else
-	            @echo "WARNING: MAC OS X does not work with -rpath"
+            ifneq ($(NOMACWARN),true)
+                ifeq (${DYLD_LIBRARY_PATH},)
+	            @echo
+                    ifeq ($(static),static)
+	                @echo "WARNING: MAC OS X does only link dynamically and does not work with -rpath"
+                    else
+	                @echo "WARNING: MAC OS X does not work with -rpath"
+                    endif
+	            @echo "         Set DYLD_LIBRARY_PATH if needed."
+	            @echo
                 endif
-	        @echo "         Set DYLD_LIBRARY_PATH if needed."
-	        @echo
             endif
         endif
 
@@ -529,3 +537,20 @@ clean:
 
 cleanclean: clean
 	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* $(PROG).dSYM
+
+check:
+	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
+	    rm -f "$(PROG)" ; \
+	    make -s MAKEPATH=$(MAKEPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
+	         CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
+	         release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
+	         imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
+	         openmp=$(openmp) NOMACWARN=true \
+	    && { $(PROG) 2>&1 | grep -E '(o.k.|failed)' ;} ; status=$$? ; \
+	    if [ $$status != 0 ] ; then \
+	      echo "$$i failed!"; \
+	    fi ; \
+	    make -s SRCPATH=$$i cleanclean ; \
+	done
+
+test: check
