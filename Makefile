@@ -231,8 +231,8 @@ ifeq ($(findstring '//','/'$(SRCPATH)),)
 else
     SOURCEPATH := $(strip $(SRCPATH))
 endif
-ifneq (exists, $(shell if [ -d $(SOURCEPATH) ] ; then echo 'exists' ; fi))
-    $(error Error: path '$(SOURCEPATH)' not found.)
+ifneq (exists, $(shell if [ -d "$(SOURCEPATH)" ] ; then echo 'exists' ; fi))
+    $(error Error: source path '$(SOURCEPATH)' not found.)
 endif
 
 # Path where all the .mod, .o, etc. files will be written
@@ -282,8 +282,8 @@ include $(MAKEINC)
 
 # --- COMPILER ---------------------------------------------------
 ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45))
-    ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
-        $(error Error: '$(GFORTRANDIR)' not found.)
+    ifneq (exists, $(shell if [ -d "$(GFORTRANDIR)" ] ; then echo 'exists' ; fi))
+        $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
     endif
     GFORTRANLIB ?= $(GFORTRANDIR)/lib
     LIBS        += -L$(GFORTRANLIB) -lgfortran
@@ -301,8 +301,8 @@ endif
 
 # --- IMSL ---------------------------------------------------
 ifneq (,$(findstring $(imsl),vendor imsl))
-    ifneq (exists, $(shell if [ -d $(IMSLDIR) ] ; then echo 'exists' ; fi))
-        $(error Error: '$(IMSLDIR)' not found.)
+    ifneq (exists, $(shell if [ -d "$(IMSLDIR)" ] ; then echo 'exists' ; fi))
+        $(error Error: IMSL path '$(IMSLDIR)' not found.)
     endif
     IMSLINC ?= $(IMSLDIR)/include
     IMSLLIB ?= $(IMSLDIR)/lib
@@ -326,8 +326,8 @@ endif
 # --- MKL ---------------------------------------------------
 ifneq (,$(findstring $(mkl),mkl mkl95))
     ifeq ($(mkl),mkl95) # First mkl95 then mkl for .mod files other then intel
-        ifneq (exists, $(shell if [ -d $(MKL95DIR) ] ; then echo 'exists' ; fi))
-            $(error Error: '$(MKL95DIR)' not found.)
+        ifneq (exists, $(shell if [ -d "$(MKL95DIR)" ] ; then echo 'exists' ; fi))
+            $(error Error: MKL95 path '$(MKL95DIR)' not found.)
         endif
         MKL95INC ?= $(MKL95DIR)/include
         MKL95LIB ?= $(MKL95DIR)/lib
@@ -342,8 +342,8 @@ ifneq (,$(findstring $(mkl),mkl mkl95))
         endif
     endif
 
-    ifneq (exists, $(shell if [ -d $(MKLDIR) ] ; then echo 'exists' ; fi))
-        $(error Error: '$(MKLDIR)' not found.)
+    ifneq (exists, $(shell if [ -d "$(MKLDIR)" ] ; then echo 'exists' ; fi))
+        $(error Error: MKL path '$(MKLDIR)' not found.)
     endif
     MKLINC ?= $(MKLDIR)/include
     MKLLIB ?= $(MKLDIR)/lib
@@ -366,8 +366,8 @@ endif
 
 # --- NETCDF ---------------------------------------------------
 ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
-    ifneq (exists, $(shell if [ -d $(NCDIR) ] ; then echo 'exists' ; fi))
-        $(error Error: '$(NCDIR)' not found.)
+    ifneq (exists, $(shell if [ -d "$(NCDIR)" ] ; then echo 'exists' ; fi))
+        $(error Error: NETCDF path '$(NCDIR)' not found.)
     endif
     NCINC ?= $(strip $(NCDIR))/include
     NCLIB ?= $(strip $(NCDIR))/lib
@@ -391,15 +391,15 @@ endif
 
 # --- PROJ --------------------------------------------------
 ifeq ($(proj),true)
-    ifneq (exists, $(shell if [ -d $(PROJ4DIR) ] ; then echo 'exists' ; fi))
-        $(error Error: '$(PROJ4DIR)' not found.)
+    ifneq (exists, $(shell if [ -d "$(PROJ4DIR)" ] ; then echo 'exists' ; fi))
+        $(error Error: PROJ4 path '$(PROJ4DIR)' not found.)
     endif
     PROJ4LIB ?= $(PROJ4DIR)/lib
     LIBS     += -L$(PROJ4LIB) -lproj    
     RPATH    += -Wl,-rpath=$(PROJ4LIB)
 
-    ifneq (exists, $(shell if [ -d $(FPROJDIR) ] ; then echo 'exists' ; fi))
-        $(error Error: '$(FPROJDIR)' not found.)
+    ifneq (exists, $(shell if [ -d "$(FPROJDIR)" ] ; then echo 'exists' ; fi))
+        $(error Error: FPROJ path '$(FPROJDIR)' not found.)
     endif
     FPROJINC ?= $(FPROJDIR)/include
     FPROJLIB ?= $(FPROJDIR)/lib
@@ -416,8 +416,8 @@ ifeq ($(lapack),true)
     ifneq (,$(findstring $(system),mcimac mcpowerbook))
         LIBS += -framework veclib
     else
-        ifneq (exists, $(shell if [ -d $(LAPACKDIR) ] ; then echo 'exists' ; fi))
-            $(error Error: '$(LAPACKDIR)' not found.)
+        ifneq (exists, $(shell if [ -d "$(LAPACKDIR)" ] ; then echo 'exists' ; fi))
+            $(error Error: LAPACK path '$(LAPACKDIR)' not found.)
         endif
         LAPACKLIB ?= $(LAPACKDIR)/lib
         LIBS      += -L$(LAPACKLIB) -lblas -llapack
@@ -428,8 +428,8 @@ ifeq ($(lapack),true)
     # Lapack on Eve needs libgfortran
     ifneq (,$(findstring $(system),eve))
         ifeq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45))
-            ifneq (exists, $(shell if [ -d $(GFORTRANDIR) ] ; then echo 'exists' ; fi))
-                $(error Error: '$(GFORTRANDIR)' not found.)
+            ifneq (exists, $(shell if [ -d "$(GFORTRANDIR)" ] ; then echo 'exists' ; fi))
+                $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
             endif
             GFORTRANLIB ?= $(GFORTRANDIR)/lib
             LIBS        += -L$(GFORTRANLIB) -lgfortran
