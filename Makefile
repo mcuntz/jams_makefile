@@ -101,7 +101,7 @@ system   := eve
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
-netcdf   := 
+netcdf   :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
