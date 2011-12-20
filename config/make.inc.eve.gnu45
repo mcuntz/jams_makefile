@@ -12,7 +12,7 @@
 
 # Paths
 GNUDIR := /usr/local/gcc/4.5.3
-GNULIB := $(GNUDIR)/lib
+GNULIB := $(GNUDIR)/lib64
 GNUBIN := $(GNUDIR)/bin
 
 # Compiling
@@ -41,6 +41,9 @@ IMSLDIR :=
 MKLDIR := /usr/local/intel/composerxe-2011.4.191/mkl
 MKLINC := $(MKLDIR)/include/intel64/lp64
 MKLLIB := $(MKLDIR)/lib/intel64
+MKL95DIR := /usr/local/intel/interfaces/lapack95_gfortran45
+MKL95INC := $(MKL95DIR)/include/intel64/lp64
+MKL95LIB := $(MKL95DIR)/lib/intel64
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
@@ -58,5 +61,5 @@ FPROJDIR := /usr/local/fproj/4.7.0_gcc45
 # LAPACK
 LAPACKDIR   := /usr
 LAPACKLIB   := $(LAPACKDIR)/lib64
-GFORTRANDIR := /usr
-GFORTRANLIB := $(GFORTRANDIR)/lib64
+GFORTRANDIR := $(GNUDIR)
+GFORTRANLIB := $(GNULIB)

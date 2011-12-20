@@ -12,7 +12,7 @@
 
 # Paths
 GNUDIR := /usr
-GNULIB := /usr/lib64
+GNULIB := $(GNUDIR)/lib64
 GNUBIN := $(GNUDIR)/bin
 
 # Compiling
@@ -57,5 +57,5 @@ FPROJDIR := /usr/local/fproj/4.7.0_gcc44
 # LAPACK
 LAPACKDIR   := /usr
 LAPACKLIB   := $(LAPACKDIR)/lib64
-GFORTRANDIR := /usr
-GFORTRANLIB := $(GFORTRANDIR)/lib64
+GFORTRANDIR := $(GNUDIR)
+GFORTRANLIB := $(GNULIB)

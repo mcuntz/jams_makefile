@@ -83,7 +83,7 @@ SHELL = /bin/bash
 # . is current directory, .. is parent directory
 MAKEPATH   := .      # where is the second make file and the makedeps.pl script
 #SRCPATH    := .      # where are the source files; use test_??? to run a test directory
-SRCPATH    := ./test_mkl
+SRCPATH    := ./test_lapack
 PROGPATH   := .      # where shall be the executable
 CONFIGPATH := config # where are the make.inc.$(system).$(compiler) files
 TESTPATH   := .      # where are all the test directories
