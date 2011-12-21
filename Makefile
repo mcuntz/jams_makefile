@@ -33,15 +33,24 @@
 #         imsl        vendor, imsl, [anything else]
 #         mkl         mkl, mkl95, [anything else]
 #         lapack      true, [anything else]
-#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52
+#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, sun12
 #                     alternative names are:
-#                     intel, ifort, ifort11=intel11
-#                     ifort12=intel12
-#                     gnu, gfortran, gcc, gfortran44, gcc44=gnu44 for eve
-#                     gnu, gfortran, gcc, gfortran45, gcc44=gnu45 for mcimac
-#                     gnu, gfortran, gcc, gfortran42, gcc42=gnu42 for mcpowerbook
-#                     gfortran41, gcc41=gnu41
-#                     nag=nag52
+#                     On eve.ufz.de
+#                       gnu, gfortran, gcc=gnu44
+#                       gfortran41, gcc41=gnu41
+#                       gfortran44, gcc44=gnu44
+#                       gfortran45, gcc45=gnu45
+#                       gfortran46, gcc46=gnu46
+#                       intel, ifort, ifort11=intel11
+#                       ifort12=intel12
+#                       sun=sun12
+#                     On Matthias' iMac
+#                       gnu, gfortran, gcc, gfortran45, gcc44=gnu45
+#                       intel, ifort, ifort12=intel12
+#                       nag=nag52
+#                     On Matthias' Powerbook
+#                       gnu, gfortran, gcc, gfortran42, gcc42=gnu42 for mcpowerbook
+#                       nag=nag52
 #         openmp      true, [anything else]
 #
 # DEPENDENCIES
@@ -112,7 +121,7 @@ imsl     :=
 mkl      := mkl
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
-# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52
+# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, sun12
 compiler := ifort
 # OpenMP parallelization: true, [anything else]
 openmp   :=
@@ -127,13 +136,13 @@ NOMACWARN = no
 # Set aliases so that one can, for example, say ifort to invoke standard intel11 on eve
 icompiler := $(compiler)
 ifeq ($(system),eve)
-    ifneq (,$(findstring $(compiler),intel ifort ifort11))
-        icompiler := intel11
+    ifneq (,$(findstring $(compiler),gnu gfortran gcc))
+        icompiler := gnu44
     endif
-    ifeq ($(compiler),ifort12)
-        icompiler := intel12
+    ifneq (,$(findstring $(compiler),gfortran41 gcc41))
+        icompiler := gnu41
     endif
-    ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran44 gcc44))
+    ifneq (,$(findstring $(compiler),gfortran41 gcc44))
         icompiler := gnu44
     endif
     ifneq (,$(findstring $(compiler),gfortran45 gcc45))
@@ -142,16 +151,22 @@ ifeq ($(system),eve)
     ifneq (,$(findstring $(compiler),gfortran46 gcc46))
         icompiler := gnu46
     endif
-    ifneq (,$(findstring $(compiler),gfortran41 gcc41))
-        icompiler := gnu41
+    ifneq (,$(findstring $(compiler),intel ifort ifort11))
+        icompiler := intel11
+    endif
+    ifeq ($(compiler),ifort12)
+        icompiler := intel12
+    endif
+    ifneq (,$(findstring $(compiler),sun))
+        icompiler := sun12
     endif
 endif
 ifeq ($(system),mcimac)
-    ifneq (,$(findstring $(compiler),intel ifort ifort12))
-        icompiler := intel12
-    endif
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran45 gcc45))
         icompiler := gnu45
+    endif
+    ifneq (,$(findstring $(compiler),intel ifort ifort12))
+        icompiler := intel12
     endif
     ifneq (,$(findstring $(compiler),nag))
         icompiler := nag52
@@ -203,8 +218,8 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     endif
 endif
 
-ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52))
-    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52')
+ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 sun12))
+    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 sun12')
 endif
 
 #
@@ -455,11 +470,10 @@ endif
 # Mac OS X is special, there is (almost) no static linking
 ifeq ($(istatic),static)
     LIBS += -Wl,--end-group
-else
-    # Only Linux and Solaris can use -rpath in executable
-    ifeq (,$(findstring $(system),mcimac mcpowerbook))
-        LIBS += $(RPATH)
-    endif
+endif
+# Only Linux and Solaris can use -rpath in executable
+ifeq (,$(findstring $(system),mcimac mcpowerbook))
+    LIBS += $(RPATH)
 endif
 
 LD := $(F90)
