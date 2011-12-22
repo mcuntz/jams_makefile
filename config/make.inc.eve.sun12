@@ -12,7 +12,7 @@
 
 # Paths
 SUNDIR := /usr/local/solstudio12.2
-SUNLIB := $(SUNDIR)/lib
+SUNLIB := $(SUNDIR)/lib/amd64
 SUNBIN := $(SUNDIR)/bin
 
 # Compiling
@@ -21,7 +21,7 @@ FC  := $(F90)
 ifeq ($(release),debug)
     F90FLAGS := -fPIC -xtarget=generic -m64 -xarch=sse4_2 -g -xcheck=%all -C -u
 else
-    F90LAGS  := -fPIC -fast -xtarget=generic -m64 -xarch=sse4_2
+    F90FLAGS  := -fPIC -fast -xtarget=generic -m64 -xarch=sse4_2
 endif
 F90FLAGS += -fpp -I$(OBJPATH) -M$(OBJPATH) -moddir=$(OBJPATH)
 FCFLAGS  := $(F90FLAGS) -fixed-form -xlang=f77
