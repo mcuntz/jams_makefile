@@ -25,7 +25,7 @@
 #     e.g. if you do not want to use IMSL, set:  imsl=no  or  imsl=
 #
 #     Current variables are
-#         system      eve, mcimac, mcpowerbook
+#         system      eve, mcimac, mcpowerbook, mcair
 #         release     debug, release
 #         netcdf      netcdf3, netcdf4
 #         static      static, shared, dynamic (last two are equal)
@@ -44,6 +44,8 @@
 #                       intel, ifort, ifort11=intel11
 #                       ifort12=intel12
 #                       sun=sun12
+#                     On Matthias' Macbook Air
+#                       gnu, gfortran, gcc, gfortran46, gcc44=gnu46
 #                     On Matthias' iMac
 #                       gnu, gfortran, gcc, gfortran45, gcc44=gnu45
 #                       intel, ifort, ifort12=intel12
@@ -105,7 +107,7 @@ ifeq (,$(wildcard $(SRCPATH)/*.f90) $(wildcard $(SRCPATH)/*.for) $(wildcard $(SR
 endif
 #
 # Options
-# Systems: eve, mcimac, mcpowerbook
+# Systems: eve, mcimac, mcpowerbook, mcair
 system   := eve
 # Releases: debug, release
 release  := release
@@ -180,14 +182,19 @@ ifeq ($(system),mcpowerbook)
         icompiler := nag52
     endif
 endif
+ifeq ($(system),mcair)
+    ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
+        icompiler := gnu46
+    endif
+endif
 
 #
 # --- CHECKS ---------------------------------------------------
 #
 
 # Check some dependices, e.g. IMSL needs intel11 on eve
-ifeq (,$(findstring $(system),eve mcimac mcpowerbook))
-    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook')
+ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair))
+    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair')
 endif
 
 ifeq (,$(findstring $(release),debug release))
@@ -281,13 +288,13 @@ LIBS     :=
 
 # Mac OS X is special, there is (almost) no static linking
 istatic := $(static)
-ifneq (,$(findstring $(system),mcimac mcpowerbook))
+ifneq (,$(findstring $(system),mcimac mcpowerbook mcair))
     istatic := dynamic
 endif
 ifeq ($(istatic),static)
     LIBS += -Bstatic -Wl,--start-group
 else
-    ifneq (,$(findstring $(system),mcimac mcpowerbook))
+    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair))
         LIBS += -Wl,-dynamic
     else
         LIBS += -Bdynamic
@@ -396,8 +403,11 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
     INCLUDES += -I$(NCINC)
     DEFINES  += -DNETCDF
 
-    LIBS     += -L$(NCLIB) -lnetcdf -lnetcdff
-    RPATH    += -Wl,-rpath,$(NCLIB)
+    LIBS  += -L$(NCLIB) -lnetcdf
+    RPATH += -Wl,-rpath,$(NCLIB)
+    ifneq ($(icompiler),absoft)
+        LIBS += -lnetcdff
+    endif
 
     # other libraries for netcdf4, ignored for netcdf3
     ifeq ($(netcdf),netcdf4)
@@ -434,7 +444,7 @@ endif
 # --- LAPACK ---------------------------------------------------
 ifeq ($(lapack),true)
     # Mac OS X uses frameworks
-    ifneq (,$(findstring $(system),mcimac mcpowerbook))
+    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair))
         LIBS += -framework veclib
     else
         ifneq (exists, $(shell if [ -d "$(LAPACKDIR)" ] ; then echo 'exists' ; fi))
@@ -472,7 +482,7 @@ ifeq ($(istatic),static)
     LIBS += -Wl,--end-group
 endif
 # Only Linux and Solaris can use -rpath in executable
-ifeq (,$(findstring $(system),mcimac mcpowerbook))
+ifeq (,$(findstring $(system),mcimac mcpowerbook mcair))
     LIBS += $(RPATH)
 endif
 
@@ -539,7 +549,7 @@ endif
 # target for executables
 all: makedirs makedeps
 	cd "$(SOURCEPATH)" ; $(MAKE) -f "$(MAKEPROG)"
-        ifneq (,$(findstring $(system),mcimac mcpowerbook))
+        ifneq (,$(findstring $(system),mcimac mcpowerbook mcair))
             ifneq ($(NOMACWARN),true)
                 ifeq (${DYLD_LIBRARY_PATH},)
 	            @echo
