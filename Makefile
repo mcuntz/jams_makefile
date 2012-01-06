@@ -186,6 +186,9 @@ ifeq ($(system),mcair)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
         icompiler := gnu46
     endif
+    ifneq (,$(findstring $(compiler),nag))
+        icompiler := nag52
+    endif
 endif
 
 #
@@ -415,7 +418,7 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
         RPATH += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
         ifneq ($(CURLLIB),)
             LIBS     += -L$(CURLLIB) -lcurl
-            LIBS     += -Wl,-rpath,$(CURLLIB)
+            RPATH    += -Wl,-rpath,$(CURLLIB)
         endif
    endif
 endif
