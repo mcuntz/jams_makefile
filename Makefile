@@ -503,6 +503,8 @@ EXCL      :=
 OAOBJS    := $(filter-out $(EXCL), $(AOBJS))
 # objects with full dir path
 OBJS      := $(addprefix $(OBJPATH)/, $(OAOBJS))
+# g90 debug files of NAG compiler
+GASRCS    := $(ASRCS:.f90=.g90)
 
 # Same for Fortran77 files with ending .for
 FORASRCS  := $(wildcard $(SOURCEPATH)/*.for)
@@ -511,6 +513,7 @@ FORAOBJS  := $(FORSRCS:.for=.o)
 FOREXCL   :=
 OFORAOBJS := $(filter-out $(FOREXCL), $(FORAOBJS))
 FOROBJS   := $(addprefix $(OBJPATH)/, $(OFORAOBJS))
+GFORASRCS := $(FORASRCS:.for=.g90)
 # Same for Fortran77 files with ending .f
 FASRCS    := $(wildcard $(SOURCEPATH)/*.f)
 FSRCS     := $(notdir $(FASRCS))
@@ -518,6 +521,7 @@ FAOBJS    := $(FSRCS:.f=.o)
 FEXCL     :=
 OFAOBJS   := $(filter-out $(FEXCL), $(FAOBJS))
 FOBJS     := $(addprefix $(OBJPATH)/, $(OFAOBJS))
+GFASRCS   := $(FASRCS:.f=.g90)
 
 # Export the variables that are used in Makefile2
 export PROG
@@ -578,9 +582,11 @@ makedirs:
 
 clean:
 	rm -f "$(OBJPATH)"/*.o "$(OBJPATH)"/*.mod "$(OBJPATH)"/make.deps "$(PROG)"
+	rm -f $(GASRCS) $(GFORASRCS) $(GFASRCS)
         ifneq (,$(findstring $(SRCPATH),test_netcdf_imsl_proj))
 	    if [ -f $(SRCPATH)/test.nc ] ; then rm $(SRCPATH)/test.nc ; fi
         endif
+	if [ -f $(strip $(PROGPATH))/"Test.nc" ] ; then rm $(strip $(PROGPATH))/"Test.nc" ; fi
 
 cleanclean: clean
 	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* $(PROG).dSYM
