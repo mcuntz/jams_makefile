@@ -33,7 +33,7 @@
 #         imsl        vendor, imsl, [anything else]
 #         mkl         mkl, mkl95, [anything else]
 #         lapack      true, [anything else]
-#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, sun12
+#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
 #                     alternative names are:
 #                     On eve.ufz.de
 #                       gnu, gfortran, gcc=gnu44
@@ -44,6 +44,7 @@
 #                       intel, ifort, ifort11=intel11
 #                       ifort12=intel12
 #                       sun=sun12
+#                       nag=nag53
 #                     On Matthias' Macbook Air
 #                       gnu, gfortran, gcc, gfortran46, gcc44=gnu46
 #                     On Matthias' iMac
@@ -123,7 +124,7 @@ imsl     :=
 mkl      := mkl
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
-# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, sun12
+# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
 compiler := ifort
 # OpenMP parallelization: true, [anything else]
 openmp   :=
@@ -161,6 +162,9 @@ ifeq ($(system),eve)
     endif
     ifneq (,$(findstring $(compiler),sun))
         icompiler := sun12
+    endif
+    ifneq (,$(findstring $(compiler),nag))
+        icompiler := nag53
     endif
 endif
 ifeq ($(system),mcimac)
@@ -228,8 +232,8 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     endif
 endif
 
-ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 sun12))
-    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 sun12')
+ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 nag53 sun12))
+    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 nag53 sun12')
 endif
 
 #
@@ -486,7 +490,15 @@ ifeq ($(istatic),static)
 endif
 # Only Linux and Solaris can use -rpath in executable
 ifeq (,$(findstring $(system),mcimac mcpowerbook mcair))
-    LIBS += $(RPATH)
+    # The NAG compiler links via gcc so that one has to give -Wl twice and double commas for the option
+    # i.e. instead of  -Wl,rpath,/path   you need   -Wl,-Wl,,rpath,,/path
+    ifneq (,$(findstring $(icompiler),nag51 nag52 nag53))
+        comma  := ,
+        iRPATH := $(subst -Wl,-Wl$(comma)-Wl,$(subst $(comma),$(comma)$(comma),$(RPATH)))
+    else
+        iRPATH := $(RPATH)
+    endif
+    LIBS += $(iRPATH)
 endif
 
 LD := $(F90)
