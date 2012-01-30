@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for NAG compiler 5.2 at Matthias' PowerBook G4
+# Setup file for NAG compiler 5.3 at Matthias' PowerBook G4
 #
 
 # The Makefile assumes the standard bin, include and lib directories

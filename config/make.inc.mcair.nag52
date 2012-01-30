@@ -27,7 +27,8 @@ else
     FCFLAGS  := $(F90FLAGS)
 endif
 # -mismatch-all
-F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=full
+F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=full -ideclient
+LDFLAGS  += -ideclient -unsharedrts
 DEFINES  += -DNAG
 
 # Linking

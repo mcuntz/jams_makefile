@@ -12,7 +12,7 @@
 #     targets    all (default), check, clean, cleanclean, cleantest
 #
 # OPTIONS
-#     All make options such as -f makefile. See 'man make'. 
+#     All make options such as -f makefile. See 'man make'.
 #
 # VARIABLES
 #     All variables defined in this makefile.
@@ -50,15 +50,15 @@
 #                     On Matthias' iMac
 #                       gnu, gfortran, gcc, gfortran45, gcc44=gnu45
 #                       intel, ifort, ifort12=intel12
-#                       nag=nag52
+#                       nag=nag52 nag53
 #                     On Matthias' Powerbook
 #                       gnu, gfortran, gcc, gfortran42, gcc42=gnu42 for mcpowerbook
-#                       nag=nag52
+#                       nag=nag52 nag53
 #         openmp      true, [anything else]
 #
 # DEPENDENCIES
 #    This make file uses the following files:
-#        Makefile2, makedeps.pl, $(CONFIGPATH)/make.inc.$(system).$(compiler) 
+#        Makefile2, makedeps.pl, $(CONFIGPATH)/make.inc.$(system).$(compiler)
 #
 # RESTRICTIONS
 #    Not all packages work with or are compiled for all compilers.
@@ -174,24 +174,24 @@ ifeq ($(system),mcimac)
     ifneq (,$(findstring $(compiler),intel ifort ifort12))
         icompiler := intel12
     endif
-    ifneq (,$(findstring $(compiler),nag))
-        icompiler := nag52
+    ifneq (,$(findstring $(compiler),nag nag52 nag53))
+        icompiler := nag53
     endif
 endif
 ifeq ($(system),mcpowerbook)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran42 gcc42))
         icompiler := gnu42
     endif
-    ifneq (,$(findstring $(compiler),nag))
-        icompiler := nag52
+    ifneq (,$(findstring $(compiler),nag nag52 nag53))
+        icompiler := nag53
     endif
 endif
 ifeq ($(system),mcair)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
         icompiler := gnu46
     endif
-    ifneq (,$(findstring $(compiler),nag))
-        icompiler := nag52
+    ifneq (,$(findstring $(compiler),nag nag52 nag53))
+        icompiler := nag53
     endif
 endif
 
@@ -433,7 +433,7 @@ ifeq ($(proj),true)
         $(error Error: PROJ4 path '$(PROJ4DIR)' not found.)
     endif
     PROJ4LIB ?= $(PROJ4DIR)/lib
-    LIBS     += -L$(PROJ4LIB) -lproj    
+    LIBS     += -L$(PROJ4LIB) -lproj
     RPATH    += -Wl,-rpath=$(PROJ4LIB)
 
     ifneq (exists, $(shell if [ -d "$(FPROJDIR)" ] ; then echo 'exists' ; fi))
@@ -537,7 +537,7 @@ GFASRCS   := $(FASRCS:.f=.g90)
 
 # Export the variables that are used in Makefile2
 export PROG
-export OBJS 
+export OBJS
 export FOROBJS
 export FOBJS
 export LD
