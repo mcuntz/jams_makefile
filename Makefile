@@ -95,10 +95,10 @@ SHELL = /bin/bash
 # . is current directory, .. is parent directory
 MAKEPATH   := .      # where is the second make file and the makedeps.pl script
 #SRCPATH    := .      # where are the source files; use test_??? to run a test directory
-SRCPATH    := ../FORTRAN_chs_lib/test/test_mo_ncwrite
+SRCPATH    := test_standard
 PROGPATH   := .      # where shall be the executable
 CONFIGPATH := config # where are the make.inc.$(system).$(compiler) files
-TESTPATH   := ../FORTRAN_chs_lib/test  # where are all the test directories
+TESTPATH   := .
 #
 PROGNAME := Prog # Name of executable
 #
@@ -113,7 +113,7 @@ system   := eve
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
-netcdf   := netcdf4
+netcdf   :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -121,11 +121,11 @@ proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
 imsl     :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
-mkl      :=
+mkl      := mkl95
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   := true
+lapack   :=
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := absoft
+compiler := nag53
 # OpenMP parallelization: true, [anything else]
 openmp   :=
 
