@@ -42,22 +42,23 @@ IMSLDIR :=
 MKLDIR := /usr/local/intel/composerxe-2011.4.191/mkl
 MKLINC := $(MKLDIR)/include/intel64/lp64
 MKLLIB := $(MKLDIR)/lib/intel64
-MKL95DIR := /usr/local/intel/interfaces/lapack95_nagfor53
+MKL95DIR := /usr/local/intel/interfaces/lapack95_nag53
 MKL95INC := $(MKL95DIR)/include/intel64/lp64
 MKL95LIB := $(MKL95DIR)/lib/intel64
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR := /usr/local/netcdf/3.6.3_nagfor53
+    NCDIR := /usr/local/netcdf/3.6.3_nag53
 else
-    NCDIR   := /usr/local/netcdf/4.1.1_nagfor53
+    NCDIR   := /usr/local/netcdf/4.1.3_nagfor
+    CURLLIB := /usr/lib64
     SZLIB   := /usr/local/szip/2.1/lib
     HDF5LIB := /usr/local/hdf5/1.8.6/lib
 endif
 
 # PROJ
 PROJ4DIR := /usr/local/proj/4.7.0
-FPROJDIR := /usr/local/fproj/4.7.0_gcc46_nagfor53
+FPROJDIR := /usr/local/fproj/4.7.0_nag53
 
 # LAPACK
 LAPACKDIR   := /usr

@@ -410,11 +410,12 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
     INCLUDES += -I$(NCINC)
     DEFINES  += -DNETCDF
 
-    LIBS  += -L$(NCLIB) -lnetcdf
+    LIBS  += -L$(NCLIB)
     RPATH += -Wl,-rpath,$(NCLIB)
     ifneq ($(icompiler),absoft)
         LIBS += -lnetcdff
     endif
+    LIBS  += -lnetcdf
 
     # other libraries for netcdf4, ignored for netcdf3
     ifeq ($(netcdf),netcdf4)
