@@ -62,7 +62,19 @@ PROGRAM main
   write(*,*) 'Prec sp ',  precision(1.0_sp)
   write(*,*) 'Prec dp ',  precision(1.0_dp)
 
-  ztmp(1) = 0.9_dp
+  ztmp(1) = huge(0.9_dp)
+  write(*,*) 'H0: ', ztmp(1)
+  write(*,*) 'H1: ', nearest(ztmp(1), 1._dp)
+  write(*,*) 'H2: ', nearest(ztmp(1),-1._dp)
+  write(*,*) 'H3: ', nearest(1e6_dp*ztmp(1), 1._dp)
+  write(*,*) 'H4: ', nearest(1e6_dp*ztmp(1),-1._dp)
+  ztmp(1) = tiny(0.9_dp)
+  write(*,*) 'H0: ', ztmp(1)
+  write(*,*) 'H1: ', nearest(ztmp(1), 1._dp)
+  write(*,*) 'H2: ', nearest(ztmp(1),-1._dp)
+  write(*,*) 'H3: ', nearest(ztmp(1)*ztmp(1), 1._dp)
+  write(*,*) 'H4: ', nearest(ztmp(1)**2,-1._dp)
+  write(*,*) 'H5: ', ztmp(1)**2
   ztmp(2) = 0.8_dp
   ztmp(3) = 0.7_dp
   write(*,*) 'Max1 ', ztmp
