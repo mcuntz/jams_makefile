@@ -132,6 +132,18 @@ openmp   :=
 # Write out warning/reminder if compiled on Mac OS X. If NOMACWARN=true then no warning is written out: true, [anything else]
 NOMACWARN = no
 
+# This Makefile sets the following variables depending on the above options:
+# FC, FCFLAGS, F90FLAGS, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
+# flags, defines, etc. will be set incremental. They will be initialised with
+# the following EXTRA_* variables. This allows for example to set an extra compiler
+# option or define a preprocessor variable such as: EXTRA_DEFINES := -DNOGUI
+EXTRA_FCFLAGS  :=
+EXTRA_F90FLAGS :=
+EXTRA_DEFINES  :=
+EXTRA_INCLUDES :=
+EXTRA_LDFLAGS  :=
+EXTRA_LIBS     :=
+
 #
 # --- ALIASES ---------------------------------------------------
 #
@@ -279,15 +291,15 @@ OBJPATH := $(SOURCEPATH)/.$(strip $(icompiler)).$(strip $(release))
 
 # These variables will be used to compile
 FC       :=
-FCFLAGS  :=
+FCFLAGS  := $(EXTRA_FCFLAGS)
 F90      :=
-F90FLAGS :=
-DEFINES  :=
-INCLUDES :=
+F90FLAGS := $(EXTRA_F90FLAGS)
+DEFINES  := $(EXTRA_DEFINES)
+INCLUDES := $(EXTRA_INCLUDES)
 # and link, and therefore set below
 LD       :=
-LDFLAGS  :=
-LIBS     :=
+LDFLAGS  := $(EXTRA_LDFLAGS)
+LIBS     := $(EXTRA_LIBS)
 
 #
 # --- COMPILER / MACHINE SPECIFIC --------------------------------
