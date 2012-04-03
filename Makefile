@@ -9,7 +9,7 @@
 #     Variables can be set on the command line [VAR=VAR] or in the SWITCHES section in this file.
 #
 # INPUTS
-#     targets    all (default), check, clean, cleanclean, cleantest
+#     targets    all (default), check (=test), clean, cleanclean, cleantest
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'.
@@ -58,11 +58,11 @@
 #
 # DEPENDENCIES
 #    This make file uses the following files:
-#        Makefile2, makedeps.pl, $(CONFIGPATH)/make.inc.$(system).$(compiler)
+#        $(MAKEDPATH)/make.d.pl, $(CONFIGPATH)/$(system).$(compiler)
 #
 # RESTRICTIONS
 #    Not all packages work with or are compiled for all compilers.
-#    The script does checksome but not all of these dependencies.
+#    The script does check some but not all of these dependencies.
 #
 # EXAMPLE
 #    make release=debug compiler=intel11 imsl=imsl mkl=mkl95
@@ -93,11 +93,11 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-MAKEPATH   := .      # where is the second make file and the makedeps.pl script
-#SRCPATH    := .      # where are the source files; use test_??? to run a test directory
+#SRCPATH    := .          # where are the source files; use test_??? to run a test directory
 SRCPATH    := test_standard
-PROGPATH   := .      # where shall be the executable
-CONFIGPATH := config # where are the make.inc.$(system).$(compiler) files
+PROGPATH   := .           # where shall be the executable
+CONFIGPATH := make.config # where are the $(system).$(compiler) files
+MAKEDPATH  := make.config # where is the make.d.pl script
 TESTPATH   := .
 #
 PROGNAME := Prog # Name of executable
@@ -230,16 +230,15 @@ ifeq (,$(findstring $(static),static shared dynamic))
     $(error Error: static '$(static)' not found: must be in 'static shared dynamic')
 endif
 
-ifneq (,$(findstring $(imsl),vendor imsl))
-    ifneq ($(icompiler),intel11)
-        $(error Error: IMSL needs intel11.0.075, set 'compiler=intel11')
-    endif
-    ifeq ($(lapack),true)
-        $(error Error: IMSL does not work with LAPACK. Use MKL instead of LAPACK. Set 'lapack=false mkl=mkl')
-    endif
-    ifeq ($(imsl),vendor)
-        ifeq (,$(findstring $(mkl),mkl mkl95))
-            $(error Error: IMSL vendor needs MKL, set 'mkl=mkl' or 'mkl=mkl95')
+ifneq (,$(findstring $(system),eve))
+    ifneq (,$(findstring $(imsl),vendor imsl))
+        ifneq ($(icompiler),intel11)
+            $(error Error: IMSL needs intel11.0.075, set 'compiler=intel11')
+        endif
+        ifeq ($(imsl),vendor)
+            ifeq (,$(findstring $(mkl),mkl mkl95))
+                $(error Error: IMSL vendor needs MKL, set 'mkl=mkl' or 'mkl=mkl95')
+            endif
         endif
     endif
 endif
@@ -259,15 +258,10 @@ else
     PROG := $(strip $(PROGPATH))/$(strip $(PROGNAME))
 endif
 
-ifeq ($(findstring '//','/'$(MAKEPATH)),)
-    MAKEPROG     := $(CURDIR)/$(strip $(MAKEPATH))/Makefile2
-    MAKEDEPSPROG := $(CURDIR)/$(strip $(MAKEPATH))/makedeps.pl
+ifeq ($(findstring '//','/'$(MAKEDPATH)),)
+    MAKEDEPSPROG := $(CURDIR)/$(strip $(MAKEDPATH))/make.d.pl
 else
-    MAKEPROG     := $(strip $(MAKEPATH))/Makefile2
-    MAKEDEPSPROG := $(strip $(MAKEPATH))/makedeps.pl
-endif
-ifneq (exists, $(shell if [ -f $(MAKEPROG) ] ; then echo 'exists' ; fi))
-    $(error Error: '$(MAKEPROG)' not found.)
+    MAKEDEPSPROG := $(strip $(MAKEDPATH))/make.d.pl
 endif
 ifneq (exists, $(shell if [ -f $(MAKEDEPSPROG) ] ; then echo 'exists' ; fi))
     $(error Error: '$(MAKEDEPSPROG)' not found.)
@@ -321,7 +315,7 @@ else
 endif
 
 # Include the individual configuration files
-MAKEINC := $(strip $(CONFIGPATH))/make.inc.$(system).$(icompiler)
+MAKEINC := $(strip $(CONFIGPATH))/$(system).$(icompiler)
 ifneq (exists, $(shell if [ -f $(MAKEINC) ] ; then echo 'exists' ; fi))
     $(error Error: '$(MAKEINC)' not found.)
 endif
@@ -517,7 +511,9 @@ endif
 LD := $(F90)
 
 # ASRCS contain source dir informations
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleantest))
 ASRCS     := $(wildcard $(SOURCEPATH)/*.f90)
+endif
 # SRCS without dir
 SRCS      := $(notdir $(ASRCS))
 # AOBJS objects without dir
@@ -528,43 +524,35 @@ EXCL      :=
 OAOBJS    := $(filter-out $(EXCL), $(AOBJS))
 # objects with full dir path
 OBJS      := $(addprefix $(OBJPATH)/, $(OAOBJS))
+# dependency files with full dir path
+DOBJS     := $(OBJS:.o=.d)
 # g90 debug files of NAG compiler
 GASRCS    := $(ASRCS:.f90=.g90)
 
 # Same for Fortran77 files with ending .for
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleantest))
 FORASRCS  := $(wildcard $(SOURCEPATH)/*.for)
+endif
 FORSRCS   := $(notdir $(FORASRCS))
 FORAOBJS  := $(FORSRCS:.for=.o)
 FOREXCL   :=
 OFORAOBJS := $(filter-out $(FOREXCL), $(FORAOBJS))
 FOROBJS   := $(addprefix $(OBJPATH)/, $(OFORAOBJS))
+FORDOBJS  := $(FOROBJS:.o=.d)
 GFORASRCS := $(FORASRCS:.for=.g90)
 # Same for Fortran77 files with ending .f
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleantest))
 FASRCS    := $(wildcard $(SOURCEPATH)/*.f)
+endif
 FSRCS     := $(notdir $(FASRCS))
 FAOBJS    := $(FSRCS:.f=.o)
 FEXCL     :=
 OFAOBJS   := $(filter-out $(FEXCL), $(FAOBJS))
 FOBJS     := $(addprefix $(OBJPATH)/, $(OFAOBJS))
+FDOBJS    := $(FOBJS:.o=.d)
 GFASRCS   := $(FASRCS:.f=.g90)
 
-# Export the variables that are used in Makefile2
-export PROG
-export OBJS
-export FOROBJS
-export FOBJS
-export LD
-export LDFLAGS
-export LIBS
-export OBJPATH
-export F90
-export DEFINES
-export INCLUDES
-export F90FLAGS
-export FC
-export FCFLAGS
-export icompiler
-# The Absoft compiler needs that ABSOFT is set to the Abost base path
+# The Absoft compiler needs that ABSOFT is set to the Absoft base path
 ifneq ($(ABSOFT),)
     export ABSOFT
 endif
@@ -579,8 +567,7 @@ endif
 .PHONY: clean cleanclean cleantest
 
 # target for executables
-all: makedirs makedeps
-	cd "$(SOURCEPATH)" ; $(MAKE) -f "$(MAKEPROG)"
+all: $(PROG)
         ifneq (,$(findstring $(system),mcimac mcpowerbook mcair))
             ifneq ($(NOMACWARN),true)
                 ifeq (${DYLD_LIBRARY_PATH},)
@@ -596,22 +583,60 @@ all: makedirs makedeps
             endif
         endif
 
-# helper targets
-makedeps:
-	rm -f "$(OBJPATH)"/make.deps
-	rm -f tmp.gf3.*
-	$(MAKEDEPSPROG) "$(OBJPATH)" "$(SOURCEPATH)"
+# Link Program
+$(PROG): $(DOBJS) $(FORDOBJS) $(FDOBJS) $(OBJS) $(FOROBJS) $(FOBJS)
+	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(LIBS)
 
-makedirs:
-	if [ ! -d "$(OBJPATH)" ] ; then mkdir "$(OBJPATH)" ; fi
+# Get Dependencies
+$(DOBJS): $(OBJPATH)/%.d: $(SRCPATH)/%.f90
+#	@set -e; rm -f $@
+	@dirname $@ | xargs mkdir -p 2>/dev/null
+	$(MAKEDEPSPROG) $< "$(OBJPATH)" "$(SOURCEPATH)"
 
+$(FORDOBJS): $(OBJPATH)/%.d: $(SRCPATH)/%.for
+	@dirname $@ | xargs mkdir -p 2>/dev/null
+	$(MAKEDEPSPROG) $< "$(OBJPATH)" "$(SOURCEPATH)"
+
+$(FDOBJS): $(OBJPATH)/%.d: $(SRCPATH)/%.f
+	@dirname $@ | xargs mkdir -p 2>/dev/null
+	$(MAKEDEPSPROG) $< "$(OBJPATH)" "$(SOURCEPATH)"
+
+# Compile Objects
+$(OBJS): $(OBJPATH)/%.o: $(SRCPATH)/%.f90
+ifneq (,$(findstring $(icompiler),gnu41 gnu42))
+	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $< > $(OBJPATH)/tmp.gf3.$(notdir $<)
+	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
+	rm -r $(OBJPATH)/tmp.gf3.$(notdir $<)
+else
+	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $< -o $@
+endif
+
+$(FOROBJS): $(OBJPATH)/%.o: $(SRCPATH)/%.for
+ifneq (,$(findstring $(icompiler),gnu41 gnu42))
+	$(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< > $(OBJPATH)/tmp.gf3.$(notdir $<)
+	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
+	rm -r $(OBJPATH)/tmp.gf3.$(notdir $<)
+else
+	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $< -o $@
+endif
+
+$(FOBJS): $(OBJPATH)/%.o: $(SRCPATH)/%.f
+ifneq (,$(findstring $(icompiler),gnu41 gnu42))
+	$(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< > $(OBJPATH)/tmp.gf3.$(notdir $<)
+	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
+	rm -r $(OBJPATH)/tmp.gf3.$(notdir $<)
+else
+	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $< -o $@
+endif
+
+# Helper Targets
 clean:
-	rm -f "$(OBJPATH)"/*.o "$(OBJPATH)"/*.mod "$(OBJPATH)"/make.deps "$(PROG)"
+	rm -f $(DOBJS) $(FORDOBJS) $(FDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) "$(OBJPATH)"/*.mod "$(PROG)"
 	rm -f $(GASRCS) $(GFORASRCS) $(GFASRCS)
         ifneq (,$(findstring $(SRCPATH),test_netcdf_imsl_proj))
-	    if [ -f $(SRCPATH)/test.nc ] ; then rm $(SRCPATH)/test.nc ; fi
+	    @if [ -f $(SRCPATH)/test.nc ] ; then rm $(SRCPATH)/test.nc ; fi
         endif
-	if [ -f $(strip $(PROGPATH))/"Test.nc" ] ; then rm $(strip $(PROGPATH))/"Test.nc" ; fi
+	@if [ -f $(strip $(PROGPATH))/"Test.nc" ] ; then rm $(strip $(PROGPATH))/"Test.nc" ; fi
 
 cleanclean: clean
 	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* $(PROG).dSYM
@@ -624,7 +649,7 @@ cleantest:
 check:
 	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
 	    rm -f "$(PROG)" ; \
-	    make -s MAKEPATH=$(MAKEPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
+	    make -s MAKEDPATH=$(MAKEDPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
 	         CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
 	         release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
 	         imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
@@ -637,3 +662,8 @@ check:
 	done
 
 test: check
+
+# All dependencies create by perl script make.d.pl
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),clean cleanclean cleantest))
+-include $(DOBJS) $(FORDOBJS) $(FDOBJS)
+endif
