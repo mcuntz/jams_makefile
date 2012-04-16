@@ -59,16 +59,17 @@
 # DEPENDENCIES
 #    This make file uses the following files:
 #        $(MAKEDPATH)/make.d.pl, $(CONFIGPATH)/$(system).$(compiler)
+#    The default $(MAKEDPATH) and $(CONFIGPATH) is make.config
 #
 # RESTRICTIONS
 #    Not all packages work with or are compiled for all compilers.
 #    The script does check some but not all of these dependencies.
 #
 # EXAMPLE
-#    make release=debug compiler=intel11 imsl=imsl mkl=mkl95
+#    make release=debug compiler=intel11 imsl=vendor mkl=mkl95
 #
 # LITERATURE
-#    The following links provide documentation:
+#    The following links provide general documentation:
 #        Make
 #          GNU           http://www.gnu.org/s/make/
 #        Compiler
