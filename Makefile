@@ -253,14 +253,30 @@ endif
 #
 
 # Make absolute pathes from relative pathes
-ifeq ($(findstring '//','/'$(PROGPATH)),)
-    PROG := $(CURDIR)/$(strip $(PROGPATH))/$(strip $(PROGNAME))
-else
+ifeq ($(findstring //,/$(PROGPATH)),)       # starts not with /
+    ifeq ($(findstring /.,/$(PROGPATH)),)       # starts not with .
+        PROG := $(CURDIR)/$(strip $(PROGPATH))/$(strip $(PROGNAME))
+    else                                        # starts with .
+	ifeq ($(subst ./,,$(dir $(PROGPATH))),) # is just .
+            PROG := $(CURDIR)/$(strip $(PROGNAME))
+        else                                    # is ./etc
+            PROG := $(CURDIR)/$(strip $(subst ./,,$(dir $(PROGPATH))))/$(strip $(PROGNAME))
+        endif
+    endif
+else                                            # starts with /
     PROG := $(strip $(PROGPATH))/$(strip $(PROGNAME))
 endif
 
-ifeq ($(findstring '//','/'$(MAKEDPATH)),)
-    MAKEDEPSPROG := $(CURDIR)/$(strip $(MAKEDPATH))/make.d.pl
+ifeq ($(findstring //,/$(MAKEDPATH)),)
+    ifeq ($(findstring /.,/$(MAKEDPATH)),)
+        MAKEDEPSPROG := $(CURDIR)/$(strip $(MAKEDPATH))/make.d.pl
+    else
+	ifeq ($(subst ./,,$(dir $(MAKEDPATH))),)
+            MAKEDEPSPROG := $(CURDIR)/make.d.pl
+        else
+            MAKEDEPSPROG := $(CURDIR)/$(strip $(subst ./,,$(dir $(MAKEDPATH))))/make.d.pl
+        endif
+    endif
 else
     MAKEDEPSPROG := $(strip $(MAKEDPATH))/make.d.pl
 endif
@@ -268,8 +284,16 @@ ifneq (exists, $(shell if [ -f $(MAKEDEPSPROG) ] ; then echo 'exists' ; fi))
     $(error Error: '$(MAKEDEPSPROG)' not found.)
 endif
 
-ifeq ($(findstring '//','/'$(SRCPATH)),)
-    SOURCEPATH := $(CURDIR)/$(strip $(SRCPATH))
+ifeq ($(findstring //,/$(strip $(SRCPATH))),)
+    ifeq ($(findstring /.,/$(strip $(SRCPATH))),)
+        SOURCEPATH := $(CURDIR)/$(strip $(SRCPATH))
+    else
+	ifeq ($(subst ./,,$(dir $(SRCPATH))),)
+            SOURCEPATH := $(CURDIR)
+        else
+            SOURCEPATH := $(CURDIR)/$(strip $(subst ./,,$(dir $(SRCPATH))))
+        endif
+    endif
 else
     SOURCEPATH := $(strip $(SRCPATH))
 endif
@@ -560,6 +584,7 @@ endif
 ifneq ($(LDPATH),)
     export LD_LIBRARY_PATH=$(LDPATH)
 endif
+#$(shell echo "aaa$(SOURCEPATH)aaa")
 
 #
 # --- TARGETS ---------------------------------------------------
@@ -589,21 +614,21 @@ $(PROG): $(DOBJS) $(FORDOBJS) $(FDOBJS) $(OBJS) $(FOROBJS) $(FOBJS)
 	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(LIBS)
 
 # Get Dependencies
-$(DOBJS): $(OBJPATH)/%.d: $(SRCPATH)/%.f90
+$(DOBJS): $(OBJPATH)/%.d: $(SOURCEPATH)/%.f90
 #	@set -e; rm -f $@
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	$(MAKEDEPSPROG) $< "$(OBJPATH)" "$(SOURCEPATH)"
 
-$(FORDOBJS): $(OBJPATH)/%.d: $(SRCPATH)/%.for
+$(FORDOBJS): $(OBJPATH)/%.d: $(SOURCEPATH)/%.for
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	$(MAKEDEPSPROG) $< "$(OBJPATH)" "$(SOURCEPATH)"
 
-$(FDOBJS): $(OBJPATH)/%.d: $(SRCPATH)/%.f
+$(FDOBJS): $(OBJPATH)/%.d: $(SOURCEPATH)/%.f
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	$(MAKEDEPSPROG) $< "$(OBJPATH)" "$(SOURCEPATH)"
 
 # Compile Objects
-$(OBJS): $(OBJPATH)/%.o: $(SRCPATH)/%.f90
+$(OBJS): $(OBJPATH)/%.o: $(SOURCEPATH)/%.f90
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $< > $(OBJPATH)/tmp.gf3.$(notdir $<)
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
@@ -612,7 +637,7 @@ else
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $< -o $@
 endif
 
-$(FOROBJS): $(OBJPATH)/%.o: $(SRCPATH)/%.for
+$(FOROBJS): $(OBJPATH)/%.o: $(SOURCEPATH)/%.for
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< > $(OBJPATH)/tmp.gf3.$(notdir $<)
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
@@ -621,7 +646,7 @@ else
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $< -o $@
 endif
 
-$(FOBJS): $(OBJPATH)/%.o: $(SRCPATH)/%.f
+$(FOBJS): $(OBJPATH)/%.o: $(SOURCEPATH)/%.f
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< > $(OBJPATH)/tmp.gf3.$(notdir $<)
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
@@ -634,8 +659,8 @@ endif
 clean:
 	rm -f $(DOBJS) $(FORDOBJS) $(FDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) "$(OBJPATH)"/*.mod "$(PROG)"
 	rm -f $(GASRCS) $(GFORASRCS) $(GFASRCS)
-        ifneq (,$(findstring $(SRCPATH),test_netcdf_imsl_proj))
-	    @if [ -f $(SRCPATH)/test.nc ] ; then rm $(SRCPATH)/test.nc ; fi
+        ifneq (,$(findstring $(SOURCEPATH),test_netcdf_imsl_proj))
+	    @if [ -f $(SOURCEPATH)/test.nc ] ; then rm $(SOURCEPATH)/test.nc ; fi
         endif
 	@if [ -f $(strip $(PROGPATH))/"Test.nc" ] ; then rm $(strip $(PROGPATH))/"Test.nc" ; fi
 

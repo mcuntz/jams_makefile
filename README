@@ -1,19 +1,20 @@
 
-This is the PYTHON library of the
+This is the Makefile project of the
 
 Department Computational Hydrosystems
 Helmholtz Centre for Environmental Research - UFZ
 Permoserstr. 15
-04318 Leipzig
-Germany
+04318 Leipzig, Germany
+
+The project tries to provide a portable, versatile way of compiling Fortran projects.
 
 The library is maintained with a subversion system at:
-https://svn.ufz.de/svn/chs-svn/PYTHON_chs_lib/
+https://svn.ufz.de/svn/chs-svn/makefile_chs/
 
 The documentation of the library is maintained as a wiki at:
-https://svn.ufz.de/chs-svn/wiki/WikiPython
+https://svn.ufz.de/chs-svn/wiki/WikiMakefile
 
 The above wiki will be printed to a PDF file from time to time, which is provided in wiki.pdf.
 Be aware that the current PDF is not always up to date.
 
-Created 11.11.2011 by Matthias Cuntz
+Created 11.11.2011 by Matthias Cuntz and Juliane Mai - matthias.cuntz (at) ufz.de
