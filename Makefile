@@ -25,7 +25,7 @@
 #     e.g. if you do not want to use IMSL, set:  imsl=no  or  imsl=
 #
 #     Current variables are
-#         system      eve, mcimac, mcpowerbook, mcair
+#         system      eve, mcimac, mcpowerbook, mcair, jmmacbookpro
 #         release     debug, release
 #         netcdf      netcdf3, netcdf4
 #         static      static, shared, dynamic (last two are equal)
@@ -54,6 +54,8 @@
 #                     On Matthias' Powerbook
 #                       gnu, gfortran, gcc, gfortran42, gcc42=gnu42 for mcpowerbook
 #                       nag=nag52 nag53
+#                     On Jule's MacBook Pro
+#                       gfortran
 #         openmp      true, [anything else]
 #
 # DEPENDENCIES
@@ -95,11 +97,11 @@ SHELL = /bin/bash
 
 # . is current directory, .. is parent directory
 #SRCPATH    := .          # where are the source files; use test_??? to run a test directory
-SRCPATH    := test_standard
+SRCPATH    := /Users/mai/Documents/FORTRAN_chs_lib/test/test_mo_ncread   #test_standard
 PROGPATH   := .           # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
-TESTPATH   := .
+TESTPATH   := /Users/mai/Documents/FORTRAN_chs_lib/test
 #
 PROGNAME := Prog # Name of executable
 #
@@ -109,12 +111,12 @@ ifeq (,$(wildcard $(SRCPATH)/*.f90) $(wildcard $(SRCPATH)/*.for) $(wildcard $(SR
 endif
 #
 # Options
-# Systems: eve, mcimac, mcpowerbook, mcair
-system   := eve
+# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro
+system   := jmmacbookpro
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
-netcdf   :=
+netcdf   := netcdf4
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -122,11 +124,11 @@ proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
 imsl     :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
-mkl      := mkl95
+mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   :=
+lapack   := true
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := nag53
+compiler := gnu
 # OpenMP parallelization: true, [anything else]
 openmp   :=
 
@@ -207,14 +209,22 @@ ifeq ($(system),mcair)
         icompiler := nag53
     endif
 endif
+ifeq ($(system),jmmacbookpro)
+    ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
+        icompiler := gnu46
+    endif
+#    ifneq (,$(findstring $(compiler),nag nag52 nag53))
+#        icompiler := nag53
+#    endif
+endif
 
 #
 # --- CHECKS ---------------------------------------------------
 #
 
 # Check some dependices, e.g. IMSL needs intel11 on eve
-ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair))
-    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair')
+ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro))
+    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro')
 endif
 
 ifeq (,$(findstring $(release),debug release))
@@ -326,13 +336,13 @@ LIBS     := $(EXTRA_LIBS)
 
 # Mac OS X is special, there is (almost) no static linking
 istatic := $(static)
-ifneq (,$(findstring $(system),mcimac mcpowerbook mcair))
+ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro))
     istatic := dynamic
 endif
 ifeq ($(istatic),static)
     LIBS += -Bstatic -Wl,--start-group
 else
-    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair))
+    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro))
         LIBS += -Wl,-dynamic
     else
         LIBS += -Bdynamic
@@ -483,7 +493,7 @@ endif
 # --- LAPACK ---------------------------------------------------
 ifeq ($(lapack),true)
     # Mac OS X uses frameworks
-    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair))
+    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro))
         LIBS += -framework veclib
     else
         ifneq (exists, $(shell if [ -d "$(LAPACKDIR)" ] ; then echo 'exists' ; fi))
@@ -521,7 +531,7 @@ ifeq ($(istatic),static)
     LIBS += -Wl,--end-group
 endif
 # Only Linux and Solaris can use -rpath in executable
-ifeq (,$(findstring $(system),mcimac mcpowerbook mcair))
+ifeq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro))
     # The NAG compiler links via gcc so that one has to give -Wl twice and double commas for the option
     # i.e. instead of  -Wl,rpath,/path   you need   -Wl,-Wl,,rpath,,/path
     ifneq (,$(findstring $(icompiler),nag51 nag52 nag53))
@@ -594,7 +604,7 @@ endif
 
 # target for executables
 all: $(PROG)
-        ifneq (,$(findstring $(system),mcimac mcpowerbook mcair))
+        ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro))
             ifneq ($(NOMACWARN),true)
                 ifeq (${DYLD_LIBRARY_PATH},)
 	            @echo
