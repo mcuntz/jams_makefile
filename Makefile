@@ -264,7 +264,7 @@ endif
 
 # Make absolute pathes from relative pathes
 ifeq ($(findstring //,/$(PROGPATH)),)       # starts not with /
-    ifeq ($(findstring /.,/$(PROGPATH)),)       # starts not with .
+    ifeq ($(findstring '/.',/$(PROGPATH)),)       # starts not with .
         PROG := $(CURDIR)/$(strip $(PROGPATH))/$(strip $(PROGNAME))
     else                                        # starts with .
 	ifeq ($(subst ./,,$(dir $(PROGPATH))),) # is just .
@@ -278,7 +278,7 @@ else                                            # starts with /
 endif
 
 ifeq ($(findstring //,/$(MAKEDPATH)),)
-    ifeq ($(findstring /.,/$(MAKEDPATH)),)
+    ifeq ($(findstring '/.',/$(MAKEDPATH)),)
         MAKEDEPSPROG := $(CURDIR)/$(strip $(MAKEDPATH))/make.d.pl
     else
 	ifeq ($(subst ./,,$(dir $(MAKEDPATH))),)
@@ -295,7 +295,7 @@ ifneq (exists, $(shell if [ -f $(MAKEDEPSPROG) ] ; then echo 'exists' ; fi))
 endif
 
 ifeq ($(findstring //,/$(strip $(SRCPATH))),)
-    ifeq ($(findstring /.,/$(strip $(SRCPATH))),)
+    ifeq ($(findstring '/.',/$(strip $(SRCPATH))),)
         SOURCEPATH := $(CURDIR)/$(strip $(SRCPATH))
     else
 	ifeq ($(subst ./,,$(dir $(SRCPATH))),)
