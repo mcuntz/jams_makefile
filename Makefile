@@ -55,7 +55,7 @@
 #                       gnu, gfortran, gcc, gfortran42, gcc42=gnu42 for mcpowerbook
 #                       nag=nag52 nag53
 #                     On Jule's MacBook Pro
-#                       gfortran
+#                       gnu, gfortran, gcc, gfortran46=gcc46
 #         openmp      true, [anything else]
 #
 # DEPENDENCIES
@@ -97,11 +97,11 @@ SHELL = /bin/bash
 
 # . is current directory, .. is parent directory
 #SRCPATH    := .          # where are the source files; use test_??? to run a test directory
-SRCPATH    := /Users/mai/Documents/FORTRAN_chs_lib/test/test_mo_ncread   #test_standard
+SRCPATH    := ../FORTRAN_chs_lib/test/test_mo_julian #test_standard
 PROGPATH   := .           # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
-TESTPATH   := /Users/mai/Documents/FORTRAN_chs_lib/test
+TESTPATH   := /Users/cuntz/prog/chs-svn/FORTRAN_chs_lib/test
 #
 PROGNAME := Prog # Name of executable
 #
@@ -112,7 +112,7 @@ endif
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro
-system   := jmmacbookpro
+system   := mcimac
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
@@ -133,7 +133,7 @@ compiler := gnu
 openmp   :=
 
 # Write out warning/reminder if compiled on Mac OS X. If NOMACWARN=true then no warning is written out: true, [anything else]
-NOMACWARN = no
+NOMACWARN = yes
 
 # This Makefile sets the following variables depending on the above options:
 # FC, FCFLAGS, F90FLAGS, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
@@ -263,7 +263,7 @@ endif
 #
 
 # Make absolute pathes from relative pathes
-ifeq ($(findstring //,/$(PROGPATH)),)       # starts not with /
+ifeq ($(findstring //,/$(PROGPATH:~%=/%)),)         # starts not with / or ~
     ifeq ($(findstring '/.',/$(PROGPATH)),)       # starts not with .
         PROG := $(CURDIR)/$(strip $(PROGPATH))/$(strip $(PROGNAME))
     else                                        # starts with .
@@ -274,10 +274,10 @@ ifeq ($(findstring //,/$(PROGPATH)),)       # starts not with /
         endif
     endif
 else                                            # starts with /
-    PROG := $(strip $(PROGPATH))/$(strip $(PROGNAME))
+    PROG := $(strip $(PROGPATH:~%=${HOME}%))/$(strip $(PROGNAME))
 endif
 
-ifeq ($(findstring //,/$(MAKEDPATH)),)
+ifeq ($(findstring //,/$(MAKEDPATH:~%=/%)),)
     ifeq ($(findstring '/.',/$(MAKEDPATH)),)
         MAKEDEPSPROG := $(CURDIR)/$(strip $(MAKEDPATH))/make.d.pl
     else
@@ -288,13 +288,13 @@ ifeq ($(findstring //,/$(MAKEDPATH)),)
         endif
     endif
 else
-    MAKEDEPSPROG := $(strip $(MAKEDPATH))/make.d.pl
+    MAKEDEPSPROG := $(strip $(MAKEDPATH:~%=${HOME}%))/make.d.pl
 endif
 ifneq (exists, $(shell if [ -f $(MAKEDEPSPROG) ] ; then echo 'exists' ; fi))
     $(error Error: '$(MAKEDEPSPROG)' not found.)
 endif
 
-ifeq ($(findstring //,/$(strip $(SRCPATH))),)
+ifeq ($(findstring //,/$(strip $(SRCPATH:~%=/%))),)
     ifeq ($(findstring '/.',/$(strip $(SRCPATH))),)
         SOURCEPATH := $(CURDIR)/$(strip $(SRCPATH))
     else
@@ -305,7 +305,7 @@ ifeq ($(findstring //,/$(strip $(SRCPATH))),)
         endif
     endif
 else
-    SOURCEPATH := $(strip $(SRCPATH))
+    SOURCEPATH := $(strip $(SRCPATH:~%=${HOME}%))
 endif
 ifneq (exists, $(shell if [ -d "$(SOURCEPATH)" ] ; then echo 'exists' ; fi))
     $(error Error: source path '$(SOURCEPATH)' not found.)
@@ -677,10 +677,12 @@ clean:
 cleanclean: clean
 	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* $(PROG).dSYM
 
-cleantest:
+cleancheck:
 	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
 	    make SRCPATH=$$i cleanclean ; \
 	done
+
+cleantest: cleancheck
 
 check:
 	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
