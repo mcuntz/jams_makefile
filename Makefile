@@ -88,6 +88,7 @@
 #          LAPACK        http://www.netlib.org/lapack/
 #
 # Written Matthias Cuntz & Juliane Mai, UFZ Leipzig, Germany, Aug. 2011 - matthias.cuntz@ufz.de
+# Modified Stephan Thober, May 2012 - fixed openmp bug
 
 SHELL = /bin/bash
 
@@ -120,11 +121,11 @@ netcdf   :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
-proj     :=
+proj     := true
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
-imsl     :=
+imsl     := 
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
-mkl      :=
+mkl      := mkl
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   := 
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
@@ -355,6 +356,11 @@ else
     else
         LIBS += -Bdynamic
     endif
+endif
+#
+# check for openmp flag before including configuration files
+ifeq ($(openmp),true)
+    iopenmp = -openmp
 endif
 
 # Include the individual configuration files
