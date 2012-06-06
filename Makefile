@@ -98,22 +98,16 @@ SHELL = /bin/bash
 
 # . is current directory, .. is parent directory
 SRCPATH    := .          # where are the source files; use test_??? to run a test directory
-#SRCPATH    := ../FORTRAN_chs_lib/test/test_mo_julian #test_standard
 PROGPATH   := .           # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
-TESTPATH   := /Users/cuntz/prog/chs-svn/FORTRAN_chs_lib/test
+TESTPATH   := .
 #
-PROGNAME := Prog # Name of executable
-#
-# check f77 files
-ifeq (,$(wildcard $(SRCPATH)/*.f90) $(wildcard $(SRCPATH)/*.for) $(wildcard $(SRCPATH)/*.f))
-        $(error Error: no fortran files in source path: $(SRCPATH))
-endif
+PROGNAME := mhm # Name of executable
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro
-system   := gdmacbookpro
+system   := eve
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
@@ -121,20 +115,20 @@ netcdf   :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
-proj     := true
+proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
-imsl     := 
+imsl     := imsl
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
-mkl      := mkl
+mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   := 
+lapack   := true 
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := gnu46
+compiler  := intel11
 # OpenMP parallelization: true, [anything else]
-openmp   :=
+openmp   := true
 
 # Write out warning/reminder if compiled on Mac OS X. If NOMACWARN=true then no warning is written out: true, [anything else]
-NOMACWARN = yes
+NOMACWARN = no
 
 # This Makefile sets the following variables depending on the above options:
 # FC, FCFLAGS, F90FLAGS, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
@@ -147,6 +141,7 @@ EXTRA_DEFINES  :=
 EXTRA_INCLUDES :=
 EXTRA_LDFLAGS  :=
 EXTRA_LIBS     :=
+EXTRA_CFLAGS   :=
 
 #
 # --- ALIASES ---------------------------------------------------
@@ -332,6 +327,8 @@ FC       :=
 FCFLAGS  := $(EXTRA_FCFLAGS)
 F90      :=
 F90FLAGS := $(EXTRA_F90FLAGS)
+CC       :=
+CFLAGS   := $(EXTRA_CFLAGS)
 DEFINES  := $(EXTRA_DEFINES)
 INCLUDES := $(EXTRA_INCLUDES)
 # and link, and therefore set below
@@ -601,6 +598,17 @@ FOBJS     := $(addprefix $(OBJPATH)/, $(OFAOBJS))
 FDOBJS    := $(FOBJS:.o=.d)
 GFASRCS   := $(FASRCS:.f=.g90)
 
+# ASRCS contain source dir informations
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleantest))
+CASRCS     := $(wildcard $(SOURCEPATH)/*.c)
+endif
+CSRCS      := $(notdir $(CASRCS))
+CAOBJS     := $(CSRCS:.c=.o)
+CEXCL      :=
+COAOBJS    := $(filter-out $(CEXCL), $(CAOBJS))
+COBJS      := $(addprefix $(OBJPATH)/, $(COAOBJS))
+CDOBJS     := $(COBJS:.o=.d)
+
 # The Absoft compiler needs that ABSOFT is set to the Absoft base path
 ifneq ($(ABSOFT),)
     export ABSOFT
@@ -634,8 +642,8 @@ all: $(PROG)
         endif
 
 # Link Program
-$(PROG): $(DOBJS) $(FORDOBJS) $(FDOBJS) $(OBJS) $(FOROBJS) $(FOBJS)
-	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(LIBS)
+$(PROG): $(DOBJS) $(FORDOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS)
+	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS) $(LIBS)
 
 # Get Dependencies
 $(DOBJS): $(OBJPATH)/%.d: $(SOURCEPATH)/%.f90
@@ -650,6 +658,10 @@ $(FORDOBJS): $(OBJPATH)/%.d: $(SOURCEPATH)/%.for
 $(FDOBJS): $(OBJPATH)/%.d: $(SOURCEPATH)/%.f
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	$(MAKEDEPSPROG) $< "$(OBJPATH)" "$(SOURCEPATH)"
+
+$(CDOBJS): $(OBJPATH)/%.d: $(SOURCEPATH)/%.c
+	@dirname $@ | xargs mkdir -p 2>/dev/null
+	gcc $(DEFINES) -M $< | sed "s|$(notdir $(<:.c=.o)):|$(OBJPATH)/$(notdir $(<:.c=.o)):|" > $@
 
 # Compile Objects
 $(OBJS): $(OBJPATH)/%.o: $(SOURCEPATH)/%.f90
@@ -679,9 +691,12 @@ else
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $< -o $@
 endif
 
+$(COBJS): $(OBJPATH)/%.o: $(SOURCEPATH)/%.c
+	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $< -o $@
+
 # Helper Targets
 clean:
-	rm -f $(DOBJS) $(FORDOBJS) $(FDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) "$(OBJPATH)"/*.mod "$(PROG)"
+	rm -f $(DOBJS) $(FORDOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS) "$(OBJPATH)"/*.mod "$(PROG)"
 	rm -f $(GASRCS) $(GFORASRCS) $(GFASRCS)
         ifneq (,$(findstring $(SOURCEPATH),test_netcdf_imsl_proj))
 	    @if [ -f $(SOURCEPATH)/test.nc ] ; then rm $(SOURCEPATH)/test.nc ; fi
