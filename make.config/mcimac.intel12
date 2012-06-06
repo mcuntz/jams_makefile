@@ -19,17 +19,21 @@ INTELBIN := $(INTEL)/bin/intel64
 # Compiling
 F90 := $(INTELBIN)/ifort
 FC  := $(F90)
+CC  := $(INTELBIN)/icc
 ifeq ($(release),debug)
-    F90FLAGS := -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
-    FCFLAGS  := -g -debug -traceback -fp-stack-check -O0 -debug
+    F90FLAGS += -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
+    FCFLAGS  += -g -debug -traceback -fp-stack-check -O0 -debug
+    CFLAGS   += -g -debug -traceback -fp-stack-check -O0 -debug -Wall -Wcheck
 else
     # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
-    F90FLAGS := $(opti) -vec-report0 -override-limits
-    FCFLAGS  := $(opti) -vec-report0 -override-limits
+    F90FLAGS += $(opti) -vec-report0 -override-limits
+    FCFLAGS  += $(opti) -vec-report0 -override-limits
+    CFLAGS   += $(opti)
 endif
 F90FLAGS += -assume byterecl -cpp -fp-model precise $(iopenmp) -m64 -module "$(OBJPATH)"
 FCFLAGS  += -assume byterecl -cpp -fp-model precise $(iopenmp) -m64 -module "$(OBJPATH)" -fixed
-DEFINES  += -DINTEL
+CFLAGS   += $(iopenmp) -m64 -std=c99
+DEFINES  += -DINTEL -DINTEL_COMPILER
 
 # Linking
 ifeq ($(istatic),static)

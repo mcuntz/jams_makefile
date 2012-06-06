@@ -15,19 +15,26 @@ NAGDIR := /usr
 NAGLIB := $(NAGDIR)/lib
 NAGBIN := $(NAGDIR)/bin
 
+GNUDIR := /usr/local
+GNULIB := $(GNUDIR)/lib
+GNUBIN := $(GNUDIR)/bin
+
 # Compiling
 F90 := $(NAGBIN)/f95
 FC  := $(F90)
+CC  := $(GNUBIN)/gcc
 ifeq ($(release),debug)
-    F90FLAGS := -C=all -g -gline -nan -O0 -strict95
-    FCFLAGS  := $(F90FLAGS)
+    F90FLAGS += -C=all -g -gline -nan -O0 -strict95
+    FCFLAGS  += $(F90FLAGS)
+    CFLAGS   += -pedantic-errors -Wall -W -O -g
 else
-    F90FLAGS := -O3
-    FCFLAGS  := $(F90FLAGS)
+    F90FLAGS += -O3
+    FCFLAGS  += $(F90FLAGS)
+    CFLAGS   += -O3
 endif
 # -mismatch-all
 F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=full
-DEFINES  += -DNAG
+DEFINES  += -DNAG -DgFortran
 
 # Linking
 LIBS += -L$(NAGLIB)

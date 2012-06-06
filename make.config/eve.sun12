@@ -18,13 +18,17 @@ SUNBIN := $(SUNDIR)/bin
 # Compiling
 F90 := $(SUNBIN)/f90
 FC  := $(F90)
+CC  := $(SUNBIN)/icc
 ifeq ($(release),debug)
-    F90FLAGS := -fPIC -xtarget=generic -m64 -xarch=sse4_2 -g -xcheck=%all -C -u
+    F90FLAGS += -fPIC -xtarget=generic -m64 -xarch=sse4_2 -g -xcheck=%all -C -u
+    CFLAGS   += -fPIC -xtarget=generic -m64 -xarch=sse4_2 -g -xcheck=%all -C -u
 else
-    F90FLAGS  := -fPIC -fast -xtarget=generic -m64 -xarch=sse4_2
+    F90FLAGS  += -fPIC -fast -xtarget=generic -m64 -xarch=sse4_2
+    CFLAGS    += -fPIC -fast -xtarget=generic -m64 -xarch=sse4_2
 endif
 F90FLAGS += -fpp -I$(OBJPATH) -M$(OBJPATH) -moddir=$(OBJPATH)
-FCFLAGS  := $(F90FLAGS) -fixed-form -xlang=f77
+FCFLAGS  += $(F90FLAGS) -fixed-form -xlang=f77
+CFLAGS   += -I$(OBJPATH)
 DEFINES  += -DSUN
 
 # Linking

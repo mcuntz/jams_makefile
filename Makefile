@@ -97,17 +97,17 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := .          # where are the source files; use test_??? to run a test directory
+SRCPATH    := test_cfortran          # where are the source files; use test_??? to run a test directory
 PROGPATH   := .           # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
 TESTPATH   := .
 #
-PROGNAME := mhm # Name of executable
+PROGNAME := Prog # Name of executable
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro
-system   := eve
+system   := mcair
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
@@ -117,15 +117,15 @@ static   := shared
 # Proj4 (Cartographic Projections Library): true, [anything else]
 proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
-imsl     := imsl
+imsl     :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   := true 
+lapack   :=
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler  := intel11
+compiler := gnu
 # OpenMP parallelization: true, [anything else]
-openmp   := true
+openmp   :=
 
 # Write out warning/reminder if compiled on Mac OS X. If NOMACWARN=true then no warning is written out: true, [anything else]
 NOMACWARN = no
@@ -329,7 +329,7 @@ F90      :=
 F90FLAGS := $(EXTRA_F90FLAGS)
 CC       :=
 CFLAGS   := $(EXTRA_CFLAGS)
-DEFINES  := $(EXTRA_DEFINES)
+DEFINES  := $(EXTRA_DEFINES) -DCFORTRAN
 INCLUDES := $(EXTRA_INCLUDES)
 # and link, and therefore set below
 LD       :=
@@ -354,7 +354,7 @@ else
         LIBS += -Bdynamic
     endif
 endif
-#
+
 # check for openmp flag before including configuration files
 ifeq ($(openmp),true)
     iopenmp = -openmp
@@ -366,6 +366,9 @@ ifneq (exists, $(shell if [ -f $(MAKEINC) ] ; then echo 'exists' ; fi))
     $(error Error: '$(MAKEINC)' not found.)
 endif
 include $(MAKEINC)
+
+# Always use -DCFORTRAN for mixed C and Fortran compilations
+DEFINES  += -DCFORTRAN
 
 # --- COMPILER ---------------------------------------------------
 ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))

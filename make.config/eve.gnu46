@@ -18,20 +18,23 @@ GNUBIN := $(GNUDIR)/bin
 # Compiling
 F90 := $(GNUBIN)/gfortran
 FC  := $(F90)
+CC  := $(GNUBIN)/gcc
 # GNU Fortran version >= 4.4
 ifeq ($(release),debug)
-    F90FLAGS := -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
-    FCFLAGS  := -pedantic-errors -ffixed-form -ffixed-line-length-132 -Wall -W -O -g
+    F90FLAGS += -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
+    FCFLAGS  += -pedantic-errors -ffixed-form -ffixed-line-length-132 -Wall -W -O -g
+    CFLAGS   += -pedantic-errors -Wall -W -O -g
 else
-    F90FLAGS := -O3
-    FCFLAGS  := -ffixed-form -O3
+    F90FLAGS += -O3
+    FCFLAGS  += -ffixed-form -O3
+    CFLAGS   += -O3
 endif
 F90FLAGS += -cpp -J$(OBJPATH)
-DEFINES  += -DGFORTRAN
-LDPATH   := /usr/local/gmp/5.0.2/lib:/usr/local/mpfr/3.0.1/lib:/usr/local/mpc/0.9/lib
+DEFINES  += -DGFORTRAN -DgFortran
+LDPATH   += /usr/local/gmp/5.0.2/lib:/usr/local/mpfr/3.0.1/lib:/usr/local/mpc/0.9/lib
 
 # Linking
-LIBS += -L$(GNULIB)
+LIBS  += -L$(GNULIB)
 RPATH += -Wl,-rpath,$(GNULIB)
 
 # IMSL
