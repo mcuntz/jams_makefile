@@ -9,7 +9,7 @@
 #     Variables can be set on the command line [VAR=VAR] or in the SWITCHES section in this file.
 #
 # INPUTS
-#     targets    all (default), check (=test), clean, cleanclean, cleantest
+#     targets    all (default), check (=test), clean, cleanclean, cleancheck (=cleantest), html
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'.
@@ -88,7 +88,6 @@
 #          LAPACK        http://www.netlib.org/lapack/
 #
 # Written Matthias Cuntz & Juliane Mai, UFZ Leipzig, Germany, Aug. 2011 - matthias.cuntz@ufz.de
-# Modified Stephan Thober, May 2012 - fixed openmp bug
 
 SHELL = /bin/bash
 
@@ -560,7 +559,7 @@ endif
 LD := $(F90)
 
 # ASRCS contain source dir informations
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleantest))
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleancheck cleantest html))
 ASRCS     := $(wildcard $(SOURCEPATH)/*.f90)
 endif
 # SRCS without dir
@@ -579,7 +578,7 @@ DOBJS     := $(OBJS:.o=.d)
 GASRCS    := $(ASRCS:.f90=.g90)
 
 # Same for Fortran77 files with ending .for
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleantest))
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleancheck cleantest html))
 FORASRCS  := $(wildcard $(SOURCEPATH)/*.for)
 endif
 FORSRCS   := $(notdir $(FORASRCS))
@@ -590,7 +589,7 @@ FOROBJS   := $(addprefix $(OBJPATH)/, $(OFORAOBJS))
 FORDOBJS  := $(FOROBJS:.o=.d)
 GFORASRCS := $(FORASRCS:.for=.g90)
 # Same for Fortran77 files with ending .f
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleantest))
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleancheck cleantest html))
 FASRCS    := $(wildcard $(SOURCEPATH)/*.f)
 endif
 FSRCS     := $(notdir $(FASRCS))
@@ -602,7 +601,7 @@ FDOBJS    := $(FOBJS:.o=.d)
 GFASRCS   := $(FASRCS:.f=.g90)
 
 # ASRCS contain source dir informations
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleantest))
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleancheck cleantest html))
 CASRCS     := $(wildcard $(SOURCEPATH)/*.c)
 endif
 CSRCS      := $(notdir $(CASRCS))
@@ -625,7 +624,7 @@ endif
 # --- TARGETS ---------------------------------------------------
 #
 
-.PHONY: clean cleanclean cleantest
+.PHONY: clean cleanclean cleantest cleancheck html
 
 # target for executables
 all: $(PROG)
@@ -707,7 +706,7 @@ clean:
 	@if [ -f $(strip $(PROGPATH))/"Test.nc" ] ; then rm $(strip $(PROGPATH))/"Test.nc" ; fi
 
 cleanclean: clean
-	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* $(PROG).dSYM
+	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* $(PROG).dSYM $(strip $(PROGPATH))/html
 
 cleancheck:
 	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
@@ -733,7 +732,10 @@ check:
 
 test: check
 
+html:
+	$(strip $(CONFIGPATH))/f2html -f $(strip $(CONFIGPATH))/f2html.fgenrc -d $(strip $(PROGPATH))/html $(SOURCEPATH)
+
 # All dependencies create by perl script make.d.pl
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),clean cleanclean cleantest))
+ifeq (,$(findstring $(strip $(MAKECMDGOALS)),clean cleanclean cleancheck cleantest html))
 -include $(DOBJS) $(FORDOBJS) $(FDOBJS)
 endif
