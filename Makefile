@@ -96,7 +96,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test_cfortran          # where are the source files; use test_??? to run a test directory
+SRCPATH    := test_cfortran         # where are the source files; use test_??? to run a test directory
 PROGPATH   := .           # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
@@ -106,9 +106,9 @@ PROGNAME := Prog # Name of executable
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro
-system   := mcair
+system   := stdesk
 # Releases: debug, release
-release  := release
+release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
 netcdf   := 
 # Linking: static, shared, dynamic (last two are equal)
@@ -122,7 +122,7 @@ mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := gnu
+compiler := intel12
 # OpenMP parallelization: true, [anything else]
 openmp   :=
 
@@ -220,14 +220,19 @@ ifeq ($(system),gdmacbookpro)
 #        icompiler := nag53
 #    endif
 endif
+ifeq ($(system),stdesk)
+    ifneq (,$(findstring $(compiler),intel12))
+        icompiler := intel12
+    endif
+endif
 
 #
 # --- CHECKS ---------------------------------------------------
 #
 
 # Check some dependices, e.g. IMSL needs intel11 on eve
-ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
-    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro')
+ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk))
+    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk')
 endif
 
 ifeq (,$(findstring $(release),debug release))
