@@ -1,0 +1,74 @@
+# -*- Makefile -*-
+
+#
+# Setup file for Intel compiler 12 on Stephan Thober Ubuntu laptop
+#
+
+# The Makefile assumes the standard bin, include and lib directories
+# i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# Define subirectories if another structure
+
+# Paths
+INTEL    := /opt/intel/composer_xe_2011_sp1.10.319
+INTELDIR := $(INTEL)/compiler
+INTELLIB := $(INTELDIR)/lib/ia32
+INTELBIN := $(INTEL)/bin/ia32
+
+# Compiling
+F90 := $(INTELBIN)/ifort
+FC  := $(F90)
+CC  := $(INTELBIN)/icc
+ifeq ($(release),debug)
+    F90FLAGS += -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
+    FCFLAGS  += -g -debug -traceback -fp-stack-check -O0 -debug
+    CFLAGS   += -g -debug -traceback -fp-stack-check -O0 -debug -Wall -Wcheck
+else
+    # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
+    F90FLAGS += $(opti) -vec-report0 -override-limits
+    FCFLAGS  += $(opti) -vec-report0 -override-limits
+    CFLAGS   += $(opti)
+endif
+F90FLAGS += -assume byterecl -cpp -fp-model precise $(iopenmp) -module "$(OBJPATH)"
+FCFLAGS  += -assume byterecl -cpp -fp-model precise $(iopenmp) -module "$(OBJPATH)" -fixed
+CFLAGS   += $(iopenmp) -std=c99
+DEFINES  += -DINTEL -DINTEL_COMPILER
+
+# Linking
+ifeq ($(istatic),static)
+    LIBS += -static-intel
+endif
+LIBS += -L$(INTELLIB) -limf -lm -lsvml
+ifneq ($(istatic),static)
+     LIBS += -lintlc
+endif
+RPATH += -Wl,-rpath,$(INTELLIB)
+
+# IMSL
+IMSLDIR :=
+
+# MKL
+MKLDIR := $(INTEL)/mkl
+MKLINC := $(MKLDIR)/include/ia32
+MKLLIB := $(MKLDIR)/lib/ia32
+MKL95DIR := $(MKLDIR)
+MKL95INC := $(MKL95DIR)/include/ia32
+MKL95LIB := $(MKL95DIR)/lib/ia32
+
+# NETCDF
+ifeq ($(netcdf),netcdf4)
+    NCDIR   := /opt/self-build
+#    SZLIB   := /usr/local/szip/2.1/lib
+    HDF5LIB := /opt/self-build/lib
+endif
+
+# PROJs
+PROJ4DIR := 
+FPROJDIR := 
+
+# LAPACK
+LAPACKDIR   := 
+LAPACKLIB   := 
+GFORTRANDIR :=
+GFORTRANLIB := 

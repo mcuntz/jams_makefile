@@ -56,6 +56,10 @@
 #                       nag=nag52 nag53
 #                     On Jule's MacBook Pro
 #                       gnu, gfortran, gcc, gfortran46=gcc46
+#                     On Stephan's Desktop
+#                       ifort=intel12
+#                     On Stephan's Laptop
+#                       ifort=intel12
 #         openmp      true, [anything else]
 #
 # DEPENDENCIES
@@ -105,7 +109,7 @@ TESTPATH   := .
 PROGNAME := Prog # Name of executable
 #
 # Options
-# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro
+# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu
 system   := stdesk
 # Releases: debug, release
 release  := debug
@@ -225,14 +229,19 @@ ifeq ($(system),stdesk)
         icompiler := intel12
     endif
 endif
+ifeq ($(system),stubuntu)
+    ifneq (,$(findstring $(compiler),intel12))
+        icompiler := intel12
+    endif
+endif
 
 #
 # --- CHECKS ---------------------------------------------------
 #
 
 # Check some dependices, e.g. IMSL needs intel11 on eve
-ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk))
-    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk')
+ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu))
+    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu')
 endif
 
 ifeq (,$(findstring $(release),debug release))
