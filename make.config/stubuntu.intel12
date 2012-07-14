@@ -59,7 +59,7 @@ MKL95LIB := $(MKL95DIR)/lib/ia32
 # NETCDF
 ifeq ($(netcdf),netcdf4)
     NCDIR   := /opt/self-build
-#    SZLIB   := /usr/local/szip/2.1/lib
+    SZLIB   := /usr/local
     HDF5LIB := /opt/self-build/lib
 endif
 
