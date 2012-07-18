@@ -6,8 +6,26 @@
 # To run make.d.pl, it will be necessary to modify the first line of 
 # this script to point to the actual location of Perl on your system.
 #
+# LICENSE
+#    This file is part of the UFZ makefile project.
+#
+#    The UFZ makefile project is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    The UFZ makefile project is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with the UFZ makefile project. If not, see <http://www.gnu.org/licenses/>.
+#
+#    Copyright 2010-2012 Matthias Cuntz
+#
 # Matthias Cuntz, Sep. 2010
-# Modified from Uwe Schulzweida's createMakefiles.pl for Echam4
+# Modified from Uwe Schulzweida''s createMakefiles.pl for Echam4
 #
 $PROG=`basename "$0"`;
 #
