@@ -125,26 +125,27 @@ MAKEDPATH  := make.config # where is the make.d.pl script
 TESTPATH   := .
 #
 PROGNAME := Prog # Name of executable
+LIBNAME  := #libminpack.a # Name of library
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu
-system   := stdesk
+system   := mcair
 # Releases: debug, release
 release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
 netcdf   := 
 # Linking: static, shared, dynamic (last two are equal)
-static   := shared
+static   := dynamic
 # Proj4 (Cartographic Projections Library): true, [anything else]
 proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
-imsl     :=
+imsl     := imsl
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := intel12
+compiler := gfortran
 # OpenMP parallelization: true, [anything else]
 openmp   :=
 
@@ -298,18 +299,56 @@ endif
 #
 
 # Make absolute pathes from relative pathes
-ifeq ($(findstring //,/$(PROGPATH:~%=/%)),)         # starts not with / or ~
-    ifeq ($(findstring '/.',/$(PROGPATH)),)       # starts not with .
-        PROG := $(CURDIR)/$(strip $(PROGPATH))/$(strip $(PROGNAME))
-    else                                        # starts with .
-	ifeq ($(subst ./,,$(dir $(PROGPATH))),) # is just .
-            PROG := $(CURDIR)/$(strip $(PROGNAME))
-        else                                    # is ./etc
-            PROG := $(CURDIR)/$(strip $(subst ./,,$(dir $(PROGPATH))))/$(strip $(PROGNAME))
+ifeq (,$(strip $(PROGNAME)))
+    PROG :=
+else
+    ifeq ($(findstring //,/$(PROGPATH:~%=/%)),)         # starts not with / or ~
+        ifeq ($(findstring '/.',/$(PROGPATH)),)       # starts not with .
+            PROG := $(CURDIR)/$(strip $(PROGPATH))/$(strip $(PROGNAME))
+        else                                        # starts with .
+        ifeq ($(subst ./,,$(dir $(PROGPATH))),) # is just .
+                PROG := $(CURDIR)/$(strip $(PROGNAME))
+            else                                    # is ./etc
+                PROG := $(CURDIR)/$(strip $(subst ./,,$(dir $(PROGPATH))))/$(strip $(PROGNAME))
+            endif
         endif
+    else                                            # starts with /
+        PROG := $(strip $(PROGPATH:~%=${HOME}%))/$(strip $(PROGNAME))
     endif
-else                                            # starts with /
-    PROG := $(strip $(PROGPATH:~%=${HOME}%))/$(strip $(PROGNAME))
+endif
+
+# Make absolute pathes from relative pathes
+ifeq (,$(strip $(LIBNAME)))
+    LIB :=
+else
+    ifeq ($(findstring //,/$(LIBPATH:~%=/%)),)         # starts not with / or ~
+        ifeq ($(findstring '/.',/$(LIBPATH)),)       # starts not with .
+            LIB := $(CURDIR)/$(strip $(LIBPATH))/$(strip $(LIBNAME))
+        else                                        # starts with .
+        ifeq ($(subst ./,,$(dir $(LIBPATH))),) # is just .
+                LIB := $(CURDIR)/$(strip $(LIBNAME))
+            else                                    # is ./etc
+                LIB := $(CURDIR)/$(strip $(subst ./,,$(dir $(LIBPATH))))/$(strip $(LIBNAME))
+            endif
+        endif
+    else                                            # starts with /
+        LIB := $(strip $(LIBPATH:~%=${HOME}%))/$(strip $(LIBNAME))
+    endif
+endif
+
+# Only Prog or Lib
+ifeq (,$(strip $(PROG)))
+    ifeq (,$(strip $(LIB)))
+        $(error Error: PROGNAME or LIBNAME must be given.)
+    else
+        islib := True
+    endif
+else
+    ifeq (,$(strip $(LIB)))
+        islib := False
+    else
+        $(error Error: only one of PROGNAME or LIBNAME can be given.)
+    endif
 endif
 
 ifeq ($(findstring //,/$(MAKEDPATH:~%=/%)),)
@@ -365,7 +404,10 @@ INCLUDES := $(EXTRA_INCLUDES)
 # and link, and therefore set below
 LD       :=
 LDFLAGS  := $(EXTRA_LDFLAGS)
-LIBS     := $(EXTRA_LIBS)
+LIBS     := $(EXTRA_LIBS) -L$(SOURCEPATH)
+AR       := ar
+ARFLAGS  := -ru
+RANLIB   := ranlib
 
 #
 # --- COMPILER / MACHINE SPECIFIC --------------------------------
@@ -429,17 +471,26 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     IMSLLIB ?= $(IMSLDIR)/lib
 
     INCLUDES += -I$(IMSLINC)
+ifneq ($(ABSOFT),)
+    INCLUDES += -p $(IMSLINC)
+endif
     DEFINES  += -DIMSL
 
-    LIBS     += -z muldefs
-    ifneq ($(istatic),static)
-       LIBS += -i_dynamic
+    ifeq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
+        LIBS     += -z muldefs
+        ifneq ($(istatic),static)
+            LIBS += -i_dynamic
+        endif
     endif
 
-    ifeq ($(imsl),imsl)
-        LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu
+    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
+        LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
     else
-        LIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
+        ifeq ($(imsl),imsl)
+            LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu
+        else
+            LIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
+        endif
     endif
     RPATH += -Wl,-rpath,$(IMSLLIB)
 endif
@@ -454,13 +505,16 @@ ifneq (,$(findstring $(mkl),mkl mkl95))
         MKL95LIB ?= $(MKL95DIR)/lib
 
         INCLUDES += -I$(MKL95INC)
+ifneq ($(ABSOFT),)
+        INCLUDES += -p $(MKL95INC)
+endif
         DEFINES  += -DMKL95
 
         LIBS  += -L$(MKL95LIB) -lmkl_blas95_lp64 -lmkl_lapack95_lp64
         RPATH += -Wl,-rpath,$(MKL95LIB)
-        ifneq ($(ABSOFT),)
-            F90FLAGS += -p $(MKL95INC)
-        endif
+ifneq ($(ABSOFT),)
+        F90FLAGS += -p $(MKL95INC)
+endif
     endif
 
     ifneq (exists, $(shell if [ -d "$(MKLDIR)" ] ; then echo 'exists' ; fi))
@@ -470,6 +524,9 @@ ifneq (,$(findstring $(mkl),mkl mkl95))
     MKLLIB ?= $(MKLDIR)/lib
 
     INCLUDES += -I$(MKLINC)
+ifneq ($(ABSOFT),)
+    INCLUDES += -p $(MKLINC)
+endif
     DEFINES  += -DMKL
 
     LIBS += -L$(MKLLIB) -lmkl_intel_lp64 -lmkl_core #-lpthread
@@ -494,6 +551,9 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
     NCLIB ?= $(strip $(NCDIR))/lib
 
     INCLUDES += -I$(NCINC)
+ifneq ($(ABSOFT),)
+    INCLUDES += -p $(NCINC)
+endif
     DEFINES  += -DNETCDF
 
     LIBS  += -L$(NCLIB)
@@ -530,6 +590,9 @@ ifeq ($(proj),true)
     FPROJLIB ?= $(FPROJDIR)/lib
 
     INCLUDES += -I$(FPROJINC)
+ifneq ($(ABSOFT),)
+    INCLUDES += -p $(FPROJINC)
+endif
     DEFINES  += -DFPROJ
     LIBS     += -L$(FPROJLIB) -lfproj4 $(FPROJLIB)/proj4.o
     RPATH    += -Wl,-rpath,$(FPROJLIB)
@@ -590,8 +653,18 @@ endif
 
 LD := $(F90)
 
+iphony    := False
+iphonyall := False
+ifneq (,$(strip $(MAKECMDGOALS)))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ cleancheck/ cleantest/))
+        iphony := True
+    endif
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ cleancheck/ cleantest/ clean/ cleanclean/))
+        iphonyall := True
+    endif
+endif
 # ASRCS contain source dir informations
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleancheck cleantest html))
+ifeq (False,$(iphony))
 ASRCS     := $(wildcard $(SOURCEPATH)/*.f90)
 endif
 # SRCS without dir
@@ -610,7 +683,7 @@ DOBJS     := $(OBJS:.o=.d)
 GASRCS    := $(ASRCS:.f90=.g90)
 
 # Same for Fortran77 files with ending .for
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleancheck cleantest html))
+ifeq (False,$(iphony))
 FORASRCS  := $(wildcard $(SOURCEPATH)/*.for)
 endif
 FORSRCS   := $(notdir $(FORASRCS))
@@ -620,8 +693,9 @@ OFORAOBJS := $(filter-out $(FOREXCL), $(FORAOBJS))
 FOROBJS   := $(addprefix $(OBJPATH)/, $(OFORAOBJS))
 FORDOBJS  := $(FOROBJS:.o=.d)
 GFORASRCS := $(FORASRCS:.for=.g90)
+
 # Same for Fortran77 files with ending .f
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleancheck cleantest html))
+ifeq (False,$(iphony))
 FASRCS    := $(wildcard $(SOURCEPATH)/*.f)
 endif
 FSRCS     := $(notdir $(FASRCS))
@@ -632,8 +706,8 @@ FOBJS     := $(addprefix $(OBJPATH)/, $(OFAOBJS))
 FDOBJS    := $(FOBJS:.o=.d)
 GFASRCS   := $(FASRCS:.f=.g90)
 
-# ASRCS contain source dir informations
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),check test clean cleanclean cleancheck cleantest html))
+# Same for C files with ending .c
+ifeq (False,$(iphony))
 CASRCS     := $(wildcard $(SOURCEPATH)/*.c)
 endif
 CSRCS      := $(notdir $(CASRCS))
@@ -642,6 +716,28 @@ CEXCL      :=
 COAOBJS    := $(filter-out $(CEXCL), $(CAOBJS))
 COBJS      := $(addprefix $(OBJPATH)/, $(COAOBJS))
 CDOBJS     := $(COBJS:.o=.d)
+
+# Static libraries in source path
+ifeq (False,$(iphony))
+LAASRCS     := $(wildcard $(SOURCEPATH)/*.a)
+endif
+LASRCS      := $(notdir $(LAASRCS))
+LAAOBJS     := $(LASRCS:.a=)
+LAEXCL      :=
+LAOAOBJS    := $(filter-out $(LAEXCL), $(LAAOBJS))
+LLAOAOBJS   := $(patsubst lib%, %, $(LAOAOBJS))
+LAOBJS      := $(addprefix -l, $(LLAOAOBJS))
+
+# Dynamic libraries in source path
+ifeq (False,$(iphony))
+LOASRCS     := $(wildcard $(SOURCEPATH)/*.so)
+endif
+LOSRCS      := $(notdir $(LOASRCS))
+LOAOBJS     := $(LOSRCS:.so=)
+LOEXCL      :=
+LOOAOBJS    := $(filter-out $(LOEXCL), $(LOAOBJS))
+LLOOAOBJS   := $(patsubst lib%, %, $(LOOAOBJS))
+LOOBJS      := $(addprefix -l, $(LLOOAOBJS))
 
 # The Absoft compiler needs that ABSOFT is set to the Absoft base path
 ifneq ($(ABSOFT),)
@@ -656,7 +752,7 @@ endif
 # --- TARGETS ---------------------------------------------------
 #
 
-.PHONY: clean cleanclean cleantest cleancheck html
+.PHONY: clean cleanclean cleantest cleancheck html check test
 
 # target for executables
 all: $(PROG)
@@ -676,8 +772,14 @@ all: $(PROG)
         endif
 
 # Link Program
+all: $(PROG) $(LIB)
+
+$(LIB): $(DOBJS) $(FORDOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS)
+	$(AR) $(ARFLAGS) $(LIB) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS)
+	$(RANLIB) $(LIB)
+
 $(PROG): $(DOBJS) $(FORDOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS)
-	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS) $(LIBS)
+	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS) $(LIBS) $(LAOBJS) $(LOOBJS)
 
 # Get Dependencies
 $(DOBJS): $(OBJPATH)/%.d: $(SOURCEPATH)/%.f90
@@ -731,6 +833,9 @@ $(COBJS): $(OBJPATH)/%.o: $(SOURCEPATH)/%.c
 # Helper Targets
 clean:
 	rm -f $(DOBJS) $(FORDOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS) "$(OBJPATH)"/*.mod "$(PROG)"
+ifeq (False,$(islib))
+	rm -f "$(PROG)"
+endif
 	rm -f $(GASRCS) $(GFORASRCS) $(GFASRCS)
         ifneq (,$(findstring $(SOURCEPATH),test_netcdf_imsl_proj))
 	    @if [ -f $(SOURCEPATH)/test.nc ] ; then rm $(SOURCEPATH)/test.nc ; fi
@@ -738,7 +843,10 @@ clean:
 	@if [ -f $(strip $(PROGPATH))/"Test.nc" ] ; then rm $(strip $(PROGPATH))/"Test.nc" ; fi
 
 cleanclean: clean
-	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* $(PROG).dSYM $(strip $(PROGPATH))/html
+	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* "$(PROG)".dSYM $(strip $(PROGPATH))/html
+ifeq (True,$(islib))
+	rm -f "$(LIB)"
+endif
 
 cleancheck:
 	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
@@ -748,8 +856,19 @@ cleancheck:
 cleantest: cleancheck
 
 check:
+ifeq (True,$(islib))
+	$(error Error: check and test must be done with PROGNAME not LIBNAME.)
+endif
 	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
 	    rm -f "$(PROG)" ; \
+	    j=$${i/minpack/maxpack} ; \
+	    if [ $$i != $$j ] ; then \
+	    	 make -s MAKEDPATH=$(MAKEDPATH) SRCPATH="$$i"/../../minpack PROGPATH=$(PROGPATH) \
+	    	      CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=libminpack.a system=$(system) \
+	    	      release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
+	    	      imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
+	    	      openmp=$(openmp) NOMACWARN=true ; \
+	    fi ; \
 	    make -s MAKEDPATH=$(MAKEDPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
 	         CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
 	         release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
@@ -757,9 +876,12 @@ check:
 	         openmp=$(openmp) NOMACWARN=true \
 	    && { $(PROG) 2>&1 | grep -E '(o.k.|failed)' ;} ; status=$$? ; \
 	    if [ $$status != 0 ] ; then \
-	      echo "$$i failed!"; \
+	      echo "$$i failed!" ; \
 	    fi ; \
 	    make -s SRCPATH=$$i cleanclean ; \
+	    if [ $$i != $$j ] ; then \
+	    	 make -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a cleanclean ; \
+	    fi ; \
 	done
 
 test: check
@@ -768,6 +890,6 @@ html:
 	$(strip $(CONFIGPATH))/f2html -f $(strip $(CONFIGPATH))/f2html.fgenrc -d $(strip $(PROGPATH))/html $(SOURCEPATH)
 
 # All dependencies create by perl script make.d.pl
-ifeq (,$(findstring $(strip $(MAKECMDGOALS)),clean cleanclean cleancheck cleantest html))
--include $(DOBJS) $(FORDOBJS) $(FDOBJS)
+ifeq (False,$(iphonyall))
+-include $(DOBJS) $(FORDOBJS) $(FDOBJS) $(CDOBJS)
 endif
