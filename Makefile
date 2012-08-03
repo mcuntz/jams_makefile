@@ -128,7 +128,7 @@ PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
-# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu
+# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz
 system   := mcair
 # Releases: debug, release
 release  := debug
@@ -253,14 +253,18 @@ ifeq ($(system),stubuntu)
         icompiler := intel12
     endif
 endif
-
+ifeq ($(system),stufz)
+    ifneq (,$(findstring $(compiler),intel12))
+        icompiler := intel12
+    endif
+endif
 #
 # --- CHECKS ---------------------------------------------------
 #
 
 # Check some dependices, e.g. IMSL needs intel11 on eve
-ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu))
-    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu')
+ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu stufz))
+    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu stufz')
 endif
 
 ifeq (,$(findstring $(release),debug release))
