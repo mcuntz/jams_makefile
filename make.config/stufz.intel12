@@ -83,5 +83,6 @@ PROJ4DIR := /usr/local/
 FPROJDIR := 
 
 # LAPACK
-LAPACKDIR   := 
+LAPACKDIR   := /usr/lib
+LAPACKLIB   := $(LAPACKDIR)/lapack
 GFORTRANDIR := /usr/local

@@ -118,34 +118,34 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test_cfortran         # where are the source files; use test_??? to run a test directory
+SRCPATH    := F90Files         # where are the source files; use test_??? to run a test directory
 PROGPATH   := .           # where shall be the executable
-CONFIGPATH := make.config # where are the $(system).$(compiler) files
-MAKEDPATH  := make.config # where is the make.d.pl script
+CONFIGPATH := ~/lib/makefile_chs/make.config # where are the $(system).$(compiler) files
+MAKEDPATH  := ~/lib/makefile_chs/make.config # where is the make.d.pl script
 TESTPATH   := .
 #
-PROGNAME := Prog # Name of executable
+PROGNAME := ME # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz
-system   := mcair
+system   := stufz
 # Releases: debug, release
 release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
-netcdf   := 
+netcdf   := netcdf4
 # Linking: static, shared, dynamic (last two are equal)
 static   := dynamic
 # Proj4 (Cartographic Projections Library): true, [anything else]
 proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
-imsl     := imsl
+imsl     :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := gfortran
+compiler := intel12
 # OpenMP parallelization: true, [anything else]
 openmp   :=
 
