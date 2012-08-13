@@ -124,7 +124,7 @@ CONFIGPATH := ~/lib/makefile_chs/make.config # where are the $(system).$(compile
 MAKEDPATH  := ~/lib/makefile_chs/make.config # where is the make.d.pl script
 TESTPATH   := .
 #
-PROGNAME := ME # Name of executable
+PROGNAME := RC # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
@@ -145,7 +145,7 @@ mkl      :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := intel12
+compiler := gnu46
 # OpenMP parallelization: true, [anything else]
 openmp   :=
 
@@ -256,6 +256,9 @@ endif
 ifeq ($(system),stufz)
     ifneq (,$(findstring $(compiler),intel12))
         icompiler := intel12
+    endif
+    ifneq (,$(findstring $(compiler),gnu46 gfortran))
+        icompiler := gnu46
     endif
 endif
 #
