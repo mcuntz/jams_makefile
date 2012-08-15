@@ -687,7 +687,7 @@ OBJS      := $(addprefix $(OBJPATH)/, $(OAOBJS))
 # dependency files with full dir path
 DOBJS     := $(OBJS:.o=.d)
 # g90 debug files of NAG compiler
-GASRCS    := $(ASRCS:.f90=.g90)
+GASRCS    := $(SRCS:.f90=.g90)
 
 # Same for Fortran77 files with ending .for
 ifeq (False,$(iphony))
@@ -699,7 +699,7 @@ FOREXCL   :=
 OFORAOBJS := $(filter-out $(FOREXCL), $(FORAOBJS))
 FOROBJS   := $(addprefix $(OBJPATH)/, $(OFORAOBJS))
 FORDOBJS  := $(FOROBJS:.o=.d)
-GFORASRCS := $(FORASRCS:.for=.g90)
+GFORASRCS := $(FORSRCS:.for=.g90)
 
 # Same for Fortran77 files with ending .f
 ifeq (False,$(iphony))
@@ -711,7 +711,7 @@ FEXCL     :=
 OFAOBJS   := $(filter-out $(FEXCL), $(FAOBJS))
 FOBJS     := $(addprefix $(OBJPATH)/, $(OFAOBJS))
 FDOBJS    := $(FOBJS:.o=.d)
-GFASRCS   := $(FASRCS:.f=.g90)
+GFASRCS   := $(FSRCS:.f=.g90)
 
 # Same for C files with ending .c
 ifeq (False,$(iphony))
