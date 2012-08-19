@@ -9,7 +9,7 @@
 #     Variables can be set on the command line [VAR=VAR] or in the SWITCHES section in this file.
 #
 # INPUTS
-#     targets    all (default), check (=test), clean, cleanclean, cleancheck (=cleantest), html
+#     targets    all (default), check (=test), clean, cleanclean, cleancheck (=cleantest), html, info
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'.
@@ -24,43 +24,7 @@
 #     Variables can be empty for disabling a certain behaviour,
 #     e.g. if you do not want to use IMSL, set:  imsl=no  or  imsl=
 #
-#     Current variables are
-#         system      eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro
-#         release     debug, release
-#         netcdf      netcdf3, netcdf4
-#         static      static, shared, dynamic (last two are equal)
-#         proj        true, [anything else]
-#         imsl        vendor, imsl, [anything else]
-#         mkl         mkl, mkl95, [anything else]
-#         lapack      true, [anything else]
-#         compiler    intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-#                     alternative names are:
-#                     On eve.ufz.de
-#                       gnu, gfortran, gcc=gnu44
-#                       gfortran41, gcc41=gnu41
-#                       gfortran44, gcc44=gnu44
-#                       gfortran45, gcc45=gnu45
-#                       gfortran46, gcc46=gnu46
-#                       intel, ifort, ifort11=intel11
-#                       ifort12=intel12
-#                       sun=sun12
-#                       nag=nag53
-#                     On Matthias' Macbook Air
-#                       gnu, gfortran, gcc, gfortran46, gcc44=gnu46
-#                     On Matthias' iMac
-#                       gnu, gfortran, gcc, gfortran45, gcc44=gnu45
-#                       intel, ifort, ifort12=intel12
-#                       nag=nag52 nag53
-#                     On Matthias' Powerbook
-#                       gnu, gfortran, gcc, gfortran42, gcc42=gnu42 for mcpowerbook
-#                       nag=nag52 nag53
-#                     On Jule's MacBook Pro
-#                       gnu, gfortran, gcc, gfortran46=gcc46
-#                     On Stephan's Desktop
-#                       ifort=intel12
-#                     On Stephan's Laptop
-#                       ifort=intel12
-#         openmp      true, [anything else]
+#     For current main variables see 'make info'.
 #
 # DEPENDENCIES
 #    This make file uses the following files:
@@ -118,36 +82,36 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := F90Files         # where are the source files; use test_??? to run a test directory
+SRCPATH    := test_standard           # where are the source files; use test_??? to run a test directory
 PROGPATH   := .           # where shall be the executable
-CONFIGPATH := ~/lib/makefile_chs/make.config # where are the $(system).$(compiler) files
-MAKEDPATH  := ~/lib/makefile_chs/make.config # where is the make.d.pl script
+CONFIGPATH := make.config # where are the $(system).$(compiler) files
+MAKEDPATH  := make.config # where is the make.d.pl script
 TESTPATH   := .
 #
-PROGNAME := RC # Name of executable
+PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz
-system   := stufz
+system   := mcair
+# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
+compiler := gnu46
 # Releases: debug, release
-release  := debug
+release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
 netcdf   := netcdf4
-# Linking: static, shared, dynamic (last two are equal)
-static   := dynamic
+# LAPACK (Linear Algebra Pack): true, [anything else]
+lapack   :=
+# MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
+mkl      :=
 # Proj4 (Cartographic Projections Library): true, [anything else]
 proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
 imsl     :=
-# MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
-mkl      :=
-# LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   :=
-# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := gnu46
 # OpenMP parallelization: true, [anything else]
 openmp   :=
+# Linking: static, shared, dynamic (last two are equal)
+static   := dynamic
 
 # Write out warning/reminder if compiled on Mac OS X. If NOMACWARN=true then no warning is written out: true, [anything else]
 NOMACWARN = no
@@ -231,17 +195,11 @@ ifeq ($(system),jmmacbookpro)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
         icompiler := gnu46
     endif
-#    ifneq (,$(findstring $(compiler),nag nag52 nag53))
-#        icompiler := nag53
-#    endif
 endif
 ifeq ($(system),gdmacbookpro)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
         icompiler := gnu46
     endif
-#    ifneq (,$(findstring $(compiler),nag nag52 nag53))
-#        icompiler := nag53
-#    endif
 endif
 ifeq ($(system),stdesk)
     ifneq (,$(findstring $(compiler),intel12))
@@ -666,7 +624,7 @@ ifneq (,$(strip $(MAKECMDGOALS)))
     ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ cleancheck/ cleantest/))
         iphony := True
     endif
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ cleancheck/ cleantest/ clean/ cleanclean/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ cleancheck/ cleantest/ info/ clean/ cleanclean/))
         iphonyall := True
     endif
 endif
@@ -759,7 +717,7 @@ endif
 # --- TARGETS ---------------------------------------------------
 #
 
-.PHONY: clean cleanclean cleantest cleancheck html check test
+.PHONY: clean cleanclean cleantest cleancheck html check test info
 
 # target for executables
 all: $(PROG)
@@ -895,6 +853,94 @@ test: check
 
 html:
 	$(strip $(CONFIGPATH))/f2html -f $(strip $(CONFIGPATH))/f2html.fgenrc -d $(strip $(PROGPATH))/html $(SOURCEPATH)
+
+info:
+	@echo "CHS Makefile"
+	@echo ""
+	@echo "Config"
+	@echo "system   = $(system)"
+	@echo "compiler = $(compiler)"
+	@echo "release  = $(release)"
+	@echo "netcdf   = $(netcdf)"
+	@echo "lapack   = $(lapack)"
+	@echo "mkl      = $(mkl)"
+	@echo "proj     = $(proj)"
+	@echo "imsl     = $(imsl)"
+	@echo "openmp   = $(openmp)"
+	@echo "static   = $(static)"
+	@echo ""
+	@echo "Files/Pathes"
+	@echo "SRCPATH    = $(SRCPATH)"
+	@echo "PROGPATH   = $(PROGPATH)"
+	@echo "CONFIGPATH = $(CONFIGPATH)"
+	@echo "MAKEDPATH  = $(MAKEDPATH)"
+	@echo "TESTPATH   = $(TESTPATH)"
+	@echo "PROGNAME   = $(PROGNAME)"
+	@echo "LIBNAME    = $(LIBNAME)"
+	@echo "FILES      = $(SRCS) $(FORSRCS) $(FSRCS) $(CSRCS) $(LASRCS) $(LOSRCS)"
+	@echo ""
+	@echo "Programs/Flags"
+	@echo "FC        = $(FC)"
+	@echo "FCFLAGS   = $(FCFLAGS)"
+	@echo "F90       = $(F90)"
+	@echo "F90FLAGS  = $(F90FLAGS)"
+	@echo "CC        = $(CC)"
+	@echo "CFLAGS    = $(CFLAGS)"
+	@echo "DEFINES   = $(DEFINES)"
+	@echo "INCLUDES  = $(INCLUDES)"
+	@echo "LD        = $(LD)"
+	@echo "LDFLAGS   = $(LDFLAGS)"
+	@echo "LIBS      = $(LIBS)"
+	@echo "AR        = $(AR)"
+	@echo "ARFLAGS   = $(ARFLAGS)"
+	@echo "RANLIB    = $(RANLIB)"
+	@echo ""
+	@echo "Possibilities"
+	@echo "system      $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)"
+	@echo "compiler    $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' | cut -d '.' -f 2 | sort | uniq)"
+	@echo "release     debug release"
+	@echo "netcdf      netcdf3 netcdf4"
+	@echo "lapack      true, [anything else]"
+	@echo "mkl         mkl, mkl95, [anything else]"
+	@echo "proj        true, [anything else]"
+	@echo "imsl        vendor, imsl, [anything else]"
+	@echo "openmp      true, [anything else]"
+	@echo "static      static, shared (=dynamic)"
+	@echo ""
+	@echo "Compiler aliases for current system"
+ifeq ($(system),eve)
+	@echo "gnu, gfortran, gcc=gnu44"
+	@echo "gfortran41, gcc41=gnu41"
+	@echo "gfortran44, gcc44=gnu44"
+	@echo "gfortran45, gcc45=gnu45"
+	@echo "gfortran46, gcc46=gnu46"
+	@echo "intel, ifort, ifort11=intel11"
+	@echo "ifort12=intel12"
+	@echo "sun=sun12"
+	@echo "nag=nag53"
+endif
+ifeq ($(system),mcimac)
+	@echo "gnu, gfortran, gcc, gfortran45, gcc44=gnu45"
+	@echo "intel, ifort, ifort12=intel12"
+	@echo "nag52 nag53=nag"
+endif
+ifeq ($(system),mcpowerbook)
+	@echo "gnu, gfortran, gcc, gfortran42, gcc42=gnu42"
+	@echo "nag52 nag53=nag"
+endif
+ifeq ($(system),mcair)
+	@echo "gnu, gfortran, gcc, gfortran46, gcc44=gnu46"
+	@echo "nag52 nag53=nag"
+endif
+ifeq ($(system),jmmacbookpro)
+	@echo "gnu, gfortran, gcc, gfortran46, gcc46=gnu46"
+endif
+ifeq ($(system),gdmacbookpro)
+	@echo "gnu, gfortran, gcc, gfortran46, gcc46=gnu46"
+endif
+ifeq ($(system),stufz)
+	@echo "gfortran=gnu46"
+endif
 
 # All dependencies create by perl script make.d.pl
 ifeq (False,$(iphonyall))
