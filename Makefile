@@ -137,7 +137,7 @@ EXTRA_CFLAGS   :=
 icompiler := $(compiler)
 ifeq ($(system),eve)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc))
-        icompiler := gnu44
+        icompiler := gnu45
     endif
     ifneq (,$(findstring $(compiler),gfortran41 gcc41))
         icompiler := gnu41
@@ -909,7 +909,7 @@ info:
 	@echo ""
 	@echo "Compiler aliases for current system"
 ifeq ($(system),eve)
-	@echo "gnu, gfortran, gcc=gnu44"
+	@echo "gnu, gfortran, gcc=gnu45"
 	@echo "gfortran41, gcc41=gnu41"
 	@echo "gfortran44, gcc44=gnu44"
 	@echo "gfortran45, gcc45=gnu45"

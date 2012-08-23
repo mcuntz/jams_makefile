@@ -77,7 +77,7 @@ MKL95LIB := $(MKL95DIR)/lib
 ifeq ($(netcdf),netcdf3)
     NCDIR := /opt/lib/netcdf3_intel_static
 else
-    NCDIR   := /usr/local
+    NCDIR := /opt/lib/netcdf4_intel
     CURLLIB := /opt/lib/curl/lib
     SZLIB   := /usr/local
     HDF5LIB := /usr/local
