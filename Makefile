@@ -92,7 +92,7 @@ PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
-# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz
+# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet
 system   := mcair
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
 compiler := gnu46
@@ -219,13 +219,22 @@ ifeq ($(system),stufz)
         icompiler := gnu46
     endif
 endif
+ifeq ($(system),burnet)
+    ifneq (,$(findstring $(compiler),intel ifort ifort11))
+        icompiler := intel11
+    endif
+endif
 #
 # --- CHECKS ---------------------------------------------------
 #
 
-# Check some dependices, e.g. IMSL needs intel11 on eve
-ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu stufz))
-    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu stufz')
+# Check available switches
+ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu stufz burnet))
+    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu stufz burnet')
+endif
+
+ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 nag53 sun12))
+    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 nag53 sun12')
 endif
 
 ifeq (,$(findstring $(release),debug release))
@@ -242,6 +251,7 @@ ifeq (,$(findstring $(static),static shared dynamic))
     $(error Error: static '$(static)' not found: must be in 'static shared dynamic')
 endif
 
+# Check some dependices, e.g. IMSL needs intel11 on eve
 ifneq (,$(findstring $(system),eve))
     ifneq (,$(findstring $(imsl),vendor imsl))
         ifneq ($(icompiler),intel11)
@@ -253,10 +263,6 @@ ifneq (,$(findstring $(system),eve))
             endif
         endif
     endif
-endif
-
-ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 nag53 sun12))
-    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 nag53 sun12')
 endif
 
 #
@@ -630,7 +636,7 @@ ifneq (,$(strip $(MAKECMDGOALS)))
 endif
 # ASRCS contain source dir informations
 ifeq (False,$(iphony))
-ASRCS     := $(wildcard $(SOURCEPATH)/*.f90)
+    ASRCS := $(wildcard $(SOURCEPATH)/*.f90)
 endif
 # SRCS without dir
 SRCS      := $(notdir $(ASRCS))
@@ -649,7 +655,7 @@ GASRCS    := $(SRCS:.f90=.g90)
 
 # Same for Fortran77 files with ending .for
 ifeq (False,$(iphony))
-FORASRCS  := $(wildcard $(SOURCEPATH)/*.for)
+    FORASRCS := $(wildcard $(SOURCEPATH)/*.for)
 endif
 FORSRCS   := $(notdir $(FORASRCS))
 FORAOBJS  := $(FORSRCS:.for=.o)
@@ -661,7 +667,7 @@ GFORASRCS := $(FORSRCS:.for=.g90)
 
 # Same for Fortran77 files with ending .f
 ifeq (False,$(iphony))
-FASRCS    := $(wildcard $(SOURCEPATH)/*.f)
+    FASRCS := $(wildcard $(SOURCEPATH)/*.f)
 endif
 FSRCS     := $(notdir $(FASRCS))
 FAOBJS    := $(FSRCS:.f=.o)
@@ -673,7 +679,7 @@ GFASRCS   := $(FSRCS:.f=.g90)
 
 # Same for C files with ending .c
 ifeq (False,$(iphony))
-CASRCS     := $(wildcard $(SOURCEPATH)/*.c)
+    CASRCS := $(wildcard $(SOURCEPATH)/*.c)
 endif
 CSRCS      := $(notdir $(CASRCS))
 CAOBJS     := $(CSRCS:.c=.o)
@@ -684,7 +690,7 @@ CDOBJS     := $(COBJS:.o=.d)
 
 # Static libraries in source path
 ifeq (False,$(iphony))
-LAASRCS     := $(wildcard $(SOURCEPATH)/*.a)
+    LAASRCS := $(wildcard $(SOURCEPATH)/*.a)
 endif
 LASRCS      := $(notdir $(LAASRCS))
 LAAOBJS     := $(LASRCS:.a=)
@@ -695,7 +701,7 @@ LAOBJS      := $(addprefix -l, $(LLAOAOBJS))
 
 # Dynamic libraries in source path
 ifeq (False,$(iphony))
-LOASRCS     := $(wildcard $(SOURCEPATH)/*.so)
+    LOASRCS := $(wildcard $(SOURCEPATH)/*.so)
 endif
 LOSRCS      := $(notdir $(LOASRCS))
 LOAOBJS     := $(LOSRCS:.so=)
@@ -940,6 +946,9 @@ ifeq ($(system),gdmacbookpro)
 endif
 ifeq ($(system),stufz)
 	@echo "gfortran=gnu46"
+endif
+ifeq ($(system),burnet)
+	@echo "intel, ifort, ifort11=intel11"
 endif
 
 # All dependencies create by perl script make.d.pl
