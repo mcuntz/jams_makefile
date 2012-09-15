@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for Intel compiler 12 on Stephan Thober Ubuntu laptop
+# Setup file for Intel compiler 12 on Stephan's Ubuntu laptop
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.

@@ -8,6 +8,9 @@
 #
 #     Variables can be set on the command line [VAR=VAR] or in the SWITCHES section in this file.
 #
+#     If PROGNAME is given then an executable will be compiled.
+#     If LIBNAME  is given then a library will be created instead.
+#
 # INPUTS
 #     targets    all (default), check (=test), clean, cleanclean, cleancheck (=cleantest), html, info
 #
@@ -24,7 +27,7 @@
 #     Variables can be empty for disabling a certain behaviour,
 #     e.g. if you do not want to use IMSL, set:  imsl=no  or  imsl=
 #
-#     For current main variables see 'make info'.
+#     For main variables see 'make info'.
 #
 # DEPENDENCIES
 #    This make file uses the following files:
@@ -36,7 +39,7 @@
 #    The script does check some but not all of these dependencies.
 #
 # EXAMPLE
-#    make release=debug compiler=intel11 imsl=vendor mkl=mkl95
+#    make release=debug compiler=intel11 imsl=vendor mkl=mkl95 PROGNAME=prog
 #
 # LITERATURE
 #    The following links provide general documentation:
@@ -199,6 +202,9 @@ endif
 ifeq ($(system),gdmacbookpro)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
         icompiler := gnu46
+    endif
+    ifneq (,$(findstring $(compiler),nag))
+        icompiler := nag53
     endif
 endif
 ifeq ($(system),stdesk)
@@ -943,6 +949,7 @@ ifeq ($(system),jmmacbookpro)
 endif
 ifeq ($(system),gdmacbookpro)
 	@echo "gnu, gfortran, gcc, gfortran46, gcc46=gnu46"
+	@echo "nag=nag53"
 endif
 ifeq ($(system),stufz)
 	@echo "gfortran=gnu46"

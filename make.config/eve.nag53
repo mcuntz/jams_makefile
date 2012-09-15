@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for NAG compiler 5.3 at Eve
+# Setup file for NAG compiler 5.3 at eve.ufz.de
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.

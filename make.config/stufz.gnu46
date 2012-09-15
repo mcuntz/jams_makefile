@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for Gnu compiler 4.6 at eve.ufz.de
+# Setup file for Gnu compiler 4.6 at Stephan's UFZ Ubuntu
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.
@@ -19,7 +19,7 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with the UFZ makefile project. If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2012 Matthias Cuntz
+#    Copyright 2012 Stephan Thober
 
 # The Makefile assumes the standard bin, include and lib directories
 # i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
