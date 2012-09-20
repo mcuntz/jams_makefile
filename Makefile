@@ -104,7 +104,7 @@ release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
 netcdf   := netcdf4
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   :=
+lapack   := true
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -114,7 +114,7 @@ imsl     :=
 # OpenMP parallelization: true, [anything else]
 openmp   :=
 # Linking: static, shared, dynamic (last two are equal)
-static   := dynamic
+static   := shared
 
 # Write out warning/reminder if compiled on Mac OS X. If NOMACWARN=true then no warning is written out: true, [anything else]
 NOMACWARN = no
@@ -661,7 +661,7 @@ OBJS      := $(addprefix $(OBJPATH)/, $(OAOBJS))
 # dependency files with full dir path
 DOBJS     := $(OBJS:.o=.d)
 # g90 debug files of NAG compiler
-GASRCS    := $(SRCS:.f90=.g90)
+GASRCS    := $(SRCS:.f90=.g90) $(addprefix $(SOURCEPATH)/, $(SRCS:.f90=.g90))
 
 # Same for Fortran77 files with ending .for
 ifeq (False,$(iphony))
@@ -673,7 +673,7 @@ FOREXCL   :=
 OFORAOBJS := $(filter-out $(FOREXCL), $(FORAOBJS))
 FOROBJS   := $(addprefix $(OBJPATH)/, $(OFORAOBJS))
 FORDOBJS  := $(FOROBJS:.o=.d)
-GFORASRCS := $(FORSRCS:.for=.g90)
+GFORASRCS := $(FORSRCS:.for=.g90) $(addprefix $(SOURCEPATH)/, $(FORSRCS:.for=.g90))
 
 # Same for Fortran77 files with ending .f
 ifeq (False,$(iphony))
@@ -685,7 +685,7 @@ FEXCL     :=
 OFAOBJS   := $(filter-out $(FEXCL), $(FAOBJS))
 FOBJS     := $(addprefix $(OBJPATH)/, $(OFAOBJS))
 FDOBJS    := $(FOBJS:.o=.d)
-GFASRCS   := $(FSRCS:.f=.g90)
+GFASRCS   := $(FSRCS:.f=.g90) $(addprefix $(SOURCEPATH)/, $(FSRCS:.f=.g90))
 
 # Same for C files with ending .c
 ifeq (False,$(iphony))
