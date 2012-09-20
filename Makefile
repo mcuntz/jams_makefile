@@ -96,9 +96,9 @@ LIBNAME  := #libminpack.a # Name of library
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet
-system   := mcair
+system   := eve
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := gnu46
+compiler := nag
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
@@ -395,13 +395,14 @@ istatic := $(static)
 ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
     istatic := dynamic
 endif
+iLIBS :=
 ifeq ($(istatic),static)
-    LIBS += -Bstatic -Wl,--start-group
+    iLIBS += -Bstatic -Wl,--start-group
 else
     ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
-        LIBS += -Wl,-dynamic
+        iLIBS += -Wl,-dynamic
     else
-        LIBS += -Bdynamic
+        iLIBS += -Bdynamic
     endif
 endif
 
@@ -426,7 +427,7 @@ ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
         $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
     endif
     GFORTRANLIB ?= $(GFORTRANDIR)/lib
-    LIBS        += -L$(GFORTRANLIB) -lgfortran
+    iLIBS        += -L$(GFORTRANLIB) -lgfortran
     RPATH       += -Wl,-rpath,$(GFORTRANLIB)
 endif
 
@@ -454,19 +455,19 @@ endif
     DEFINES  += -DIMSL
 
     ifeq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
-        LIBS     += -z muldefs
+        iLIBS     += -z muldefs
         ifneq ($(istatic),static)
-            LIBS += -i_dynamic
+            iLIBS += -i_dynamic
         endif
     endif
 
     ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
-        LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
+        iLIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
     else
         ifeq ($(imsl),imsl)
-            LIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu
+            iLIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu
         else
-            LIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
+            iLIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
         endif
     endif
     RPATH += -Wl,-rpath,$(IMSLLIB)
@@ -487,7 +488,7 @@ ifneq ($(ABSOFT),)
 endif
         DEFINES  += -DMKL95
 
-        LIBS  += -L$(MKL95LIB) -lmkl_blas95_lp64 -lmkl_lapack95_lp64
+        iLIBS  += -L$(MKL95LIB) -lmkl_blas95_lp64 -lmkl_lapack95_lp64
         RPATH += -Wl,-rpath,$(MKL95LIB)
 ifneq ($(ABSOFT),)
         F90FLAGS += -p $(MKL95INC)
@@ -506,14 +507,14 @@ ifneq ($(ABSOFT),)
 endif
     DEFINES  += -DMKL
 
-    LIBS += -L$(MKLLIB) -lmkl_intel_lp64 -lmkl_core #-lpthread
+    iLIBS += -L$(MKLLIB) -lmkl_intel_lp64 -lmkl_core #-lpthread
     ifneq (,$(findstring $(imsl),vendor imsl))
-       LIBS += -lmkl_intel_thread #-lpthread
+       iLIBS += -lmkl_intel_thread #-lpthread
     else
         ifeq ($(openmp),true)
-            LIBS += -lmkl_intel_thread #-lpthread
+            iLIBS += -lmkl_intel_thread #-lpthread
         else
-            LIBS += -lmkl_sequential #-lpthread
+            iLIBS += -lmkl_sequential #-lpthread
         endif
     endif
     RPATH += -Wl,-rpath,$(MKLLIB)
@@ -533,19 +534,19 @@ ifneq ($(ABSOFT),)
 endif
     DEFINES  += -DNETCDF
 
-    LIBS  += -L$(NCLIB)
+    iLIBS  += -L$(NCLIB)
     RPATH += -Wl,-rpath,$(NCLIB)
     ifneq ($(icompiler),absoft)
-        LIBS += -lnetcdff
+        iLIBS += -lnetcdff
     endif
-    LIBS  += -lnetcdf
+    iLIBS  += -lnetcdf
 
     # other libraries for netcdf4, ignored for netcdf3
     ifeq ($(netcdf),netcdf4)
-        LIBS  += -lz -L$(SZLIB) -lsz -L$(HDF5LIB) -lhdf5 -lhdf5_hl
+        iLIBS  += -L$(HDF5LIB) -lhdf5_hl -lhdf5 -L$(SZLIB) -lsz -lz
         RPATH += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
         ifneq ($(CURLLIB),)
-            LIBS     += -L$(CURLLIB) -lcurl
+            iLIBS     += -L$(CURLLIB) -lcurl
             RPATH    += -Wl,-rpath,$(CURLLIB)
         endif
    endif
@@ -557,7 +558,7 @@ ifeq ($(proj),true)
         $(error Error: PROJ4 path '$(PROJ4DIR)' not found.)
     endif
     PROJ4LIB ?= $(PROJ4DIR)/lib
-    LIBS     += -L$(PROJ4LIB) -lproj
+    iLIBS     += -L$(PROJ4LIB) -lproj
     RPATH    += -Wl,-rpath=$(PROJ4LIB)
 
     ifneq (exists, $(shell if [ -d "$(FPROJDIR)" ] ; then echo 'exists' ; fi))
@@ -571,7 +572,7 @@ ifneq ($(ABSOFT),)
     INCLUDES += -p $(FPROJINC)
 endif
     DEFINES  += -DFPROJ
-    LIBS     += -L$(FPROJLIB) -lfproj4 $(FPROJLIB)/proj4.o
+    iLIBS     += -L$(FPROJLIB) -lfproj4 $(FPROJLIB)/proj4.o
     RPATH    += -Wl,-rpath,$(FPROJLIB)
 endif
 
@@ -579,13 +580,13 @@ endif
 ifeq ($(lapack),true)
     # Mac OS X uses frameworks
     ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
-        LIBS += -framework veclib
+        iLIBS += -framework veclib
     else
         ifneq (exists, $(shell if [ -d "$(LAPACKDIR)" ] ; then echo 'exists' ; fi))
             $(error Error: LAPACK path '$(LAPACKDIR)' not found.)
         endif
         LAPACKLIB ?= $(LAPACKDIR)/lib
-        LIBS      += -L$(LAPACKLIB) -lblas -llapack
+        iLIBS      += -L$(LAPACKLIB) -lblas -llapack
         RPATH     += -Wl,-rpath,$(LAPACKLIB)
     endif
     DEFINES += -DLAPACK
@@ -597,7 +598,7 @@ ifeq ($(lapack),true)
                 $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
             endif
             GFORTRANLIB ?= $(GFORTRANDIR)/lib
-            LIBS        += -L$(GFORTRANLIB) -lgfortran
+            iLIBS        += -L$(GFORTRANLIB) -lgfortran
             RPATH       += -Wl,-rpath,$(GFORTRANLIB)
         endif
     endif
@@ -613,18 +614,21 @@ endif
 
 # Mac OS X is special, there is (almost) no static linking
 ifeq ($(istatic),static)
-    LIBS += -Wl,--end-group
+    iLIBS += -Wl,--end-group
 endif
+# The NAG compiler links via gcc so that one has to give -Wl twice and double commas for the option
+# i.e. instead of  -Wl,rpath,/path   you need   -Wl,-Wl,,rpath,,/path
+ifneq (,$(findstring $(icompiler),nag51 nag52 nag53))
+    comma  := ,
+    iiLIBS := $(subst -Wl,-Wl$(comma)-Wl,$(subst $(comma),$(comma)$(comma),$(iLIBS)))
+    iRPATH := $(subst -Wl,-Wl$(comma)-Wl,$(subst $(comma),$(comma)$(comma),$(RPATH)))
+else
+    iiLIBS := $(iLIBS)
+    iRPATH := $(RPATH)
+endif
+LIBS += $(iiLIBS)
 # Only Linux and Solaris can use -rpath in executable
 ifeq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
-    # The NAG compiler links via gcc so that one has to give -Wl twice and double commas for the option
-    # i.e. instead of  -Wl,rpath,/path   you need   -Wl,-Wl,,rpath,,/path
-    ifneq (,$(findstring $(icompiler),nag51 nag52 nag53))
-        comma  := ,
-        iRPATH := $(subst -Wl,-Wl$(comma)-Wl,$(subst $(comma),$(comma)$(comma),$(RPATH)))
-    else
-        iRPATH := $(RPATH)
-    endif
     LIBS += $(iRPATH)
 endif
 
