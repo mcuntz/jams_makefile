@@ -41,7 +41,7 @@ F90 := $(NAGBIN)/nagfor
 FC  := $(F90)
 CC  := $(GNUBIN)/gcc
 ifeq ($(release),debug)
-    F90FLAGS += -C=all -g -gline -nan -O0 -strict95 -g90
+    F90FLAGS += -C -C=dangling -g -gline -nan -O0 -strict95 -g90
     FCFLAGS  += $(F90FLAGS)
     CFLAGS   += -pedantic-errors -Wall -W -O -g
     LDFLAGS  += -g90
