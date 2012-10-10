@@ -51,7 +51,9 @@ else
     CFLAGS   += -O3
 endif
 # -mismatch-all
-F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=full -ideclient
+F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=full -ideclient $(iopenmp)
+FCFLAGS  += $(iopenmp)
+CFLAGS   += $(iopenmp)
 LDFLAGS  += -ideclient -unsharedrts
 DEFINES  += -DNAG -DgFortran
 

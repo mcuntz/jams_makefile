@@ -85,8 +85,8 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test_standard           # where are the source files; use test_??? to run a test directory
-PROGPATH   := .           # where shall be the executable
+SRCPATH    := .       # where are the source files; use test_??? to run a test directory
+PROGPATH   := .       # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
 TESTPATH   := .
@@ -98,13 +98,13 @@ LIBNAME  := #libminpack.a # Name of library
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet
 system   := eve
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
-compiler := nag
+compiler := gnu
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4
-netcdf   := netcdf4
+netcdf   := 
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   := true
+lapack   := 
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -112,7 +112,7 @@ proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
 imsl     :=
 # OpenMP parallelization: true, [anything else]
-openmp   :=
+openmp   := 
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 
@@ -197,6 +197,9 @@ endif
 ifeq ($(system),jmmacbookpro)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
         icompiler := gnu46
+    endif
+    ifneq (,$(findstring $(compiler),nag))
+        icompiler := nag53
     endif
 endif
 ifeq ($(system),gdmacbookpro)
@@ -408,7 +411,22 @@ endif
 
 # check for openmp flag before including configuration files
 ifeq ($(openmp),true)
-    iopenmp = -openmp
+    ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
+        iopenmp = -fopenmp
+        LDFLAGS += -fopenmp
+    else
+        iopenmp = -openmp
+        LDFLAGS += -openmp
+    endif
+    DEFINES += -DOPENMP
+else
+    ifneq (,$(findstring $(imsl),vendor imsl))
+        ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
+            LDFLAGS += -fopenmp
+        else
+            LDFLAGS += -openmp
+        endif
+    endif
 endif
 
 # Include the individual configuration files
@@ -429,15 +447,6 @@ ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
     GFORTRANLIB ?= $(GFORTRANDIR)/lib
     iLIBS        += -L$(GFORTRANLIB) -lgfortran
     RPATH       += -Wl,-rpath,$(GFORTRANLIB)
-endif
-
-# --- OPENMP -----------------------------------------------------
-ifeq ($(openmp),true)
-    LDFLAGS  += -openmp
-else
-    ifneq (,$(findstring $(imsl),vendor imsl))
-        LDFLAGS  += -openmp
-    endif
 endif
 
 # --- IMSL ---------------------------------------------------
@@ -950,6 +959,7 @@ ifeq ($(system),mcair)
 endif
 ifeq ($(system),jmmacbookpro)
 	@echo "gnu, gfortran, gcc, gfortran46, gcc46=gnu46"
+	@echo "nag=nag53"
 endif
 ifeq ($(system),gdmacbookpro)
 	@echo "gnu, gfortran, gcc, gfortran46, gcc46=gnu46"

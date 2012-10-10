@@ -46,7 +46,9 @@ else
     FCFLAGS  += -ffixed-form -O3
     CFLAGS   += -O3
 endif
-F90FLAGS += -cpp -J$(OBJPATH)
+F90FLAGS += -cpp $(iopenmp) -J$(OBJPATH)
+FCFLAGS  += $(iopenmp)
+CFLAGS   += $(iopenmp)
 DEFINES  += -DGFORTRAN -DgFortran
 LDPATH   += /usr/local/gmp/5.0.2/lib:/usr/local/mpfr/3.0.1/lib:/usr/local/mpc/0.9/lib
 
