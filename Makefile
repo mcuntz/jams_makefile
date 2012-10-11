@@ -112,7 +112,7 @@ proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
 imsl     :=
 # OpenMP parallelization: true, [anything else]
-openmp   := 
+openmp   :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 
