@@ -96,13 +96,13 @@ LIBNAME  := #libminpack.a # Name of library
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet
-system   := mcimac
+system   := eve
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
 compiler := gnu
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   := 
+netcdf   := netcdf4
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
