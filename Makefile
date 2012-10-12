@@ -96,15 +96,15 @@ LIBNAME  := #libminpack.a # Name of library
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet
-system   := eve
+system   := mcimac
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
 compiler := gnu
 # Releases: debug, release
 release  := release
-# Netcdf versions (Network Common Data Form): netcdf3, netcdf4
+# Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
 netcdf   := 
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   := 
+lapack   :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -117,7 +117,7 @@ openmp   :=
 static   := shared
 
 # Write out warning/reminder if compiled on Mac OS X. If NOMACWARN=true then no warning is written out: true, [anything else]
-NOMACWARN = no
+NOMACWARN = true
 
 # This Makefile sets the following variables depending on the above options:
 # FC, FCFLAGS, F90FLAGS, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
@@ -174,7 +174,7 @@ ifeq ($(system),mcimac)
     ifneq (,$(findstring $(compiler),intel ifort ifort12))
         icompiler := intel12
     endif
-    ifneq (,$(findstring $(compiler),nag nag52 nag53))
+    ifneq (,$(findstring $(compiler),nag nag52))
         icompiler := nag53
     endif
 endif
@@ -182,7 +182,7 @@ ifeq ($(system),mcpowerbook)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran42 gcc42))
         icompiler := gnu42
     endif
-    ifneq (,$(findstring $(compiler),nag nag52 nag53))
+    ifneq (,$(findstring $(compiler),nag nag52))
         icompiler := nag53
     endif
 endif
@@ -190,7 +190,7 @@ ifeq ($(system),mcair)
     ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
         icompiler := gnu46
     endif
-    ifneq (,$(findstring $(compiler),nag nag52 nag53))
+    ifneq (,$(findstring $(compiler),nag nag52))
         icompiler := nag53
     endif
 endif
@@ -226,6 +226,9 @@ ifeq ($(system),stufz)
     endif
     ifneq (,$(findstring $(compiler),gnu46 gfortran))
         icompiler := gnu46
+    endif
+    ifneq (,$(findstring $(compiler),nag))
+        icompiler := nag53
     endif
 endif
 ifeq ($(system),burnet)
@@ -840,7 +843,7 @@ endif
 
 cleancheck:
 	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
-	    make SRCPATH=$$i cleanclean ; \
+	    $(MAKE) SRCPATH=$$i cleanclean ; \
 	done
 
 cleantest: cleancheck
@@ -853,13 +856,13 @@ endif
 	    rm -f "$(PROG)" ; \
 	    j=$${i/minpack/maxpack} ; \
 	    if [ $$i != $$j ] ; then \
-	    	 make -s MAKEDPATH=$(MAKEDPATH) SRCPATH="$$i"/../../minpack PROGPATH=$(PROGPATH) \
+	    	 $(MAKE) -s MAKEDPATH=$(MAKEDPATH) SRCPATH="$$i"/../../minpack PROGPATH=$(PROGPATH) \
 	    	      CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=libminpack.a system=$(system) \
 	    	      release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
 	    	      imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
 	    	      openmp=$(openmp) NOMACWARN=true ; \
 	    fi ; \
-	    make -s MAKEDPATH=$(MAKEDPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
+	    $(MAKE) -s MAKEDPATH=$(MAKEDPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
 	         CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
 	         release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
 	         imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
@@ -868,9 +871,9 @@ endif
 	    if [ $$status != 0 ] ; then \
 	      echo "$$i failed!" ; \
 	    fi ; \
-	    make -s SRCPATH=$$i cleanclean ; \
+	    $(MAKE) -s SRCPATH=$$i cleanclean ; \
 	    if [ $$i != $$j ] ; then \
-	    	 make -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a cleanclean ; \
+	    	 $(MAKE) -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a cleanclean ; \
 	    fi ; \
 	done
 
@@ -924,53 +927,20 @@ info:
 	@echo "system      $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)"
 	@echo "compiler    $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' | cut -d '.' -f 2 | sort | uniq)"
 	@echo "release     debug release"
-	@echo "netcdf      netcdf3 netcdf4"
-	@echo "lapack      true, [anything else]"
-	@echo "mkl         mkl, mkl95, [anything else]"
-	@echo "proj        true, [anything else]"
-	@echo "imsl        vendor, imsl, [anything else]"
-	@echo "openmp      true, [anything else]"
-	@echo "static      static, shared (=dynamic)"
+	@echo "netcdf      netcdf3 netcdf4 [anything else]"
+	@echo "lapack      true [anything else]"
+	@echo "mkl         mkl mkl95 [anything else]"
+	@echo "proj        true [anything else]"
+	@echo "imsl        vendor imsl [anything else]"
+	@echo "openmp      true [anything else]"
+	@echo "static      static shared (=dynamic)"
 	@echo ""
 	@echo "Compiler aliases for current system"
-ifeq ($(system),eve)
-	@echo "gnu, gfortran, gcc=gnu45"
-	@echo "gfortran41, gcc41=gnu41"
-	@echo "gfortran44, gcc44=gnu44"
-	@echo "gfortran45, gcc45=gnu45"
-	@echo "gfortran46, gcc46=gnu46"
-	@echo "intel, ifort, ifort11=intel11"
-	@echo "ifort12=intel12"
-	@echo "sun=sun12"
-	@echo "nag=nag53"
-endif
-ifeq ($(system),mcimac)
-	@echo "gnu, gfortran, gcc, gfortran45, gcc44=gnu45"
-	@echo "intel, ifort, ifort12=intel12"
-	@echo "nag52 nag53=nag"
-endif
-ifeq ($(system),mcpowerbook)
-	@echo "gnu, gfortran, gcc, gfortran42, gcc42=gnu42"
-	@echo "nag52 nag53=nag"
-endif
-ifeq ($(system),mcair)
-	@echo "gnu, gfortran, gcc, gfortran46, gcc44=gnu46"
-	@echo "nag52 nag53=nag"
-endif
-ifeq ($(system),jmmacbookpro)
-	@echo "gnu, gfortran, gcc, gfortran46, gcc46=gnu46"
-	@echo "nag=nag53"
-endif
-ifeq ($(system),gdmacbookpro)
-	@echo "gnu, gfortran, gcc, gfortran46, gcc46=gnu46"
-	@echo "nag=nag53"
-endif
-ifeq ($(system),stufz)
-	@echo "gfortran=gnu46"
-endif
-ifeq ($(system),burnet)
-	@echo "intel, ifort, ifort11=intel11"
-endif
+	@sed -n '/^ifeq ($$(system),'$(system)')/,/^endif/p' $(firstword $(MAKEFILE_LIST)) | \
+	 sed -n '/ifneq (,$$(findstring $$(compiler)/,/endif/p' | \
+	 sed -e '/endif/d' -e 's/icompiler ://' | \
+	 sed -e 's/ifneq (,$$(findstring $$(compiler),//' -e 's/))//' | \
+	 paste - - | tr -d '\t' | tr -s ' '
 
 # All dependencies create by perl script make.d.pl
 ifeq (False,$(iphonyall))
