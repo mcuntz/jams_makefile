@@ -125,6 +125,10 @@ NOMACWARN = true
 # the following EXTRA_* variables. This allows for example to set an extra compiler
 # option or define a preprocessor variable such as: EXTRA_DEFINES := -DNOGUI
 EXTRA_FCFLAGS  :=
+# Possible further testing with NAG debug: -C=undefined and -C=intovf
+#   Note: -C=undefined is also checking 0-strings. Function nonull in mo_string_utils will stop with error.
+#   Note: -C=intovf check integer overflow, which is intentional in xor4096.
+#   Note: -C=undefined fails mo_corr, makes mo_fit due to compiler bugs
 EXTRA_F90FLAGS :=
 EXTRA_DEFINES  :=
 EXTRA_INCLUDES :=
