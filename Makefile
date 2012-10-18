@@ -1,18 +1,18 @@
 # -*- Makefile -*-
 #
 # PURPOSE
-#     Makefile for CHS projects
+#     CHS Makefile for Fortran, C and mixed projects
 #
 # CALLING SEQUENCE
 #     make [options] [VARIABLE=VARIABLE ...] [targets]
 #
-#     Variables can be set on the command line [VAR=VAR] or in the SWITCHES section in this file.
+#     Variables can be set on the command line [VAR=VAR] or in the SWITCHES section below.
 #
 #     If PROGNAME is given then an executable will be compiled.
 #     If LIBNAME  is given then a library will be created instead.
 #
-# INPUTS
-#     targets    all (default), check (=test), clean, cleanclean, cleancheck (=cleantest), html, info
+# TARGETS
+#     all (default), check (=test), clean, cleanclean, cleancheck (=cleantest), html, info
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'.
@@ -22,7 +22,7 @@
 #     This makefile has lots of conditional statements depending on variables.
 #     If the variable functions as a switch then the condition checks for variable = true,
 #     otherwise the variable can have different values.
-#     See individual variables in SWITCHES section below.
+#     See individual variables in SWITCHES section below or try 'make info'.
 #
 #     Variables can be empty for disabling a certain behaviour,
 #     e.g. if you do not want to use IMSL, set:  imsl=no  or  imsl=
@@ -31,32 +31,22 @@
 #
 # DEPENDENCIES
 #    This make file uses the following files:
-#        $(MAKEDPATH)/make.d.pl, $(CONFIGPATH)/$(system).$(compiler)
+#        $(MAKEDPATH)/make.d.pl, $(CONFIGPATH)/$(system).$(compiler), $(CONFIGPATH)/$(system).alias
+#        $(CONFIGPATH)/f2html, $(CONFIGPATH)/f2html.fgenrc
 #    The default $(MAKEDPATH) and $(CONFIGPATH) is make.config
 #
 # RESTRICTIONS
 #    Not all packages work with or are compiled for all compilers.
-#    The script does check some but not all of these dependencies.
+#    The static switch is maintained like a red-headed stepchild. Libraries might be not ordered correctly
+#    if static linking and --begin/end-group is not supported.
 #
 # EXAMPLE
 #    make release=debug compiler=intel11 imsl=vendor mkl=mkl95 PROGNAME=prog
 #
-# LITERATURE
-#    The following links provide general documentation:
-#        Make
-#          GNU           http://www.gnu.org/s/make/
-#        Compiler
-#          GFORTRAN      http://gcc.gnu.org/fortran/
-#          INTEL         http://software.intel.com/en-us/articles/intel-composer-xe/
-#          NAG           http://www.nag.co.uk/nagware/np.asp
-#                        http://www.nag.co.uk/nagware/np/doc_index.asp
-#          ABSOFT        http://www.absoft.com/Support/Documentation/fortran_documentation.html
-#        Libraries
-#          MKL           http://software.intel.com/en-us/articles/intel-mkl/
-#          IMSL          http://www.roguewave.com/products/imsl-numerical-libraries.aspx
-#          NETCDF        http://www.unidata.ucar.edu/software/netcdf/
-#          PROJ4         http://trac.osgeo.org/proj/
-#          LAPACK        http://www.netlib.org/lapack/
+# NOTES
+#    Further information is given in the README, for example
+#    on the repository of the makefile, further reading, how to add a new compiler on a system, or
+#    how to add a new system.
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.
@@ -76,7 +66,7 @@
 #
 #    Copyright 2011-2012 Matthias Cuntz, Juliane Mai, Stephan Thober
 #
-# Written Matthias Cuntz & Juliane Mai, UFZ Leipzig, Germany, Aug. 2011 - matthias.cuntz@ufz.de
+# Written Matthias Cuntz & Juliane Mai, UFZ Leipzig, Germany, Nov. 2011 - mc (at) macu.de
 
 SHELL = /bin/bash
 
@@ -85,7 +75,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := .       # where are the source files; use test_??? to run a test directory
+SRCPATH    := test_standard       # where are the source files; use test_??? to run a test directory
 PROGPATH   := .       # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
@@ -96,15 +86,15 @@ LIBNAME  := #libminpack.a # Name of library
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet
-system   := eve
+system   := mcair
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
 compiler := gnu
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   := netcdf4
+netcdf   :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   :=
+lapack   := true
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -116,10 +106,7 @@ openmp   :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 
-# Write out warning/reminder if compiled on Mac OS X. If NOMACWARN=true then no warning is written out: true, [anything else]
-NOMACWARN = true
-
-# This Makefile sets the following variables depending on the above options:
+# The Makefile sets the following variables depending on the above options:
 # FC, FCFLAGS, F90FLAGS, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
 # flags, defines, etc. will be set incremental. They will be initialised with
 # the following EXTRA_* variables. This allows for example to set an extra compiler
@@ -137,122 +124,10 @@ EXTRA_LIBS     :=
 EXTRA_CFLAGS   :=
 
 #
-# --- ALIASES ---------------------------------------------------
-#
-
-# Set aliases so that one can, for example, say ifort to invoke standard intel11 on eve
-icompiler := $(compiler)
-ifeq ($(system),eve)
-    ifneq (,$(findstring $(compiler),gnu gfortran gcc))
-        icompiler := gnu45
-    endif
-    ifneq (,$(findstring $(compiler),gfortran41 gcc41))
-        icompiler := gnu41
-    endif
-    ifneq (,$(findstring $(compiler),gfortran41 gcc44))
-        icompiler := gnu44
-    endif
-    ifneq (,$(findstring $(compiler),gfortran45 gcc45))
-        icompiler := gnu45
-    endif
-    ifneq (,$(findstring $(compiler),gfortran46 gcc46))
-        icompiler := gnu46
-    endif
-    ifneq (,$(findstring $(compiler),intel ifort ifort11))
-        icompiler := intel11
-    endif
-    ifeq ($(compiler),ifort12)
-        icompiler := intel12
-    endif
-    ifneq (,$(findstring $(compiler),sun))
-        icompiler := sun12
-    endif
-    ifneq (,$(findstring $(compiler),nag))
-        icompiler := nag53
-    endif
-endif
-ifeq ($(system),mcimac)
-    ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran45 gcc45))
-        icompiler := gnu45
-    endif
-    ifneq (,$(findstring $(compiler),intel ifort ifort12))
-        icompiler := intel12
-    endif
-    ifneq (,$(findstring $(compiler),nag nag52))
-        icompiler := nag53
-    endif
-endif
-ifeq ($(system),mcpowerbook)
-    ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran42 gcc42))
-        icompiler := gnu42
-    endif
-    ifneq (,$(findstring $(compiler),nag nag52))
-        icompiler := nag53
-    endif
-endif
-ifeq ($(system),mcair)
-    ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
-        icompiler := gnu46
-    endif
-    ifneq (,$(findstring $(compiler),nag nag52))
-        icompiler := nag53
-    endif
-endif
-ifeq ($(system),jmmacbookpro)
-    ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
-        icompiler := gnu46
-    endif
-    ifneq (,$(findstring $(compiler),nag))
-        icompiler := nag53
-    endif
-endif
-ifeq ($(system),gdmacbookpro)
-    ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran46 gcc46))
-        icompiler := gnu46
-    endif
-    ifneq (,$(findstring $(compiler),nag))
-        icompiler := nag53
-    endif
-endif
-ifeq ($(system),stdesk)
-    ifneq (,$(findstring $(compiler),intel12))
-        icompiler := intel12
-    endif
-endif
-ifeq ($(system),stubuntu)
-    ifneq (,$(findstring $(compiler),intel12))
-        icompiler := intel12
-    endif
-endif
-ifeq ($(system),stufz)
-    ifneq (,$(findstring $(compiler),intel12))
-        icompiler := intel12
-    endif
-    ifneq (,$(findstring $(compiler),gnu46 gfortran))
-        icompiler := gnu46
-    endif
-    ifneq (,$(findstring $(compiler),nag))
-        icompiler := nag53
-    endif
-endif
-ifeq ($(system),burnet)
-    ifneq (,$(findstring $(compiler),intel ifort ifort11))
-        icompiler := intel11
-    endif
-endif
-#
-# --- CHECKS ---------------------------------------------------
+# --- CHECK 0 ---------------------------------------------------
 #
 
 # Check available switches
-ifeq (,$(findstring $(system),eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu stufz burnet))
-    $(error Error: system '$(system)' not found: must be in 'eve mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro stdesk stubuntu stufz burnet')
-endif
-
-ifeq (,$(findstring $(icompiler),intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 nag53 sun12))
-    $(error Error: compiler '$(icompiler)' not found: must be in 'intel11 intel12 gnu41 gnu42 gnu44 gnu45 gnu46 absoft nag51 nag52 nag53 sun12')
-endif
-
 ifeq (,$(findstring $(release),debug release))
     $(error Error: release '$(release)' not found: must be in 'debug release')
 endif
@@ -267,22 +142,8 @@ ifeq (,$(findstring $(static),static shared dynamic))
     $(error Error: static '$(static)' not found: must be in 'static shared dynamic')
 endif
 
-# Check some dependices, e.g. IMSL needs intel11 on eve
-ifneq (,$(findstring $(system),eve))
-    ifneq (,$(findstring $(imsl),vendor imsl))
-        ifneq ($(icompiler),intel11)
-            $(error Error: IMSL needs intel11.0.075, set 'compiler=intel11')
-        endif
-        ifeq ($(imsl),vendor)
-            ifeq (,$(findstring $(mkl),mkl mkl95))
-                $(error Error: IMSL vendor needs MKL, set 'mkl=mkl' or 'mkl=mkl95')
-            endif
-        endif
-    endif
-endif
-
 #
-# --- PATHS ------------------------------------------------
+# --- PATHES ------------------------------------------------
 #
 
 # Make absolute pathes from relative pathes
@@ -372,8 +233,33 @@ ifneq (exists, $(shell if [ -d "$(SOURCEPATH)" ] ; then echo 'exists' ; fi))
     $(error Error: source path '$(SOURCEPATH)' not found.)
 endif
 
-# Path where all the .mod, .o, etc. files will be written
-OBJPATH := $(SOURCEPATH)/.$(strip $(icompiler)).$(strip $(release))
+#
+# --- CHECK 1 ---------------------------------------------------
+#
+
+systems=$(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)
+ifeq (,$(findstring $(system),$(systems)))
+    $(error Error: system '$(system)' not found: known systems are $(systems))
+endif
+
+#
+# --- ALIASES ---------------------------------------------------
+#
+
+# Include compiler alias on specific systems, e.g. nag for nag53
+icompiler := $(compiler)
+ALIASINC := $(strip $(CONFIGPATH))/$(system).alias
+ifeq (exists, $(shell if [ -f $(ALIASINC) ] ; then echo 'exists' ; fi))
+    include $(ALIASINC)
+endif
+
+#
+# --- CHECK 2 ---------------------------------------------------
+#
+compilers=$(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' -e '/alias/d' | grep $(system) | cut -d '.' -f 2 | sort | uniq)
+ifeq (,$(findstring $(icompiler),$(compilers)))
+    $(error Error: compiler '$(icompiler)' not found: configured compilers for system $(system) are $(compilers))
+endif
 
 #
 # --- DEFAULTS ---------------------------------------------------
@@ -386,7 +272,7 @@ F90      :=
 F90FLAGS := $(EXTRA_F90FLAGS)
 CC       :=
 CFLAGS   := $(EXTRA_CFLAGS)
-DEFINES  := $(EXTRA_DEFINES) -DCFORTRAN
+DEFINES  := $(EXTRA_DEFINES)
 INCLUDES := $(EXTRA_INCLUDES)
 # and link, and therefore set below
 LD       :=
@@ -400,41 +286,8 @@ RANLIB   := ranlib
 # --- COMPILER / MACHINE SPECIFIC --------------------------------
 #
 
-# Mac OS X is special, there is (almost) no static linking
-istatic := $(static)
-ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
-    istatic := dynamic
-endif
-iLIBS :=
-ifeq ($(istatic),static)
-    iLIBS += -Bstatic -Wl,--start-group
-else
-    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
-        iLIBS += -Wl,-dynamic
-    else
-        iLIBS += -Bdynamic
-    endif
-endif
-
-# check for openmp flag before including configuration files
-ifeq ($(openmp),true)
-    ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
-        iopenmp = -fopenmp
-        LDFLAGS += -fopenmp
-    else
-        iopenmp = -openmp
-        LDFLAGS += -openmp
-    endif
-    DEFINES += -DOPENMP
-else
-    ifneq (,$(findstring $(imsl),vendor imsl))
-        ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
-            LDFLAGS += -fopenmp
-        else
-            LDFLAGS += -openmp
-        endif
-    endif
-endif
+# Set path where all the .mod, .o, etc. files will be written, set before include $(MAKEINC)
+OBJPATH := $(SOURCEPATH)/.$(strip $(icompiler)).$(strip $(release))
 
 # Include the individual configuration files
 MAKEINC := $(strip $(CONFIGPATH))/$(system).$(icompiler)
@@ -446,13 +299,33 @@ include $(MAKEINC)
 # Always use -DCFORTRAN for mixed C and Fortran compilations
 DEFINES  += -DCFORTRAN
 
+# Mac OS X is special, there is (almost) no static linking.
+# MAC OS X does not work with -rpath. Set DYLD_LIBRARY_PATH if needed.
+iOS := $(shell uname -s)
+istatic := $(static)
+ifneq (,$(findstring $(iOS),Darwin))
+    istatic := dynamic
+endif
+
+# Start group for cyclic search in static linking
+iLIBS :=
+ifeq ($(istatic),static)
+    iLIBS += -Bstatic -Wl,--start-group
+else
+    ifneq (,$(findstring $(iOS),Darwin))
+        iLIBS += -Wl,-dynamic
+    else
+        iLIBS += -Bdynamic
+    endif
+endif
+
 # --- COMPILER ---------------------------------------------------
 ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
     ifneq (exists, $(shell if [ -d "$(GFORTRANDIR)" ] ; then echo 'exists' ; fi))
         $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
     endif
     GFORTRANLIB ?= $(GFORTRANDIR)/lib
-    iLIBS        += -L$(GFORTRANLIB) -lgfortran
+    iLIBS       += -L$(GFORTRANLIB) -lgfortran
     RPATH       += -Wl,-rpath,$(GFORTRANLIB)
 endif
 
@@ -465,28 +338,53 @@ ifneq (,$(findstring $(imsl),vendor imsl))
     IMSLLIB ?= $(IMSLDIR)/lib
 
     INCLUDES += -I$(IMSLINC)
-ifneq ($(ABSOFT),)
-    INCLUDES += -p $(IMSLINC)
-endif
+    ifneq ($(ABSOFT),)
+        INCLUDES += -p $(IMSLINC)
+    endif
     DEFINES  += -DIMSL
 
-    ifeq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
+    ifeq (,$(findstring $(iOS),Darwin))
         iLIBS     += -z muldefs
         ifneq ($(istatic),static)
             iLIBS += -i_dynamic
         endif
     endif
 
-    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
+    ifneq (,$(findstring $(iOS),Darwin))
         iLIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
     else
         ifeq ($(imsl),imsl)
             iLIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_imsl -limslblas_imsl -limsls_err -limslmpistub -limslsuperlu
         else
-            iLIBS  += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
+            iLIBS += -L$(IMSLLIB) -limsl -limslscalar -limsllapack_vendor -limslblas_vendor -limsls_err -limslmpistub -limslsuperlu -limslhpc_l
         endif
     endif
     RPATH += -Wl,-rpath,$(IMSLLIB)
+endif
+
+# --- OPENMP ---------------------------------------------------
+iopenmp=
+ifeq ($(openmp),true)
+    ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
+        iopenmp = -fopenmp
+    else
+        iopenmp = -openmp
+    endif
+    DEFINES += -DOPENMP
+endif
+F90FLAGS += $(iopenmp)
+FCFLAGS  += $(iopenmp)
+CFLAGS   += $(iopenmp)
+LDFLAGS  += $(iopenmp)
+# IMSL needs openmp during linking in any case
+ifneq ($(openmp),true)
+    ifneq (,$(findstring $(imsl),vendor imsl))
+        ifneq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
+            LDFLAGS += -fopenmp
+        else
+            LDFLAGS += -openmp
+        endif
+    endif
 endif
 
 # --- MKL ---------------------------------------------------
@@ -499,16 +397,16 @@ ifneq (,$(findstring $(mkl),mkl mkl95))
         MKL95LIB ?= $(MKL95DIR)/lib
 
         INCLUDES += -I$(MKL95INC)
-ifneq ($(ABSOFT),)
-        INCLUDES += -p $(MKL95INC)
-endif
+        ifneq ($(ABSOFT),)
+            INCLUDES += -p $(MKL95INC)
+        endif
         DEFINES  += -DMKL95
 
-        iLIBS  += -L$(MKL95LIB) -lmkl_blas95_lp64 -lmkl_lapack95_lp64
+        iLIBS += -L$(MKL95LIB) -lmkl_blas95_lp64 -lmkl_lapack95_lp64
         RPATH += -Wl,-rpath,$(MKL95LIB)
-ifneq ($(ABSOFT),)
-        F90FLAGS += -p $(MKL95INC)
-endif
+        ifneq ($(ABSOFT),)
+            F90FLAGS += -p $(MKL95INC)
+        endif
     endif
 
     ifneq (exists, $(shell if [ -d "$(MKLDIR)" ] ; then echo 'exists' ; fi))
@@ -518,9 +416,9 @@ endif
     MKLLIB ?= $(MKLDIR)/lib
 
     INCLUDES += -I$(MKLINC)
-ifneq ($(ABSOFT),)
-    INCLUDES += -p $(MKLINC)
-endif
+    ifneq ($(ABSOFT),)
+        INCLUDES += -p $(MKLINC)
+    endif
     DEFINES  += -DMKL
 
     iLIBS += -L$(MKLLIB) -lmkl_intel_lp64 -lmkl_core #-lpthread
@@ -545,25 +443,25 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
     NCLIB ?= $(strip $(NCDIR))/lib
 
     INCLUDES += -I$(NCINC)
-ifneq ($(ABSOFT),)
-    INCLUDES += -p $(NCINC)
-endif
-    DEFINES  += -DNETCDF
+    ifneq ($(ABSOFT),)
+        INCLUDES += -p $(NCINC)
+    endif
+    DEFINES += -DNETCDF
 
-    iLIBS  += -L$(NCLIB)
+    iLIBS += -L$(NCLIB)
     RPATH += -Wl,-rpath,$(NCLIB)
     ifneq ($(icompiler),absoft)
         iLIBS += -lnetcdff
     endif
-    iLIBS  += -lnetcdf
+    iLIBS += -lnetcdf
 
     # other libraries for netcdf4, ignored for netcdf3
     ifeq ($(netcdf),netcdf4)
-        iLIBS  += -L$(HDF5LIB) -lhdf5_hl -lhdf5 -L$(SZLIB) -lsz -lz
+        iLIBS += -L$(HDF5LIB) -lhdf5_hl -lhdf5 -L$(SZLIB) -lsz -lz
         RPATH += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
         ifneq ($(CURLLIB),)
-            iLIBS     += -L$(CURLLIB) -lcurl
-            RPATH    += -Wl,-rpath,$(CURLLIB)
+            iLIBS += -L$(CURLLIB) -lcurl
+            RPATH += -Wl,-rpath,$(CURLLIB)
         endif
    endif
 endif
@@ -574,7 +472,7 @@ ifeq ($(proj),true)
         $(error Error: PROJ4 path '$(PROJ4DIR)' not found.)
     endif
     PROJ4LIB ?= $(PROJ4DIR)/lib
-    iLIBS     += -L$(PROJ4LIB) -lproj
+    iLIBS    += -L$(PROJ4LIB) -lproj
     RPATH    += -Wl,-rpath=$(PROJ4LIB)
 
     ifneq (exists, $(shell if [ -d "$(FPROJDIR)" ] ; then echo 'exists' ; fi))
@@ -584,40 +482,28 @@ ifeq ($(proj),true)
     FPROJLIB ?= $(FPROJDIR)/lib
 
     INCLUDES += -I$(FPROJINC)
-ifneq ($(ABSOFT),)
-    INCLUDES += -p $(FPROJINC)
-endif
+    ifneq ($(ABSOFT),)
+        INCLUDES += -p $(FPROJINC)
+    endif
     DEFINES  += -DFPROJ
-    iLIBS     += -L$(FPROJLIB) -lfproj4 $(FPROJLIB)/proj4.o
+    iLIBS    += -L$(FPROJLIB) -lfproj4 $(FPROJLIB)/proj4.o
     RPATH    += -Wl,-rpath,$(FPROJLIB)
 endif
 
 # --- LAPACK ---------------------------------------------------
 ifeq ($(lapack),true)
     # Mac OS X uses frameworks
-    ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
+    ifneq (,$(findstring $(iOS),Darwin))
         iLIBS += -framework veclib
     else
         ifneq (exists, $(shell if [ -d "$(LAPACKDIR)" ] ; then echo 'exists' ; fi))
             $(error Error: LAPACK path '$(LAPACKDIR)' not found.)
         endif
         LAPACKLIB ?= $(LAPACKDIR)/lib
-        iLIBS      += -L$(LAPACKLIB) -lblas -llapack
+        iLIBS     += -L$(LAPACKLIB) -lblas -llapack
         RPATH     += -Wl,-rpath,$(LAPACKLIB)
     endif
     DEFINES += -DLAPACK
-
-    # Lapack on Eve needs libgfortran
-    ifneq (,$(findstring $(system),eve))
-        ifeq (,$(findstring $(icompiler),gnu41 gnu42 gnu44 gnu45 gnu46))
-            ifneq (exists, $(shell if [ -d "$(GFORTRANDIR)" ] ; then echo 'exists' ; fi))
-                $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
-            endif
-            GFORTRANLIB ?= $(GFORTRANDIR)/lib
-            iLIBS        += -L$(GFORTRANLIB) -lgfortran
-            RPATH       += -Wl,-rpath,$(GFORTRANLIB)
-        endif
-    endif
 endif
 
 #
@@ -644,7 +530,7 @@ else
 endif
 LIBS += $(iiLIBS)
 # Only Linux and Solaris can use -rpath in executable
-ifeq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
+ifeq (,$(findstring $(iOS),Darwin))
     LIBS += $(iRPATH)
 endif
 
@@ -660,6 +546,7 @@ ifneq (,$(strip $(MAKECMDGOALS)))
         iphonyall := True
     endif
 endif
+
 # ASRCS contain source dir informations
 ifeq (False,$(iphony))
     ASRCS := $(wildcard $(SOURCEPATH)/*.f90)
@@ -743,7 +630,6 @@ endif
 ifneq ($(LDPATH),)
     export LD_LIBRARY_PATH=$(LDPATH)
 endif
-#$(shell echo "aaa$(SOURCEPATH)aaa")
 
 #
 # --- TARGETS ---------------------------------------------------
@@ -751,32 +637,15 @@ endif
 
 .PHONY: clean cleanclean cleantest cleancheck html check test info
 
-# target for executables
-all: $(PROG)
-        ifneq (,$(findstring $(system),mcimac mcpowerbook mcair jmmacbookpro gdmacbookpro))
-            ifneq ($(NOMACWARN),true)
-                ifeq (${DYLD_LIBRARY_PATH},)
-	            @echo
-                    ifeq ($(static),static)
-	                @echo "WARNING: MAC OS X does only link dynamically and does not work with -rpath"
-                    else
-	                @echo "WARNING: MAC OS X does not work with -rpath"
-                    endif
-	            @echo "         Set DYLD_LIBRARY_PATH if needed."
-	            @echo
-                endif
-            endif
-        endif
-
 # Link Program
 all: $(PROG) $(LIB)
+
+$(PROG): $(DOBJS) $(FORDOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS)
+	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS) $(LIBS) $(LAOBJS) $(LOOBJS)
 
 $(LIB): $(DOBJS) $(FORDOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS)
 	$(RANLIB) $(LIB)
-
-$(PROG): $(DOBJS) $(FORDOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS)
-	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(FOROBJS) $(FOBJS) $(COBJS) $(LIBS) $(LAOBJS) $(LOOBJS)
 
 # Get Dependencies
 $(DOBJS): $(OBJPATH)/%.d: $(SOURCEPATH)/%.f90
@@ -803,6 +672,7 @@ ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
 	rm -r $(OBJPATH)/tmp.gf3.$(notdir $<)
 else
+	echo $(OBJPATH)
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $< -o $@
 endif
 
@@ -927,9 +797,19 @@ info:
 	@echo "ARFLAGS   = $(ARFLAGS)"
 	@echo "RANLIB    = $(RANLIB)"
 	@echo ""
-	@echo "Possibilities"
+	@echo "Configured compilers on $(system): $(compilers)"
+ifeq (exists, $(shell if [ -f $(ALIASINC) ] ; then echo 'exists' ; fi))
+	@echo ""
+	@echo "Compiler aliases for $(system)"
+	@sed -n '/ifneq (,$$(findstring $$(compiler)/,/endif/p' $(ALIASINC) | \
+	 sed -e '/endif/d' -e 's/icompiler ://' | \
+	 sed -e 's/ifneq (,$$(findstring $$(compiler),//' -e 's/))//' | \
+	 paste - - | tr -d '\t' | tr -s ' '
+endif
+	@echo ""
+	@echo "All possibilities"
 	@echo "system      $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)"
-	@echo "compiler    $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' | cut -d '.' -f 2 | sort | uniq)"
+	@echo "compiler    $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' -e '/alias/d' | cut -d '.' -f 2 | sort | uniq)"
 	@echo "release     debug release"
 	@echo "netcdf      netcdf3 netcdf4 [anything else]"
 	@echo "lapack      true [anything else]"
@@ -938,13 +818,6 @@ info:
 	@echo "imsl        vendor imsl [anything else]"
 	@echo "openmp      true [anything else]"
 	@echo "static      static shared (=dynamic)"
-	@echo ""
-	@echo "Compiler aliases for current system"
-	@sed -n '/^ifeq ($$(system),'$(system)')/,/^endif/p' $(firstword $(MAKEFILE_LIST)) | \
-	 sed -n '/ifneq (,$$(findstring $$(compiler)/,/endif/p' | \
-	 sed -e '/endif/d' -e 's/icompiler ://' | \
-	 sed -e 's/ifneq (,$$(findstring $$(compiler),//' -e 's/))//' | \
-	 paste - - | tr -d '\t' | tr -s ' '
 
 # All dependencies create by perl script make.d.pl
 ifeq (False,$(iphonyall))

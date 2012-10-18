@@ -46,9 +46,9 @@ else
     FCFLAGS  += -ffixed-form -O3
     CFLAGS   += -O3
 endif
-F90FLAGS += -cpp -J$(OBJPATH) $(iopenmp)
-FCFLAGS  += $(iopenmp)
-CFLAGS   += $(iopenmp)
+F90FLAGS += -cpp -J$(OBJPATH)
+FCFLAGS  +=
+CFLAGS   +=
 DEFINES  += -DGFORTRAN -DgFortran
 
 # Linking

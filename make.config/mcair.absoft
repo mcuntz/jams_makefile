@@ -47,17 +47,16 @@ ifeq ($(release),debug)
     # Vectorisation: -YLOOP_ANALYZER -LNO:simd_verbose=on -LNO:simd=2 (1: default; 2: aggressive)
     F90FLAGS += -g -en -Ra -Rb -Rc -Rn -Rp -Rs -YNDFP=1 -O0 -z0
     #F90FLAGS += -g -en     -Rb -Rc     -Rp -Rs -YNDFP=1 -O0 -z0
-    FCFLAGS  += $(F90FLAGS)
     CFLAGS   += -pedantic-errors -Wall -W -O -g
 else
     F90FLAGS += -O3
-    FCFLAGS  += $(F90FLAGS)
     CFLAGS   += -O3
 endif
 #F90FLAGS += -m64 -cpp -f free -YMOD_OUT_DIR=$(OBJPATH) -I$(OBJPATH) -p $(OBJPATH) -safefp -OPT:roundoff=0 #-stack:1f40000
-F90FLAGS += -m64 -cpp -YMOD_OUT_DIR=$(OBJPATH) -I$(OBJPATH) -p $(OBJPATH) -safefp -OPT:roundoff=0 $(iopenmp) #-stack:1f40000
+F90FLAGS += -m64 -cpp -YMOD_OUT_DIR=$(OBJPATH) -I$(OBJPATH) -p $(OBJPATH) -safefp -OPT:roundoff=0 #-stack:1f40000
 # -Znnn suppress message number: 399 - Generic subroutine; 938 - real division in int; 1610 - generic-spec end F90FLAGS += -Z399
 FCFLAGS += $(F90FLAGS)
+CFLAGS  +=
 DEFINES += -DABSOFT -DgFortran
 LDFLAGS += -m64
 

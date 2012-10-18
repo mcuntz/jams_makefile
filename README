@@ -1,18 +1,19 @@
 
-This is the Makefile project of the
+This is the Makefile project for Fortran, C and mixed projects of the
 
 Department Computational Hydrosystems
 Helmholtz Centre for Environmental Research - UFZ
 Permoserstr. 15
 04318 Leipzig, Germany
 
-The project tries to provide a portable, versatile way of compiling Fortran projects.
+The project tries to provide a portable, versatile way of compiling Fortran, C and mixed projects.
+It is released under the GNU Lesser General Public License (see below).
 
 The library is maintained with a subversion system at:
-https://svn.ufz.de/svn/chs-svn/makefile_chs/
+    https://svn.ufz.de/svn/chs-svn/makefile_chs/
 
 The documentation of the library is maintained as a wiki at:
-https://svn.ufz.de/chs-svn/wiki/WikiMakefile
+    https://svn.ufz.de/chs-svn/wiki/WikiMakefile
 
 The above wiki will be printed to a PDF file from time to time, which is provided in wiki.pdf.
 Be aware that the current PDF is not always up to date.
@@ -20,7 +21,6 @@ Be aware that the current PDF is not always up to date.
 Created 11.11.2011 by Matthias Cuntz and Juliane Mai
 Copyright 2011-2012 UFZ CHS
 Contact Matthias Cuntz - mc (at) macu.de
-
 
 License
 -------
@@ -38,3 +38,57 @@ GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the UFZ makefile project. If not, see <http://www.gnu.org/licenses/>.
+
+Literature
+----------
+The following links provide general documentation on used compiler and packages/libraries:
+   Make
+     GNU           http://www.gnu.org/s/make/
+   Compiler
+     GFORTRAN      http://gcc.gnu.org/fortran/
+     INTEL         http://software.intel.com/en-us/articles/intel-composer-xe/
+     NAG           http://www.nag.co.uk/nagware/np.asp
+                   http://www.nag.co.uk/nagware/np/doc_index.asp
+     ABSOFT        http://www.absoft.com/Support/Documentation/fortran_documentation.html
+   Libraries
+     MKL           http://software.intel.com/en-us/articles/intel-mkl/
+     IMSL          http://www.roguewave.com/products/imsl-numerical-libraries.aspx
+     NETCDF        http://www.unidata.ucar.edu/software/netcdf/
+     PROJ4         http://trac.osgeo.org/proj/
+     LAPACK        http://www.netlib.org/lapack/
+
+How to use the makefile
+-----------------------
+You have to checkout the Makefile and the directory make.config.
+Open the file Makefile and make the proper settings for your source code (select compiler, IMSL, MKL, LAPACK, etc.).
+Read the header of the makefile for targets, etc.
+'make info' gives detailed information.
+
+How to add a new compiler on a given system
+-------------------------------------------
+Say you want to add the PGI compiler suite version 8.5 on the system eve.
+Choose the compiler abbreviation pgi8.5, i.e. system=eve, compiler=pgi8.5
+1. Copy a config file in make.config to the name eve.pgi85
+   Take a file that ends with an abbreviation which could be your compiler,
+   e.g. if there were the file mcair.pgi8.3.
+   If there is none, take eve.intel12.
+2. Adapt the pathes and compiler switches in the config file.
+3. If wanted, you can give aliases for that compiler, e.g. simply pgi instead of also the version number.
+   Edit the file eve.alias. Follow the examples of sun or nag.
+4. For completeness: in Makefile add pgi85 at the end of the list above compiler := ...
+
+How to add a new system
+-----------------------
+You want to port the Makefile onto a new system. Say you have a system called 'Liclus'
+on which is a gnu compiler version 4.6, i.e. system=liclus, compiler=gnu46
+1. Copy a config file in make.config to the name liclus.gnu46
+   Take a file that ends with gnu46 or close to it,
+   e.g. the file mcair.gnu46 if Liclus is a Mac OSX or eve.gnu45 if Liclus is a Linux machine.
+   If there is none close to your compiler, take eve.intel12.
+2. Adapt the pathes and compiler switches in the config file.
+3. You can give aliases for that compiler, e.g. simply gnu instead of also the version number.
+   Therefore we need the file liclus.alias. Create it in make.config, even empty if you do not want to give any aliases.
+   You can copy eve.alias for examples.
+4. In Makefile search for gnu and if there are some if-clauses with gnu45, for example, add gnu46 there as well.
+5. For completeness: in Makefile add liclus at the end of the list above system := ...
+                     add gnu46 (if not there yet) at the end of the list above compiler := ...

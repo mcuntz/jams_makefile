@@ -50,9 +50,9 @@ else
     CFLAGS   += -O3
 endif
 # -mismatch-all
-F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=full $(iopenmp)
-FCFLAGS  += $(iopenmp)
-CFLAGS   += $(iopenmp)
+F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=full
+FCFLAGS  +=
+CFLAGS   +=
 DEFINES  += -DNAG -DgFortran
 
 # Linking

@@ -46,9 +46,9 @@ else
     FCFLAGS  += -ffixed-form -O3
     CFLAGS   += -O3
 endif
-F90FLAGS += -cpp $(iopenmp) -J$(OBJPATH)
-FCFLAGS  += $(iopenmp)
-CFLAGS   += $(iopenmp)
+F90FLAGS += -cpp -J$(OBJPATH)
+FCFLAGS  +=
+CFLAGS   +=
 DEFINES  += -DGFORTRAN -DgFortran
 
 # Linking
@@ -81,3 +81,17 @@ LAPACKDIR   := /usr
 LAPACKLIB   := $(LAPACKDIR)/lib64
 GFORTRANDIR := $(GNUDIR)
 GFORTRANLIB := $(GNULIB)
+
+# Check some dependices, e.g. IMSL needs intel11 on eve
+ifneq (,$(findstring $(system),eve))
+    ifneq (,$(findstring $(imsl),vendor imsl))
+        ifneq ($(icompiler),intel11)
+            $(error Error: IMSL needs intel11.0.075, set 'compiler=intel11')
+        endif
+        ifeq ($(imsl),vendor)
+            ifeq (,$(findstring $(mkl),mkl mkl95))
+                $(error Error: IMSL vendor needs MKL, set 'mkl=mkl' or 'mkl=mkl95')
+            endif
+        endif
+    endif
+endif

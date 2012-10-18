@@ -50,9 +50,9 @@ else
     FCFLAGS  += $(opti) -vec-report0 -override-limits
     CFLAGS   += $(opti)
 endif
-F90FLAGS += -assume byterecl -cpp -fp-model precise $(iopenmp) -m64 -module "$(OBJPATH)"
-FCFLAGS  += -assume byterecl -cpp -fp-model precise $(iopenmp) -m64 -module "$(OBJPATH)" -fixed
-CFLAGS   += $(iopenmp) -m64 -std=c99
+F90FLAGS += -assume byterecl -cpp -fp-model precise -m64 -module "$(OBJPATH)"
+FCFLAGS  += -assume byterecl -cpp -fp-model precise -m64 -module "$(OBJPATH)" -fixed
+CFLAGS   += -m64 -std=c99
 DEFINES  += -DINTEL -DINTEL_COMPILER
 
 # Linking
@@ -94,3 +94,27 @@ LAPACKDIR   := /usr
 LAPACKLIB   := $(LAPACKDIR)/lib64
 GFORTRANDIR := /usr
 GFORTRANLIB := $(GFORTRANDIR)/lib64
+
+# Check some dependices, e.g. IMSL needs intel11 on eve
+ifneq (,$(findstring $(system),eve))
+    ifneq (,$(findstring $(imsl),vendor imsl))
+        ifneq ($(icompiler),intel11)
+            $(error Error: IMSL needs intel11.0.075, set 'compiler=intel11')
+        endif
+        ifeq ($(imsl),vendor)
+            ifeq (,$(findstring $(mkl),mkl mkl95))
+                $(error Error: IMSL vendor needs MKL, set 'mkl=mkl' or 'mkl=mkl95')
+            endif
+        endif
+    endif
+endif
+
+# Lapack on Eve needs libgfortran
+ifeq ($(lapack),true)
+    ifneq (exists, $(shell if [ -d "$(GFORTRANDIR)" ] ; then echo 'exists' ; fi))
+        $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
+    endif
+    GFORTRANLIB ?= $(GFORTRANDIR)/lib
+    iLIBS        += -L$(GFORTRANLIB) -lgfortran
+    RPATH       += -Wl,-rpath,$(GFORTRANLIB)
+endif

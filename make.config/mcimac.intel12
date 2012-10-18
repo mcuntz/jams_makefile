@@ -47,9 +47,9 @@ else
     FCFLAGS  += $(opti) -vec-report0 -override-limits
     CFLAGS   += $(opti)
 endif
-F90FLAGS += -assume byterecl -cpp -fp-model precise $(iopenmp) -m64 -module "$(OBJPATH)"
-FCFLAGS  += -assume byterecl -cpp -fp-model precise $(iopenmp) -m64 -module "$(OBJPATH)" -fixed
-CFLAGS   += $(iopenmp) -m64 -std=c99
+F90FLAGS += -assume byterecl -cpp -fp-model precise -m64 -module "$(OBJPATH)"
+FCFLAGS  += -assume byterecl -cpp -fp-model precise -m64 -module "$(OBJPATH)" -fixed
+CFLAGS   += -m64 -std=c99
 DEFINES  += -DINTEL -DINTEL_COMPILER
 
 # Linking

@@ -1,5 +1,7 @@
-#!/usr/bin/perl
-# -*-perl-*-
+eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}' && eval 'exec perl -S $0 $argv:q' # -*-perl-*-
+  if 0;
+use strict;
+# #!/usr/bin/perl
 # f2html, html source converter for fortran 77/90 code
 # Copyright (C) 1997,98  Beroud Jean-Marc
 
