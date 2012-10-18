@@ -672,7 +672,6 @@ ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $(OBJPATH)/tmp.gf3.$(notdir $<) -o $@
 	rm -r $(OBJPATH)/tmp.gf3.$(notdir $<)
 else
-	echo $(OBJPATH)
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) -c $< -o $@
 endif
 
