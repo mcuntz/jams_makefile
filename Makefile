@@ -110,12 +110,24 @@ static   := shared
 # FC, FCFLAGS, F90FLAGS, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
 # flags, defines, etc. will be set incremental. They will be initialised with
 # the following EXTRA_* variables. This allows for example to set an extra compiler
-# option or define a preprocessor variable such as: EXTRA_DEFINES := -DNOGUI
+# option or define a preprocessor variable such as: EXTRA_DEFINES := -DNOGUI -DDPREC
+#
+# INTEL optimisation: -ipo=0 -ipo-c
+#     -ipo=n             Interprocedural optimization
+# INTEL debug: -fpe=0 -fpe-all=0 -no-ftz -ftrapuv
+#     -fpe=0 -fpe-all=0  errors on all floating point exceptions except underflow.
+#     -no-ftz            catches then also all underflows.
+#     -ftrapuv           sets undefined numbers to arbitrary values so that floating point exceptions kick in.
+# SUN optimisation: -xipo=2
+#     -xipo=n 0 disables interprocedural analysis, 1 enables inlining across source files,
+#             2 adds whole-program detection and analysis.
+# SUN debug: -ftrap=%all, %none, common, [no%]invalid, [no%]overflow, [no%]underflow, [no%]division, [no%]inexact.
+#     -ftrap=%n  Set floating-point trapping mode.
+# NAG debug: -C=undefined -C=intovf
+#     -C=undefined  is also checking 0-strings. Function nonull in UFZ mo_string_utils will stop with error.
+#     -C=intovf  check integer overflow, which is intentional in UFZ mo_xor4096.
+#     -C=undefined fails UFZs mo_corr and mo_fit due to compiler bugs.
 EXTRA_FCFLAGS  :=
-# Possible further testing with NAG debug: -C=undefined and -C=intovf
-#   Note: -C=undefined is also checking 0-strings. Function nonull in mo_string_utils will stop with error.
-#   Note: -C=intovf check integer overflow, which is intentional in xor4096.
-#   Note: -C=undefined fails mo_corr, makes mo_fit due to compiler bugs
 EXTRA_F90FLAGS :=
 EXTRA_DEFINES  :=
 EXTRA_INCLUDES :=
@@ -450,10 +462,26 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
 
     iLIBS += -L$(NCLIB)
     RPATH += -Wl,-rpath,$(NCLIB)
-    ifneq ($(icompiler),absoft)
+    ifeq (libnetcdff, $(shell ls $(NCLIB)/libnetcdff.* 2> /dev/null | sed -n '1p' | sed -e 's/.*\(libnetcdff\)/\1/' -e 's/\(libnetcdff\).*/\1/'))
         iLIBS += -lnetcdff
     endif
     iLIBS += -lnetcdf
+
+    ifeq (exists, $(shell if [ -d "$(NCDIR2)" ] ; then echo 'exists' ; fi))
+        NCINC2 ?= $(strip $(NCDIR2))/include
+        NCLIB2 ?= $(strip $(NCDIR2))/lib
+
+        INCLUDES += -I$(NCINC2)
+        ifneq ($(ABSOFT),)
+            INCLUDES += -p $(NCINC2)
+        endif
+
+        iLIBS += -L$(NCLIB2)
+        RPATH += -Wl,-rpath,$(NCLIB2)
+        ifeq (libnetcdff, $(shell ls $(NCLIB2)/libnetcdff.* 2> /dev/null | sed -n '1p' | sed -e 's/.*\(libnetcdff\)/\1/' -e 's/\(libnetcdff\).*/\1/'))
+            iLIBS += -lnetcdff
+        endif
+    endif
 
     # other libraries for netcdf4, ignored for netcdf3
     ifeq ($(netcdf),netcdf4)

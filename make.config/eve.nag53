@@ -28,7 +28,7 @@
 # Define subdirectories if another structure
 
 # Paths
-NAGDIR := /opt/nag/5.3
+NAGDIR := /opt/nag/5.3.1-907
 NAGLIB := $(NAGDIR)/lib
 NAGBIN := $(NAGDIR)/bin
 
