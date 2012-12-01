@@ -731,10 +731,13 @@ ifeq (False,$(islib))
 	rm -f "$(PROG)"
 endif
 	rm -f $(GASRCS) $(GFORASRCS) $(GFASRCS)
+	# Special cleaning of CHS library tests
         ifneq (,$(findstring $(SOURCEPATH),test_netcdf_imsl_proj))
 	    @if [ -f $(SOURCEPATH)/test.nc ] ; then rm $(SOURCEPATH)/test.nc ; fi
         endif
-	@if [ -f $(strip $(PROGPATH))/"Test.nc" ] ; then rm $(strip $(PROGPATH))/"Test.nc" ; fi
+	@if [ -f $(strip $(PROGPATH))/"Test.nc" ] ; then rm $(strip $(PROGPATH))/Test.nc ; fi
+	@if [ -f $(strip $(PROGPATH))/"1_tmp_parasets.nc" ]  ; then rm $(strip $(PROGPATH))/?_tmp_parasets.nc  ; fi
+	@if [ -f $(strip $(PROGPATH))/"10_tmp_parasets.nc" ] ; then rm $(strip $(PROGPATH))/??_tmp_parasets.nc ; fi
 
 cleanclean: clean
 	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* "$(PROG)".dSYM $(strip $(PROGPATH))/html
