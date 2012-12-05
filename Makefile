@@ -731,7 +731,7 @@ ifeq (False,$(islib))
 	rm -f "$(PROG)"
 endif
 	rm -f $(GASRCS) $(GFORASRCS) $(GFASRCS)
-	# Special cleaning of CHS library tests
+#       Special cleaning of CHS library tests
         ifneq (,$(findstring $(SOURCEPATH),test_netcdf_imsl_proj))
 	    @if [ -f $(SOURCEPATH)/test.nc ] ; then rm $(SOURCEPATH)/test.nc ; fi
         endif
