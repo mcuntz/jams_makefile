@@ -87,3 +87,9 @@ LAPACKDIR   := /usr/lib
 LAPACKLIB   := $(LAPACKDIR)/lapack
 GFORTRANDIR := $(GNUDIR)
 GFORTRANLIB := $(GNULIB)
+
+# Documentation
+DOXYGENDIR :=
+DOTDIR     :=
+TEXDIR     :=
+PERLDIR    :=

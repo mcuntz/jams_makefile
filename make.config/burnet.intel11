@@ -90,3 +90,9 @@ LAPACKDIR   := /home/apps/lapack/3.4.0
 LAPACKLIB   := $(LAPACKDIR)/lib
 GFORTRANDIR := /home/apps/gcc/4.6.1
 GFORTRANLIB := $(GFORTRANDIR)/lib
+
+# Documentation
+DOXYGENDIR :=
+DOTDIR     :=
+TEXDIR     :=
+PERLDIR    :=

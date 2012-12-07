@@ -12,7 +12,7 @@
 #     If LIBNAME  is given then a library will be created instead.
 #
 # TARGETS
-#     all (default), check (=test), clean, cleanclean, cleancheck (=cleantest), html, info
+#     all (default), check (=test), clean, cleanclean, cleancheck (=cleantest), html, pdf, doxygen, info
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'.
@@ -30,10 +30,13 @@
 #     For main variables see 'make info'.
 #
 # DEPENDENCIES
-#    This make file uses the following files:
+#    This makefile uses the following files:
 #        $(MAKEDPATH)/make.d.pl, $(CONFIGPATH)/$(system).$(compiler), $(CONFIGPATH)/$(system).alias
-#        $(CONFIGPATH)/f2html, $(CONFIGPATH)/f2html.fgenrc
 #    The default $(MAKEDPATH) and $(CONFIGPATH) is make.config
+#    The makefile can se doxygen for html and pdf automatic documentation. It is then using:
+#        $(DOXPATH)/doxygen.config
+#    If this is not available, it uses the perl script f2html for html documentation:
+#        $(CONFIGPATH)/f2html, $(CONFIGPATH)/f2html.fgenrc
 #
 # RESTRICTIONS
 #    Not all packages work with or are compiled for all compilers.
@@ -79,6 +82,7 @@ SRCPATH    := test_standard       # where are the source files; use test_??? to 
 PROGPATH   := .       # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
+DOXPATH    := .       # where is doxygen.config
 TESTPATH   := .
 #
 PROGNAME := Prog # Name of executable
@@ -86,7 +90,7 @@ LIBNAME  := #libminpack.a # Name of library
 #
 # Options
 # Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet
-system   := mcair
+system   := eve
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
 compiler := gnu
 # Releases: debug, release
@@ -249,7 +253,7 @@ endif
 # --- CHECK 1 ---------------------------------------------------
 #
 
-systems=$(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)
+systems = $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.pl/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)
 ifeq (,$(findstring $(system),$(systems)))
     $(error Error: system '$(system)' not found: known systems are $(systems))
 endif
@@ -260,7 +264,7 @@ endif
 
 # Include compiler alias on specific systems, e.g. nag for nag53
 icompiler := $(compiler)
-ALIASINC := $(strip $(CONFIGPATH))/$(system).alias
+ALIASINC  := $(strip $(CONFIGPATH))/$(system).alias
 ifeq (exists, $(shell if [ -f $(ALIASINC) ] ; then echo 'exists' ; fi))
     include $(ALIASINC)
 endif
@@ -534,6 +538,70 @@ ifeq ($(lapack),true)
     DEFINES += -DLAPACK
 endif
 
+# --- DOXYGEN ---------------------------------------------------
+ISDOX := True
+ifneq (,$(filter doxygen html pdf, $(MAKECMDGOALS)))
+    ifeq (exists, $(shell if [ -f $(strip $(DOXPATH))/"doxygen.config" ] ; then echo 'exists' ; fi))
+        ifneq ($(DOXYGENDIR),)
+            ifneq (exists, $(shell if [ -f $(strip $(DOXYGENDIR))/"doxygen" ] ; then echo 'exists' ; fi))
+                $(error Error: doxygen not found in $(strip $(DOXYGENDIR)).)
+            else
+                DOXYGEN := $(strip $(DOXYGENDIR))/"doxygen"
+            endif
+        else
+            ifneq (, $(shell which doxygen))
+                DOXYGEN := doxygen
+            else
+                $(error Error: doxygen not found in $PATH.)
+            endif
+        endif
+        ifneq ($(DOTDIR),)
+            ifneq (exists, $(shell if [ -f $(strip $(DOTDIR))/"dot" ] ; then echo 'exists' ; fi))
+                $(error Error: dot not found in $(strip $(DOTDIR)).)
+            else
+                DOTPATH := $(strip $(DOTDIR))
+            endif
+        else
+            ifneq (, $(shell which dot))
+                DOTPATH := $(dir $(shell which dot))
+            else
+                DOTPATH :=
+            endif
+        endif
+        ifneq ($(TEXDIR),)
+            ifneq (exists, $(shell if [ -f $(strip $(TEXDIR))/"latex" ] ; then echo 'exists' ; fi))
+                $(error Error: latex not found in $(strip $(TEXDIR)).)
+            else
+                TEXPATH := $(strip $(TEXDIR))
+            endif
+        else
+            ifneq (, $(shell which latex))
+                TEXPATH := $(dir $(shell which latex))
+            else
+                $(error Error: latex not found in $PATH.)
+            endif
+        endif
+        ifneq ($(PERLDIR),)
+            ifneq (exists, $(shell if [ -f $(strip $(PERLDIR))/"perl" ] ; then echo 'exists' ; fi))
+                $(error Error: perl not found in $(strip $(PERLDIR)).)
+            else
+                PERLPATH := $(strip $(PERLDIR))
+            endif
+        else
+            ifneq (, $(shell which perl))
+                PERLPATH := $(dir $(shell which perl))
+            else
+                $(error Error: perl not found in $PATH.)
+            endif
+        endif
+    else
+        ISDOX += False
+        ifneq (,$(filter doxygen pdf, $(MAKECMDGOALS)))
+            $(error Error: no doxygen.config found in $(strip $(DOXPATH)).)
+        endif
+    endif
+endif
+
 #
 # --- FINISH SETUP ---------------------------------------------------
 #
@@ -567,10 +635,10 @@ LD := $(F90)
 iphony    := False
 iphonyall := False
 ifneq (,$(strip $(MAKECMDGOALS)))
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ cleancheck/ cleantest/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ pdf/ doxygen/ cleancheck/ cleantest/))
         iphony := True
     endif
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ cleancheck/ cleantest/ info/ clean/ cleanclean/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ pdf/ doxygen/ cleancheck/ cleantest/ info/ clean/ cleanclean/))
         iphonyall := True
     endif
 endif
@@ -663,7 +731,7 @@ endif
 # --- TARGETS ---------------------------------------------------
 #
 
-.PHONY: clean cleanclean cleantest cleancheck html check test info
+.PHONY: clean cleanclean cleantest cleancheck html pdf doxygen check test info
 
 # Link Program
 all: $(PROG) $(LIB)
@@ -741,6 +809,10 @@ endif
 
 cleanclean: clean
 	rm -rf "$(SOURCEPATH)"/.*.r* "$(SOURCEPATH)"/.*.d* "$(PROG)".dSYM $(strip $(PROGPATH))/html
+	@if [ -f $(strip $(DOXPATH))/"doxygen.config" ] ; then \
+	    rm -rf $(strip $(PROGPATH))/latex ; \
+	fi
+
 ifeq (True,$(islib))
 	rm -f "$(LIB)"
 endif
@@ -783,8 +855,28 @@ endif
 
 test: check
 
+doxygen: 
+	@export PATH=${PATH}:$(TEXPATH)
+	@cat $(strip $(DOXPATH))/"doxygen.config" | \
+	     sed -e "/^PERL_PATH/s|=.*|=$(PERLPATH)|" | \
+	     sed -e "/^DOT_PATH/s|=.*|=$(DOTPATH)|" | $(DOXYGEN) -
+
 html:
-	$(strip $(CONFIGPATH))/f2html -f $(strip $(CONFIGPATH))/f2html.fgenrc -d $(strip $(PROGPATH))/html $(SOURCEPATH)
+	@if [ $(ISDOX) == True ] ; then \
+	    export PATH=${PATH}:$(TEXPATH) ; \
+	    cat $(strip $(DOXPATH))/"doxygen.config" | \
+	        sed -e "/^PERL_PATH/s|=.*|=$(PERLPATH)|" | sed -e "/^DOT_PATH/s|=.*|=$(DOTPATH)|" | \
+	        $(DOXYGEN) - ; \
+	else \
+	    $(strip $(CONFIGPATH))/f2html -f $(strip $(CONFIGPATH))/f2html.fgenrc -d $(strip $(PROGPATH))/html \
+	                                     $(SOURCEPATH) ; \
+	fi
+
+pdf:
+	@export PATH=${PATH}:$(TEXPATH)
+	@cat $(strip $(DOXPATH))/"doxygen.config" | sed -e "/^PERL_PATH/s|=.*|=$(PERLPATH)|" | \
+	     sed -e "/^DOT_PATH/s|=.*|=$(DOTPATH)|" | $(DOXYGEN) -
+	@cd latex ; make pdf
 
 info:
 	@echo "CHS Makefile"

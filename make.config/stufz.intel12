@@ -86,3 +86,9 @@ FPROJDIR :=
 LAPACKDIR   := /usr/lib
 LAPACKLIB   := $(LAPACKDIR)/lapack
 GFORTRANDIR := /usr/local
+
+# Documentation
+DOXYGENDIR :=
+DOTDIR     :=
+TEXDIR     :=
+PERLDIR    :=

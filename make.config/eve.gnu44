@@ -82,6 +82,12 @@ LAPACKLIB   := $(LAPACKDIR)/lib64
 GFORTRANDIR := $(GNUDIR)
 GFORTRANLIB := $(GNULIB)
 
+# Documentation
+DOXYGENDIR := /usr/local/doxygen/1.8.2-1/bin
+DOTDIR     := /usr/local/graphviz/2.28.0-1/bin
+TEXDIR     := /usr/local/texlive/2011/bin/x86_64-linux
+PERLDIR    := /usr/bin
+
 # Check some dependices, e.g. IMSL needs intel11 on eve
 ifneq (,$(findstring $(system),eve))
     ifneq (,$(findstring $(imsl),vendor imsl))

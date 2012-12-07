@@ -89,3 +89,9 @@ LAPACKDIR   :=
 LAPACKLIB   := 
 GFORTRANDIR :=
 GFORTRANLIB := 
+
+# Documentation
+DOXYGENDIR :=
+DOTDIR     :=
+TEXDIR     :=
+PERLDIR    :=
