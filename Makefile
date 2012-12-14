@@ -724,7 +724,9 @@ ifneq ($(ABSOFT),)
     export ABSOFT
 endif
 ifneq ($(LDPATH),)
-    export LD_LIBRARY_PATH=$(LDPATH)
+    empty:=
+    space:= $(empty) $(empty)
+    export LD_LIBRARY_PATH=$(subst $(space),$(empty),$(LDPATH))
 endif
 
 #
