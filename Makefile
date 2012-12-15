@@ -89,7 +89,7 @@ PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
-# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet, lsimac
+# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet, lsimac, lsair
 system   := eve
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, absoft, nag51, nag52, nag53, sun12
 compiler := gnu

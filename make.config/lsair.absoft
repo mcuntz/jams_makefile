@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for Absoft compiler at Luis' iMac
+# Setup file for Absoft compiler at Luis' Macbook Air
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.
@@ -47,11 +47,9 @@ ifeq ($(release),debug)
     # Vectorisation: -YLOOP_ANALYZER -LNO:simd_verbose=on -LNO:simd=2 (1: default; 2: aggressive)
     F90FLAGS += -g -en -Ra -Rb -Rc -Rn -Rp -Rs -YNDFP=1 -O0 -z0
     #F90FLAGS += -g -en     -Rb -Rc     -Rp -Rs -YNDFP=1 -O0 -z0
-    FCFLAGS  += $(F90FLAGS)
     CFLAGS   += -pedantic-errors -Wall -W -O -g
 else
     F90FLAGS += -O3
-    FCFLAGS  += $(F90FLAGS)
     CFLAGS   += -O3
 endif
 #F90FLAGS += -m64 -cpp -f free -YMOD_OUT_DIR=$(OBJPATH) -I$(OBJPATH) -p $(OBJPATH) -safefp -OPT:roundoff=0 #-stack:1f40000
@@ -66,12 +64,8 @@ LDFLAGS += -m64
 IMSLDIR := /opt/imsl/fnl600/macab110e64
 
 # MKL
-MKLDIR := /opt/intel/composerxe-2011.4.184/mkl
-MKLINC := $(MKLDIR)/include/intel64/lp64
-MKLLIB := $(MKLDIR)/lib
-MKL95DIR := /opt/lib/mkl95_lapack/absoft
-MKL95INC := $(MKL95DIR)/include/intel64/lp64
-MKL95LIB := $(MKL95DIR)/lib/intel64
+MKLDIR := 
+MKL95DIR :=
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
@@ -82,7 +76,7 @@ else
     NCDIR   := $(ABSOFT)
     NCINC   := $(ABSOFTINC)
     NCLIB   := $(ABSOFTLIB)
-    SZLIB   := /opt/local/lib/
+    SZLIB   := /usr/local
     HDF5LIB := $(ABSOFTLIB)
 endif
 
