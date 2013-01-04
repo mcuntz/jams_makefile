@@ -80,7 +80,8 @@ LAPACKDIR   :=
 GFORTRANDIR := $(GNUDIR)
 
 # Documentation
-DOXYGENDIR := /usr/local/bin
-DOTDIR     := /usr/local/bin
-TEXDIR     := /usr/texbin
-PERLDIR    := /usr/bin
+DOXYGENDIR := /Applications/Doxygen.app/Contents/Resources 
+DOTDIR     := /usr/local/bin 
+TEXDIR     := /usr/texbin 
+PERLDIR    := /usr/bin 
+
