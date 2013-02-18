@@ -59,20 +59,20 @@ RPATH += -Wl,-rpath,$(GNULIB)
 IMSLDIR :=
 
 # MKL
-MKLDIR := /opt/intel/composer_xe_2011_sp1.9.293/mkl
-MKLINC := $(MKLDIR)/include/intel64/lp64
-MKLLIB := $(MKLDIR)/lib/intel64
-MKL95DIR := $(MKLDIR)
-MKL95INC := $(MKL95DIR)/include/intel64/lp64
-MKL95LIB := $(MKL95DIR)/lib/intel64
+MKLDIR := 
+MKLINC := 
+MKLLIB := 
+MKL95DIR := 
+MKL95INC := 
+MKL95LIB := 
 
 # NETCDF
-NCDIR   := /opt/gfortran_netcdf4.1.2
+NCDIR   := /usr/local/netcdf_4.1.2_gfortran46
 SZLIB   := /usr/local
-HDF5LIB := /opt/gfortran_netcdf4.1.2
+HDF5LIB := /usr/local/hdf5_1.8.9_gfortran46/lib
 
 # PROJ
-PROJ4DIR := /usr/local
+PROJ4DIR :=
 FPROJDIR := 
 
 # LAPACK
