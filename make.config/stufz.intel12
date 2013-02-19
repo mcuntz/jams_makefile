@@ -28,7 +28,7 @@
 # Define subirectories if another structure
 
 # Paths
-INTEL    := /opt/intel/composer_xe_2011_sp1.9.293
+INTEL    := /usr/local/intel/composer_xe_2011_sp1.9.293
 INTELDIR := $(INTEL)/compiler
 INTELLIB := $(INTELDIR)/lib
 INTELBIN := $(INTEL)/bin/intel64
@@ -74,12 +74,12 @@ MKL95INC := $(MKL95DIR)/include/intel64/lp64
 MKL95LIB := $(MKL95DIR)/lib
 
 # NETCDF
-NCDIR := /opt/intel_netcdf4.1.2
+NCDIR := /usr/local/netcdf-4.1.2-ifort12
 SZLIB   := /usr/local
-HDF5LIB := /usr/local
+HDF5LIB :=
 
 # PROJ
-PROJ4DIR := /usr/local/
+PROJ4DIR := /usr/local
 FPROJDIR := 
 
 # LAPACK
