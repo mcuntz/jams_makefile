@@ -68,10 +68,10 @@ IMSLDIR :=
 # MKL
 MKLDIR := $(INTEL)/mkl
 MKLINC := $(MKLDIR)/include/intel64/lp64
-MKLLIB := $(MKLDIR)/lib
+MKLLIB := $(MKLDIR)/lib/intel64
 MKL95DIR := $(MKLDIR)
 MKL95INC := $(MKL95DIR)/include/intel64/lp64
-MKL95LIB := $(MKL95DIR)/lib
+MKL95LIB := $(MKL95DIR)/lib/lp64
 
 # NETCDF
 NCDIR := /usr/local/netcdf-4.1.2-ifort12
@@ -83,9 +83,9 @@ PROJ4DIR := /usr/local
 FPROJDIR := 
 
 # LAPACK
-LAPACKDIR   := /usr/lib
-LAPACKLIB   := $(LAPACKDIR)/lapack
-GFORTRANDIR := /usr/local
+LAPACKDIR   := 
+LAPACKLIB   := 
+GFORTRANDIR := 
 
 # Documentation
 DOXYGENDIR :=

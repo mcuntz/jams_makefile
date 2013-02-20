@@ -66,7 +66,7 @@ RPATH += -Wl,-rpath,$(NAGLIB)
 IMSLDIR :=
 
 # MKL
-MKLDIR := /opt/intel/composer_xe_2011_sp1.9.293/mkl
+MKLDIR := /usr/local/intel/composer_xe_2011_sp1.9.293/mkl
 MKLINC := $(MKLDIR)/include/intel64/lp64
 MKLLIB := $(MKLDIR)/lib/intel64
 MKL95DIR := $(MKLDIR)
@@ -74,9 +74,9 @@ MKL95INC := $(MKL95DIR)/include/intel64/lp64
 MKL95LIB := $(MKL95DIR)/lib/intel64
 
 # NETCDF
-NCDIR   := /opt/nagfor_netcdf4.1.2
+NCDIR   := /usr/local/netcdf-4.1.2-nag53
 SZLIB   := /usr/local
-HDF5LIB := /opt/nagfor_netcdf4.1.2
+HDF5LIB := /usr
 
 # PROJ
 PROJ4DIR := /usr/local
