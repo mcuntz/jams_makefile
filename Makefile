@@ -116,8 +116,8 @@ static   := shared
 # the following EXTRA_* variables. This allows for example to set an extra compiler
 # option or define a preprocessor variable such as: EXTRA_DEFINES := -DNOGUI -DDPREC
 #
-# INTEL optimisation: -ipo=0 -ipo-c
-#     -ipo=n             Interprocedural optimization
+# INTEL optimisation: -fast (=-ipo -O3 -static)
+#     -fast             Multifile interprocedure optimization
 # INTEL debug: -fpe=0 -fpe-all=0 -no-ftz -ftrapuv
 #     -fpe=0 -fpe-all=0  errors on all floating point exceptions except underflow.
 #     -no-ftz            catches then also all underflows.

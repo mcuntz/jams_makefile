@@ -46,9 +46,9 @@ ifeq ($(release),debug)
     CFLAGS   += -g -debug -traceback -fp-stack-check -O0 -debug -Wall -Wcheck
 else
     # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
-    F90FLAGS += $(opti) -vec-report0 -override-limits
-    FCFLAGS  += $(opti) -vec-report0 -override-limits
-    CFLAGS   += $(opti)
+    F90FLAGS += -O3 -vec-report0 -override-limits
+    FCFLAGS  += -O3 -vec-report0 -override-limits
+    CFLAGS   += -O3
 endif
 F90FLAGS += -assume byterecl -cpp -fp-model precise -m64 -module "$(OBJPATH)"
 FCFLAGS  += -assume byterecl -cpp -fp-model precise -m64 -module "$(OBJPATH)" -fixed
