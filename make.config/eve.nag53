@@ -4,7 +4,7 @@
 # Setup file for NAG compiler 5.3 at eve.ufz.de
 #
 # LICENSE
-#    This file is part of the UFZ makefile project.
+#    This file is part of the UFZ makefile project.  
 #
 #    The UFZ makefile project is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as published by
@@ -28,7 +28,7 @@
 # Define subdirectories if another structure
 
 # Paths
-NAGDIR := /opt/nag/5.3.1-907
+NAGDIR := /opt/nag/5.3.1-919
 NAGLIB := $(NAGDIR)/lib
 NAGBIN := $(NAGDIR)/bin
 
@@ -77,7 +77,8 @@ MKL95LIB := $(MKL95DIR)/lib/intel64
 ifeq ($(netcdf),netcdf3)
     NCDIR := /usr/local/netcdf/3.6.3_nag53
 else
-    NCDIR   := /usr/local/netcdf/4.1.3_nagfor
+    #NCDIR   := /usr/local/netcdf/4.1.3_nagfor
+    NCDIR   := /usr/local/netcdf/4.1.1_nagfor
     CURLLIB := /usr/lib64
     SZLIB   := /usr/local/szip/2.1/lib
     HDF5LIB := /usr/local/hdf5/1.8.6/lib
