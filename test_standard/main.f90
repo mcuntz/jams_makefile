@@ -27,9 +27,21 @@ PROGRAM main
   call alloc_arr(nx,ny)
   call alloc_arr2(nx,ny)
   call alloc_strucarr(nx,ny)
+  !$OMP parallel
   arr(:,:) = 0.9_dp
   arr2(:,:) = 0.9_dp
   struc%arr(:,:) = 0.9_dp
+  !$OMP end parallel
+
+  !$OMP parallel default(shared) &
+  !$OMP private(i)
+  !$OMP do
+  do i=1, ny
+     arr(:,i) = 2.0_dp*arr(:,i)
+  end do
+  !$OMP end do
+  !$OMP end parallel
+
   
   if (.not. allocated(local_arr)) allocate(local_arr(nx,ny))
   if (.not. allocated(local_arr1)) allocate(local_arr1(nx,ny))
@@ -62,12 +74,12 @@ PROGRAM main
   write(*,*) 'Prec sp ',  precision(1.0_sp)
   write(*,*) 'Prec dp ',  precision(1.0_dp)
 
-  ztmp(1) = huge(0.9_dp)
-  write(*,*) 'H0: ', ztmp(1)
-  write(*,*) 'H1: ', nearest(ztmp(1), 1._dp)
-  write(*,*) 'H2: ', nearest(ztmp(1),-1._dp)
-  write(*,*) 'H3: ', nearest(1e6_dp*ztmp(1), 1._dp)
-  write(*,*) 'H4: ', nearest(1e6_dp*ztmp(1),-1._dp)
+  ! ztmp(1) = huge(0.9_dp)
+  ! write(*,*) 'H0: ', ztmp(1)
+  ! write(*,*) 'H1: ', nearest(ztmp(1), 1._dp)
+  ! write(*,*) 'H2: ', nearest(ztmp(1),-1._dp)
+  ! write(*,*) 'H3: ', nearest(1e6_dp*ztmp(1), 1._dp)
+  ! write(*,*) 'H4: ', nearest(1e6_dp*ztmp(1),-1._dp)
   ztmp(1) = tiny(0.9_dp)
   write(*,*) 'H0: ', ztmp(1)
   write(*,*) 'H1: ', nearest(ztmp(1), 1._dp)
