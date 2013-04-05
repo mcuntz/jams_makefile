@@ -62,16 +62,16 @@ IMSLDIR :=
 MKLDIR := /opt/intel/composerxe-2011.4.184/mkl
 MKLINC := $(MKLDIR)/include/intel64/lp64
 MKLLIB := $(MKLDIR)/lib
-MKL95DIR := /opt/lib/mkl95_lapack/gfortran48
+MKL95DIR := /opt/lib/mkl95_lapack/gnu47
 MKL95INC := $(MKL95DIR)/include/intel64/lp64
 MKL95LIB := $(MKL95DIR)/lib/intel64
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR := /opt/lib/netcdf3_gfortran_static
+    NCDIR   :=
 else
-    NCDIR    = /usr/local
-    CURLLIB := /opt/lib/curl/lib
+    NCDIR   := /usr/local/netcdf_4.2_gnu47
+    CURLLIB :=
     SZLIB   := /usr/local/lib
     HDF5LIB := /usr/local/lib
 endif
