@@ -12,7 +12,8 @@
 #     If LIBNAME  is given then a library will be created instead.
 #
 # TARGETS
-#     all (default), check (=test), clean, cleanclean, cleancheck (=cleantest), html, pdf, doxygen, info
+#     all (default), check (=test), clean, cleanclean, cleancheck (=cleantest=checkclean=testclean),
+#     html, pdf, doxygen, info
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'.
@@ -96,7 +97,7 @@ compiler := gnu
 # Releases: debug, release
 release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   :=
+netcdf   := netcdf4
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
@@ -635,10 +636,10 @@ LD := $(F90)
 iphony    := False
 iphonyall := False
 ifneq (,$(strip $(MAKECMDGOALS)))
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ pdf/ doxygen/ cleancheck/ cleantest/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ pdf/ doxygen/ cleancheck/ cleantest/ checkclean/ testclean/))
         iphony := True
     endif
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ pdf/ doxygen/ cleancheck/ cleantest/ info/ clean/ cleanclean/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ pdf/ doxygen/ cleancheck/ cleantest/ checkclean/ testclean/ info/ clean/ cleanclean/))
         iphonyall := True
     endif
 endif
@@ -733,7 +734,7 @@ endif
 # --- TARGETS ---------------------------------------------------
 #
 
-.PHONY: clean cleanclean cleantest cleancheck html pdf doxygen check test info
+.PHONY: clean cleanclean cleantest checkclean testclean cleancheck html pdf doxygen check test info
 
 # Link Program
 all: $(PROG) $(LIB)
@@ -826,6 +827,10 @@ cleancheck:
 
 cleantest: cleancheck
 
+checkclean: cleancheck
+
+testclean: cleancheck
+
 check:
 ifeq (True,$(islib))
 	$(error Error: check and test must be done with PROGNAME not LIBNAME.)
@@ -833,22 +838,22 @@ endif
 	for i in $(shell ls -d $(strip $(TESTPATH))/test*) ; do \
 	    rm -f "$(PROG)" ; \
 	    j=$${i/minpack/maxpack} ; \
+	    ldextra= ; \
 	    if [ $$i != $$j ] ; then \
 	    	 $(MAKE) -s MAKEDPATH=$(MAKEDPATH) SRCPATH="$$i"/../../minpack PROGPATH=$(PROGPATH) \
 	    	      CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=libminpack.a system=$(system) \
 	    	      release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
 	    	      imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
 	    	      openmp=$(openmp) NOMACWARN=true ; \
+                 ldextra="-L. -lminpack" ; \
 	    fi ; \
 	    $(MAKE) -s MAKEDPATH=$(MAKEDPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
 	         CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
 	         release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
 	         imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
-	         openmp=$(openmp) NOMACWARN=true \
+	         openmp=$(openmp) NOMACWARN=true EXTRA_LDFLAGS="$$ldextra" \
 	    && { $(PROG) 2>&1 | grep -E '(o.k.|failed)' ;} ; status=$$? ; \
-	    if [ $$status != 0 ] ; then \
-	      echo "$$i failed!" ; \
-	    fi ; \
+	    if [ $$status != 0 ] ; then echo "$$i failed!" ; fi ; \
 	    $(MAKE) -s SRCPATH=$$i cleanclean ; \
 	    if [ $$i != $$j ] ; then \
 	    	 $(MAKE) -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a cleanclean ; \
