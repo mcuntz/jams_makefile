@@ -79,25 +79,25 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test_standard       # where are the source files; use test_??? to run a test directory
-PROGPATH   := .       # where shall be the executable
+SRCPATH    := ../FORTRAN_chs_lib/test       # where are the source files; use test_??? to run a test directory
+PROGPATH   := $(SRCPATH)       # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
 DOXPATH    := .       # where is doxygen.config
-TESTPATH   := .
+TESTPATH   := $(SRCPATH)
 #
 PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
-# Systems: eve, mcimac, mcpowerbook, mcair, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet, lsimac, lsair
-system   := mcimac
+# Systems: eve, mcimac, mcpowerbook, mcair, jcthinkpad, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet, lsimac, lsair
+system   := jcthinkpad
 # Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, gnu47, gnu48, absoft, nag51, nag52, nag53, sun12
-compiler := gnu
+compiler := gnu46
 # Releases: debug, release
-release  := release
+release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   := netcdf4
+netcdf   := 
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
