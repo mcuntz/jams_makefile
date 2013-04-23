@@ -77,9 +77,10 @@ MKL95LIB := $(MKL95DIR)/lib/intel64
 ifeq ($(netcdf),netcdf3)
     NCDIR :=
 else
-    NCDIR   :=
-    SZLIB   :=
-    HDF5LIB :=
+    NCDIR   := /usr/local/netcdf_4.2_nag53
+    CURLLIB :=
+    SZLIB   := /usr/local/lib
+    HDF5LIB := /usr/local/lib
 endif
 
 # PROJ
