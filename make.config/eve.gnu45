@@ -92,7 +92,7 @@ GFORTRANLIB := $(GNULIB)
 
 # Documentation
 DOXYGENDIR := /usr/local/doxygen/1.8.2-1/bin
-DOTDIR     := /usr/local/graphviz/2.28.0-1/bin
+DOTDIR     := /usr/local/graphviz/2.28.0-2/bin
 TEXDIR     := /usr/local/texlive/2011/bin/x86_64-linux
 PERLDIR    := /usr/bin
 ifneq ($(LDPATH),)
@@ -101,7 +101,7 @@ else
     LDPATH := /usr/local/graphviz/2.28.0-2/lib:/usr/local/librsvg/2.36.4-1/lib
 endif
 LDPATH     += :/usr/local/libcroco/0.6.8-1/lib:/usr/local/pango/1.32.4-1/lib
-LDPATH     += :/usr/local/harfbuzz/0.9.9-1/lib:/usr/local/cairo/1.12.8-1/lib
+LDPATH     += :/usr/local/harfbuzz/0.9.9-1/lib:/usr/local/cairo/1.12.8-2/lib
 LDPATH     += :/usr/local/fontconfig/2.10.2-1/lib:/usr/local/freetype/2.4.10-1/lib
 LDPATH     += :/usr/local/expat/2.1.0-1/lib:/usr/local/pixman/0.28.0-1/lib
 LDPATH     += :/usr/local/libxml2/2.8.0/lib:/usr/local/gdk-pixbuf/2.26.5-1/lib

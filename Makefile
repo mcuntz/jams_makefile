@@ -13,7 +13,7 @@
 #
 # TARGETS
 #     all (default), check (=test), clean, cleanclean, cleancheck (=cleantest=checkclean=testclean),
-#     html, pdf, doxygen, info
+#     html, pdf, latex, doxygen, info
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'.
@@ -34,7 +34,7 @@
 #    This makefile uses the following files:
 #        $(MAKEDPATH)/make.d.pl, $(CONFIGPATH)/$(system).$(compiler), $(CONFIGPATH)/$(system).alias
 #    The default $(MAKEDPATH) and $(CONFIGPATH) is make.config
-#    The makefile can se doxygen for html and pdf automatic documentation. It is then using:
+#    The makefile can use doxygen for html and pdf automatic documentation. It is then using:
 #        $(DOXPATH)/doxygen.config
 #    If this is not available, it uses the perl script f2html for html documentation:
 #        $(CONFIGPATH)/f2html, $(CONFIGPATH)/f2html.fgenrc
@@ -541,7 +541,7 @@ endif
 
 # --- DOXYGEN ---------------------------------------------------
 ISDOX := True
-ifneq (,$(filter doxygen html pdf, $(MAKECMDGOALS)))
+ifneq (,$(filter doxygen html latex pdf, $(MAKECMDGOALS)))
     ifeq (exists, $(shell if [ -f $(strip $(DOXPATH))/"doxygen.config" ] ; then echo 'exists' ; fi))
         ifneq ($(DOXYGENDIR),)
             ifneq (exists, $(shell if [ -f $(strip $(DOXYGENDIR))/"doxygen" ] ; then echo 'exists' ; fi))
@@ -597,7 +597,7 @@ ifneq (,$(filter doxygen html pdf, $(MAKECMDGOALS)))
         endif
     else
         ISDOX += False
-        ifneq (,$(filter doxygen pdf, $(MAKECMDGOALS)))
+        ifneq (,$(filter doxygen latex pdf, $(MAKECMDGOALS)))
             $(error Error: no doxygen.config found in $(strip $(DOXPATH)).)
         endif
     endif
@@ -636,10 +636,10 @@ LD := $(F90)
 iphony    := False
 iphonyall := False
 ifneq (,$(strip $(MAKECMDGOALS)))
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ pdf/ doxygen/ cleancheck/ cleantest/ checkclean/ testclean/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ latex/ pdf/ doxygen/ cleancheck/ cleantest/ checkclean/ testclean/))
         iphony := True
     endif
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ pdf/ doxygen/ cleancheck/ cleantest/ checkclean/ testclean/ info/ clean/ cleanclean/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ latex/ pdf/ doxygen/ cleancheck/ cleantest/ checkclean/ testclean/ info/ clean/ cleanclean/))
         iphonyall := True
     endif
 endif
@@ -734,7 +734,7 @@ endif
 # --- TARGETS ---------------------------------------------------
 #
 
-.PHONY: clean cleanclean cleantest checkclean testclean cleancheck html pdf doxygen check test info
+.PHONY: clean cleanclean cleantest checkclean testclean cleancheck html latex pdf doxygen check test info
 
 # Link Program
 all: $(PROG) $(LIB)
@@ -863,27 +863,24 @@ endif
 test: check
 
 doxygen: 
-	@export PATH=${PATH}:$(TEXPATH)
 	@cat $(strip $(DOXPATH))/"doxygen.config" | \
 	     sed -e "/^PERL_PATH/s|=.*|=$(PERLPATH)|" | \
-	     sed -e "/^DOT_PATH/s|=.*|=$(DOTPATH)|" | $(DOXYGEN) -
+	     sed -e "/^DOT_PATH/s|=.*|=$(DOTPATH)|" | env PATH=${PATH}:$(TEXPATH) $(DOXYGEN) -
 
 html:
 	@if [ $(ISDOX) == True ] ; then \
-	    export PATH=${PATH}:$(TEXPATH) ; \
 	    cat $(strip $(DOXPATH))/"doxygen.config" | \
-	        sed -e "/^PERL_PATH/s|=.*|=$(PERLPATH)|" | sed -e "/^DOT_PATH/s|=.*|=$(DOTPATH)|" | \
-	        $(DOXYGEN) - ; \
+	        sed -e "/^PERL_PATH/s|=.*|=$(PERLPATH)|" | \
+	        sed -e "/^DOT_PATH/s|=.*|=$(DOTPATH)|" | env PATH=${PATH}:$(TEXPATH) $(DOXYGEN) - ; \
 	else \
 	    $(strip $(CONFIGPATH))/f2html -f $(strip $(CONFIGPATH))/f2html.fgenrc -d $(strip $(PROGPATH))/html \
 	                                     $(SOURCEPATH) ; \
 	fi
 
-pdf:
-	@export PATH=${PATH}:$(TEXPATH)
-	@cat $(strip $(DOXPATH))/"doxygen.config" | sed -e "/^PERL_PATH/s|=.*|=$(PERLPATH)|" | \
-	     sed -e "/^DOT_PATH/s|=.*|=$(DOTPATH)|" | $(DOXYGEN) -
-	@cd latex ; make pdf
+latex: pdf
+
+pdf: doxygen
+	@cd latex ; env PATH=${PATH}:$(TEXPATH) make pdf
 
 info:
 	@echo "CHS Makefile"
