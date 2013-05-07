@@ -85,7 +85,7 @@ LAPACKDIR   :=
 GFORTRANDIR := /usr/local
 
 # Documentation
-DOXYGENDIR := /usr/local/bin
+DOXYGENDIR := /Applications/Program/Doxygen.app/Contents/Resources
 DOTDIR     := /usr/local/bin
 TEXDIR     := /usr/texbin
 PERLDIR    := /usr/bin
