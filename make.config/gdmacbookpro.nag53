@@ -70,14 +70,14 @@ MKLDIR :=
 MKL95DIR :=
 
 # NETCDF
-# ifeq ($(netcdf),netcdf3)
-#     NCDIR := /usr/local/netcdf_3.6.3_nag52
-# else
-#     NCDIR    = /usr/local/netcdf_4.1.2_nag52
-#     CURLLIB := /usr/lib
-#     SZLIB   := /usr/local/lib
-#     HDF5LIB := /usr/local/hdf5_1.1.8_nag52/lib
-# endif
+ifeq ($(netcdf),netcdf3)
+    NCDIR :=
+else
+    NCDIR    = /usr/local/netcdf_4.1.2_nag53
+    CURLLIB := /usr/bin
+    SZLIB   := /usr/local/lib
+    HDF5LIB := /usr/local/hdf5_1.8.11_nag53/lib
+endif
 
 # PROJ
 # PROJ4DIR := /usr/local
