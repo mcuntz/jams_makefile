@@ -636,10 +636,10 @@ LD := $(F90)
 iphony    := False
 iphonyall := False
 ifneq (,$(strip $(MAKECMDGOALS)))
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ latex/ pdf/ doxygen/ cleancheck/ cleantest/ checkclean/ testclean/))
+    ifneq (,$(findstring /$(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/ /cleancheck/ /cleantest/ /checkclean/ /testclean/))
         iphony := True
     endif
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,check/ test/ html/ latex/ pdf/ doxygen/ cleancheck/ cleantest/ checkclean/ testclean/ info/ clean/ cleanclean/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/ /cleancheck/ /cleantest/ /checkclean/ /testclean/ /info/ /clean/ /cleanclean/))
         iphonyall := True
     endif
 endif
