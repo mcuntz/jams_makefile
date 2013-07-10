@@ -6,10 +6,10 @@
 # CALLING SEQUENCE
 #     make [options] [VARIABLE=VARIABLE ...] [targets]
 #
-#     Variables can be set on the command line [VAR=VAR] or in the SWITCHES section below.
+#     Variables can be set on the command line [VAR=VAR] or in the section SWITCHES below.
 #
-#     If PROGNAME is given then an executable will be compiled.
-#     If LIBNAME  is given then a library will be created instead.
+#     If PROGNAME is given, an executable will be compiled.
+#     If LIBNAME  is given, a library will be created.
 #
 # TARGETS
 #     all (default), check (=test), clean, cleanclean, cleancheck (=cleantest=checkclean=testclean),
@@ -21,9 +21,10 @@
 # VARIABLES
 #     All variables defined in this makefile.
 #     This makefile has lots of conditional statements depending on variables.
-#     If the variable functions as a switch then the condition checks for variable = true,
-#     otherwise the variable can have different values.
-#     See individual variables in SWITCHES section below or try 'make info'.
+#     If the variable works as a switch then the condition checks for variable = true,
+#     i.e. ifeq ($(variable),true)
+#     otherwise the variable can have any other value.
+#     See individual variables in section SWITCHES below or type 'make info'.
 #
 #     Variables can be empty for disabling a certain behaviour,
 #     e.g. if you do not want to use IMSL, set:  imsl=no  or  imsl=
@@ -68,7 +69,7 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with the UFZ makefile project. If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2011-2012 Matthias Cuntz, Juliane Mai, Stephan Thober
+#    Copyright 2011-2013 Matthias Cuntz, Juliane Mai, Stephan Thober
 #
 # Written Matthias Cuntz & Juliane Mai, UFZ Leipzig, Germany, Nov. 2011 - mc (at) macu.de
 
@@ -80,20 +81,21 @@ SHELL = /bin/bash
 
 # . is current directory, .. is parent directory
 SRCPATH    := ../FORTRAN_chs_lib/test       # where are the source files; use test_??? to run a test directory
-PROGPATH   := $(SRCPATH)       # where shall be the executable
+PROGPATH   := $(SRCPATH)  # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.pl script
-DOXPATH    := .       # where is doxygen.config
+DOXPATH    := .           # where is doxygen.config
 TESTPATH   := $(SRCPATH)
 #
 PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
-# Systems: eve, mcimac, mcpowerbook, mcair, jcthinkpad, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet, lsimac, lsair
-system   := jcthinkpad
-# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, gnu47, gnu48, absoft, nag51, nag52, nag53, sun12
-compiler := gnu46
+# Systems: eve and personal computers such as mcimac for Matthias Cuntz' iMac; look in $(MAKEDPATH) or type 'make info'
+system   := eve
+# Compiler: intelX, gnuX, nagX, sunX, where X stands for version number, e.g. intel13;
+#   look at $(MAKEDPATH)/$(system).alias for shortcuts or type 'make info'
+compiler := gnu
 # Releases: debug, release
 release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
