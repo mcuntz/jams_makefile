@@ -1,6 +1,7 @@
 # -*- Makefile -*-
+
 #
-# Setup file for Intel compiler 13 on Vanessa Haverd's Ubuntu
+# Setup file for Intel compiler 12 on Stephan's Ubuntu laptop
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.
@@ -37,7 +38,7 @@ F90 := $(INTELBIN)/ifort
 FC  := $(F90)
 CC  := $(INTELBIN)/icc
 ifeq ($(release),debug)
-    F90FLAGS += -warn all, -check all,noarg_temp_created -warn all -g -debug -traceback -fp-stack-check -O0 -debug
+    F90FLAGS += -check all,noarg_temp_created -warn all -g -debug -traceback -fp-stack-check -O0 -debug
     FCFLAGS  += -g -debug -traceback -fp-stack-check -O0 -debug
     CFLAGS   += -g -debug -traceback -fp-stack-check -O0 -debug -Wall -Wcheck
 else
@@ -66,13 +67,12 @@ IMSLDIR :=
 
 # MKL
 MKLDIR := $(INTEL)/mkl
-MKLINC := $(MKLDIR)/include/ia32
-MKLLIB := $(MKLDIR)/lib/ia32
+MKLINC := $(MKLDIR)/include/intel64
+MKLLIB := $(MKLDIR)/lib/intel64
 MKL95DIR := $(MKLDIR)
-MKL95INC := $(MKL95DIR)/include/ia32
-MKL95LIB := $(MKL95DIR)/lib/ia32
+MKL95INC := $(MKL95DIR)/include/intel64
+MKL95LIB := $(MKL95DIR)/lib/intel64
 
-# NETCDF
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR :=

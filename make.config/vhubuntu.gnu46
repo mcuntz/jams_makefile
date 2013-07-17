@@ -1,6 +1,7 @@
 # -*- Makefile -*-
+
 #
-# Setup file for Gnu compiler 4.6 on Vanessa Haverd's Ubuntu
+# Setup file for Gnu compiler 4.6 at Vanessa's Ubuntu
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.
@@ -36,6 +37,8 @@ F90 := $(GNUBIN)/gfortran
 FC  := $(F90)
 CC  := $(GNUBIN)/gcc
 ifeq ($(release),debug)
+
+
     F90FLAGS += -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
     FCFLAGS  += -pedantic-errors -ffixed-form -ffixed-line-length-132 -Wall -W -O -g
     CFLAGS   += -pedantic-errors -Wall -W -O -g
@@ -57,8 +60,13 @@ RPATH += -Wl,-rpath,$(GNULIB)
 IMSLDIR :=
 
 # MKL
-MKLDIR :=
-MKL95DIR :=
+INTEL  := /opt/intel/composer_xe_2013.4.183
+MKLDIR := $(INTEL)/mkl
+MKLINC := $(MKLDIR)/include/intel64
+MKLLIB := $(MKLDIR)/lib/intel64
+MKL95DIR := $(MKLDIR)
+MKL95INC := $(MKL95DIR)/include/intel64
+MKL95LIB := $(MKL95DIR)/lib/intel64
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
