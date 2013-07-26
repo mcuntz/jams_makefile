@@ -1,7 +1,7 @@
 PROGRAM main
 
-  USE kind, ONLY: dp, sp, i8
-  USE mo1,  ONLY: arr, alloc_arr, dealloc_arr, dosin, dosin2, dosin3, dosin4, dosin5, dosin6
+  USE kind, ONLY: dp, sp, i8, i4
+  USE mo1,  ONLY: arr, alloc_arr, dealloc_arr, dosin, dosin2, dosin21, dosin3, dosin4, dosin5, dosin6
   USE mo2,  ONLY: arr2, struc, alloc_arr2, alloc_strucarr, dealloc_arr2, dealloc_strucarr
 
   ! test passing arrays
@@ -9,6 +9,7 @@ PROGRAM main
   REAL(dp), ALLOCATABLE, DIMENSION(:,:) :: local_arr
   REAL(dp), ALLOCATABLE, DIMENSION(:,:) :: local_arr1
   REAL(dp), POINTER, DIMENSION(:,:) :: local_arr2
+  REAL(dp), ALLOCATABLE, DIMENSION(:) :: local_arr1d
   REAL(dp) :: ztmp(3), ztmp2(3)
   ! test sum
   ! INTEGER(i8) :: n1
@@ -18,9 +19,11 @@ PROGRAM main
   INTEGER(i8) :: ierr, cc
   CHARACTER(len=1) :: strin1
   CHARACTER(len=256) :: strin256
+  integer(i4), dimension(:), allocatable :: ii, jj
+  real(dp), dimension(:), allocatable :: rii, rjj
 
   ! test passing arrays
-  nx = 100
+  nx = 10000
   ny = 100
   nt = 200
 
@@ -45,13 +48,24 @@ PROGRAM main
   
   if (.not. allocated(local_arr)) allocate(local_arr(nx,ny))
   if (.not. allocated(local_arr1)) allocate(local_arr1(nx,ny))
+  if (.not. allocated(local_arr1d)) allocate(local_arr1d(nx*ny))
   local_arr1(:,:) = arr(:,:)
   local_arr2 => arr
+  local_arr1d = reshape(arr,(/nx*ny/))
+  if (.not. allocated(ii)) allocate(ii(nx/2))
+  if (.not. allocated(jj)) allocate(jj(nx/2*ny))
+  if (.not. allocated(rii)) allocate(rii(nx/2))
+  if (.not. allocated(rjj)) allocate(rjj(nx/2*ny))
 
+  call random_number(rii)
+  call random_number(rjj)
+  ii = 1 + int(rii*real(nx,dp))
+  jj = 1 + int(rjj*real(nx*ny,dp))
   do i=1_i8, nt
 !     local_arr(:,:) = dosin(local_arr1(:,:))       ! elemental with local array
 !     local_arr(:,:) = dosin(arr(:,:))              ! elemental with module array
-     local_arr(:,:) = dosin2(local_arr1(:,:))      ! pass local array
+     local_arr1(ii,:) = dosin2(local_arr1(ii,:))      ! pass local array
+!     local_arr1d(jj) = dosin21(local_arr1d(jj))      ! pass local array
 !     local_arr(:,:) = dosin2(local_arr2(:,:))      ! pass module array
 !     local_arr(:,:) = dosin3(nx,ny,arr(1:nx,1:ny)) ! pass direct array
 !     local_arr(:,:) = dosin4()                     ! use internal module array

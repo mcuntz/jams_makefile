@@ -131,9 +131,11 @@ static   := shared
 # SUN debug: -ftrap=%all, %none, common, [no%]invalid, [no%]overflow, [no%]underflow, [no%]division, [no%]inexact.
 #     -ftrap=%n  Set floating-point trapping mode.
 # NAG debug: -C=undefined -C=intovf
-#     -C=undefined  is also checking 0-strings. Function nonull in UFZ mo_string_utils will stop with error.
-#     -C=intovf  check integer overflow, which is intentional in UFZ mo_xor4096.
-#     -C=undefined fails UFZs mo_corr and mo_fit due to compiler bugs.
+#     -C=undefined is also checking 0-strings. Function nonull in UFZ mo_string_utils will stop with error.
+#     -C=undefined must be used on all routines, i.e. also on netcdf for example.
+#                  This means that all tests do not work which use netcdf and/or lapack.
+#     -C=intovf    check integer overflow, which is intentional in UFZ mo_xor4096.
+#     -C=undefined fails UFZs mo_corr due to compiler bug.
 EXTRA_FCFLAGS  :=
 EXTRA_F90FLAGS :=
 EXTRA_DEFINES  :=
@@ -638,7 +640,7 @@ LD := $(F90)
 iphony    := False
 iphonyall := False
 ifneq (,$(strip $(MAKECMDGOALS)))
-    ifneq (,$(findstring /$(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/ /cleancheck/ /cleantest/ /checkclean/ /testclean/))
+    ifneq (,$(findstring /$(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/))
         iphony := True
     endif
     ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/ /cleancheck/ /cleantest/ /checkclean/ /testclean/ /info/ /clean/ /cleanclean/))

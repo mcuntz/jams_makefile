@@ -10,6 +10,7 @@ MODULE mo1
             alloc_arr, dealloc_arr, &
             dosin, &  ! elemental pure
             dosin2, & ! pass array
+            dosin21, & ! pass 1D-array
             dosin3, & ! pass direct array
             dosin4, & ! use internal module array
             dosin5, & ! use external module array
@@ -72,6 +73,24 @@ CONTAINS
     dosin2 = exp(dosin2)
 
   END FUNCTION dosin2
+
+
+  ! -------------------------------------------------------
+  FUNCTION dosin21(x)
+
+    IMPLICIT NONE
+    
+    REAL(dp), DIMENSION(:), INTENT(IN) :: x
+    REAL(dp), DIMENSION(size(x,1)) :: dosin21
+
+    where (x > 0.0_dp)
+       dosin21 = sin(x)
+    elsewhere
+       dosin21 = cos(x)
+    endwhere
+    dosin21 = exp(dosin21)
+
+  END FUNCTION dosin21
 
   ! -------------------------------------------------------
   FUNCTION dosin3(nx,ny,x)
