@@ -23,7 +23,7 @@ PROGRAM main
   real(dp), dimension(:), allocatable :: rii, rjj
 
   ! test passing arrays
-  nx = 10000
+  nx = 100
   ny = 100
   nt = 200
 
@@ -63,8 +63,10 @@ PROGRAM main
   jj = 1 + int(rjj*real(nx*ny,dp))
   do i=1_i8, nt
 !     local_arr(:,:) = dosin(local_arr1(:,:))       ! elemental with local array
-!     local_arr(:,:) = dosin(arr(:,:))              ! elemental with module array
-     local_arr1(ii,:) = dosin2(local_arr1(ii,:))      ! pass local array
+     local_arr(:,:) = dosin(arr(:,:))              ! elemental with module array
+      ! The next two commands do not work with nag
+      ! because ii could have the same value twice so LHS does not know what to do
+!     local_arr1(ii,:) = dosin2(local_arr1(ii,:))      ! pass local array
 !     local_arr1d(jj) = dosin21(local_arr1d(jj))      ! pass local array
 !     local_arr(:,:) = dosin2(local_arr2(:,:))      ! pass module array
 !     local_arr(:,:) = dosin3(nx,ny,arr(1:nx,1:ny)) ! pass direct array

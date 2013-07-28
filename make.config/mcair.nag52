@@ -44,6 +44,7 @@ ifeq ($(release),debug)
     F90FLAGS += -C=all -g -gline -nan -O0 -strict95 -g90
     FCFLAGS  += $(F90FLAGS)
     CFLAGS   += -pedantic-errors -Wall -W -O -g
+    #CFLAGS   += -Wall -W -O -g
     LDFLAGS  += -g90
 else
     F90FLAGS += -O3
@@ -51,7 +52,8 @@ else
     CFLAGS   += -O3
 endif
 # -mismatch-all
-F90FLAGS += -fpp -colour -mdir $(OBJPATH) -I$(OBJPATH) -unsharedf95 -kind=byte -ieee=stop -ideclient
+F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient
+MODFLAG  := -mdir # space significant
 FCFLAGS  +=
 CFLAGS   +=
 LDFLAGS  += -ideclient -unsharedrts

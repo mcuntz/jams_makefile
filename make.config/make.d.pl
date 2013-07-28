@@ -58,12 +58,38 @@ else {
 }
 ($srcfile1 = $srcfile) =~ s/.*\///;     # rm leading path
 ($dfile1 = $srcfile1)  =~ s/\.f90$/.d/; # .f90 -> .d
-($dfile1 = $dfile1)    =~ s/\.f$/.d/;   # .f   -> .d
-($dfile1 = $dfile1)    =~ s/\.for$/.d/; # .for -> .d
+($dfile1 = $dfile1)    =~ s/\.F90$/.d/;
+($dfile1 = $dfile1)    =~ s/\.f95$/.d/;
+($dfile1 = $dfile1)    =~ s/\.F95$/.d/;
+($dfile1 = $dfile1)    =~ s/\.f03$/.d/;
+($dfile1 = $dfile1)    =~ s/\.F03$/.d/;
+($dfile1 = $dfile1)    =~ s/\.f08$/.d/;
+($dfile1 = $dfile1)    =~ s/\.F08$/.d/;
+($dfile1 = $dfile1)    =~ s/\.f$/.d/;
+($dfile1 = $dfile1)    =~ s/\.F$/.d/;
+($dfile1 = $dfile1)    =~ s/\.for$/.d/;
+($dfile1 = $dfile1)    =~ s/\.FOR$/.d/;
+($dfile1 = $dfile1)    =~ s/\.f77$/.d/;
+($dfile1 = $dfile1)    =~ s/\.F77$/.d/;
+($dfile1 = $dfile1)    =~ s/\.ftn$/.d/;
+($dfile1 = $dfile1)    =~ s/\.fTN$/.d/;
 $dfile = "$objpath$dfile1";             # .d in objpath
-($ofile1 = $srcfile1) =~ s/\.f90$/.o/; # .f90 -> .o
-($ofile1 = $ofile1)   =~ s/\.f$/.o/;   # .f   -> .o
-($ofile1 = $ofile1)   =~ s/\.for$/.o/; # .for -> .o
+($ofile1 = $srcfile1)  =~ s/\.f90$/.o/; # .f90 -> .o
+($ofile1 = $ofile1)    =~ s/\.F90$/.o/;
+($ofile1 = $ofile1)    =~ s/\.f95$/.o/;
+($ofile1 = $ofile1)    =~ s/\.F95$/.o/;
+($ofile1 = $ofile1)    =~ s/\.f03$/.o/;
+($ofile1 = $ofile1)    =~ s/\.F03$/.o/;
+($ofile1 = $ofile1)    =~ s/\.f08$/.o/;
+($ofile1 = $ofile1)    =~ s/\.F08$/.o/;
+($ofile1 = $ofile1)    =~ s/\.f$/.o/;
+($ofile1 = $ofile1)    =~ s/\.F$/.o/;
+($ofile1 = $ofile1)    =~ s/\.for$/.o/;
+($ofile1 = $ofile1)    =~ s/\.FOR$/.o/;
+($ofile1 = $ofile1)    =~ s/\.f77$/.o/;
+($ofile1 = $ofile1)    =~ s/\.F77$/.o/;
+($ofile1 = $ofile1)    =~ s/\.ftn$/.o/;
+($ofile1 = $ofile1)    =~ s/\.fTN$/.o/;
 $ofile = "$objpath$ofile1";            # .o in objpath
 #print " SF:$srcfile SP:$srcpath OP:$objpath IP:$incpath S1:$srcfile1 D1:$dfile1 D:$dfile O1:$ofile1 O:$ofile\n";
 open(MAKEFILE, "> $dfile");
@@ -143,6 +169,55 @@ sub MakeDependsf90 {
             ($filename{&toLower($1)} = $file) =~ s/\.f90$/.o/;
          }
       }
+   foreach $file (<*.F90>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.F90$/.o/;
+         }
+      }
+   foreach $file (<*.f95>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.f95$/.o/;
+         }
+      }
+   foreach $file (<*.F95>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.F95$/.o/;
+         }
+      }
+   foreach $file (<*.f03>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.f03$/.o/;
+         }
+      }
+   foreach $file (<*.F03>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.F03$/.o/;
+         }
+      }
+   foreach $file (<*.f08>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.f08$/.o/;
+         }
+      }
+   foreach $file (<*.F08>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.F08$/.o/;
+         }
+      }
    foreach $file (<*.f>) {
       open(FILE, $file) || warn "Cannot open $file: $!\n";
       while (<FILE>) {
@@ -150,11 +225,53 @@ sub MakeDependsf90 {
             ($filename{&toLower($1)} = $file) =~ s/\.f$/.o/;
          }
       }
+   foreach $file (<*.F>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.F$/.o/;
+         }
+      }
    foreach $file (<*.for>) {
       open(FILE, $file) || warn "Cannot open $file: $!\n";
       while (<FILE>) {
          /^\s*module\s+([^\s!]+)/i &&
             ($filename{&toLower($1)} = $file) =~ s/\.for$/.o/;
+         }
+      }
+   foreach $file (<*.FOR>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.FOR$/.o/;
+         }
+      }
+   foreach $file (<*.f77>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.f77$/.o/;
+         }
+      }
+   foreach $file (<*.F77>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.F77$/.o/;
+         }
+      }
+   foreach $file (<*.ftn>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.ftn$/.o/;
+         }
+      }
+   foreach $file (<*.FTN>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /^\s*module\s+([^\s!]+)/i &&
+            ($filename{&toLower($1)} = $file) =~ s/\.FTN$/.o/;
          }
       }
    #
@@ -198,6 +315,7 @@ sub MakeDependsf90 {
 
    if (defined @incs || defined @modules) {
      print MAKEFILE "$ofile $dfile : $srcfile ";
+     #print MAKEFILE "$ofile $dfile : ";
      undef @dependencies;
      foreach $module (@modules) {
        if ("$filename{$module}" ne "") {
@@ -213,5 +331,6 @@ sub MakeDependsf90 {
    }
    else {
      print MAKEFILE "$ofile $dfile : $srcfile\n";
+     #print MAKEFILE "$ofile $dfile : \n";
    }
  }

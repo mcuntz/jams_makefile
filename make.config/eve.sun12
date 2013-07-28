@@ -43,9 +43,10 @@ else
     F90FLAGS  += -fPIC -fast -xtarget=generic -m64 -xarch=sse4_2
     CFLAGS    += -fPIC -fast -xtarget=generic -m64 -xarch=sse4_2
 endif
-F90FLAGS += -fpp -I$(OBJPATH) -M$(OBJPATH) -moddir=$(OBJPATH)
+F90FLAGS += -fpp
+MODFLAG  := -moddir=# space significant
 FCFLAGS  += $(F90FLAGS) -fixed-form -xlang=f77
-CFLAGS   += -I$(OBJPATH)
+CFLAGS   +=
 DEFINES  += -DSUN
 
 # Linking

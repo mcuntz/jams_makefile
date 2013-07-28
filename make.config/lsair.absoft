@@ -52,10 +52,11 @@ else
     F90FLAGS += -O3
     CFLAGS   += -O3
 endif
-#F90FLAGS += -m64 -cpp -f free -YMOD_OUT_DIR=$(OBJPATH) -I$(OBJPATH) -p $(OBJPATH) -safefp -OPT:roundoff=0 #-stack:1f40000
-F90FLAGS += -m64 -cpp -YMOD_OUT_DIR=$(OBJPATH) -I$(OBJPATH) -p $(OBJPATH) -safefp -OPT:roundoff=0 #-stack:1f40000
+#F90FLAGS += -m64 -cpp -f free -safefp -OPT:roundoff=0 #-stack:1f40000
+F90FLAGS += -m64 -cpp -safefp -OPT:roundoff=0 -p $(OBJPATH) #-stack:1f40000
 # -Znnn suppress message number: 399 - Generic subroutine; 938 - real division in int; 1610 - generic-spec end F90FLAGS += -Z399
 FCFLAGS += $(F90FLAGS)
+MODFLAG := -YMOD_OUT_DIR=# space significant
 CFLAGS  +=
 DEFINES += -DABSOFT -DgFortran
 LDFLAGS += -m64

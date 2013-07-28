@@ -40,12 +40,14 @@ ifeq ($(release),debug)
     F90FLAGS += -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
     FCFLAGS  += -pedantic-errors -ffixed-form -ffixed-line-length-132 -Wall -W -O -g
     CFLAGS   += -pedantic-errors -Wall -W -O -g
+    #CFLAGS   += -Wall -W -O -g
 else
     F90FLAGS += -O3
     FCFLAGS  += -ffixed-form -O3
     CFLAGS   += -pedantic-errors -Wall -W -O -g
 endif
-F90FLAGS += -J$(OBJPATH) -I$(OBJPATH)
+F90FLAGS +=
+MODFLAG  := -J# space significant
 FCFLAGS  +=
 CFLAGS   +=
 DEFINES  += -DGFORTRAN -DgFortran

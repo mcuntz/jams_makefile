@@ -45,9 +45,9 @@ else
     FCFLAGS  += -ffixed-form -O3
     CFLAGS   += -O3
 endif
-F90FLAGS += -J$(OBJPATH) -I$(OBJPATH)
+MODFLAG  := -J# space significant
 FCFLAGS  +=
-CFLAGS   += -I$(OBJPATH)
+CFLAGS   +=
 DEFINES  += -DGFORTRAN -DgFortran
 
 # Linking

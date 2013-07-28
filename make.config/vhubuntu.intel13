@@ -47,8 +47,9 @@ else
     FCFLAGS  += -O3 -vec-report0 -override-limits
     CFLAGS   += -O3
 endif
-F90FLAGS += -assume byterecl -cpp -fp-model precise -module "$(OBJPATH)"
-FCFLAGS  += -assume byterecl -cpp -fp-model precise -module "$(OBJPATH)" -fixed
+F90FLAGS += -assume byterecl -cpp -fp-model precise
+MODFLAG  := -module # space significant
+FCFLAGS  += -assume byterecl -cpp -fp-model precise -fixed
 CFLAGS   += -std=c99
 DEFINES  += -DINTEL -DINTEL_COMPILER
 
