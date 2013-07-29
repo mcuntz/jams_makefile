@@ -676,7 +676,7 @@ all: $(PROGNAME) $(LIBNAME)
 
 # Link program
 $(PROGNAME): $(OBJS) $(FOBJS) $(COBJS)
-	$(LD) $(LDFLAGS) -o $(PROGNAME) $(LIBS) $(LOBJS) $(OBJS) $(FOBJS) $(COBJS)
+	$(LD) $(LDFLAGS) -o $(PROGNAME) $(OBJS) $(FOBJS) $(COBJS) $(LIBS) $(LOBJS)
 
 # Link library
 $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
