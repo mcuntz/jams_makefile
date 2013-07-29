@@ -111,20 +111,24 @@ for i in ${olist} ; do
 done
 printf "\n" >> ${tmpfile}
 
-# replace .d file if changed
+# replace .d file
 outfile=${s2ofile/\.[fF]*/.d}
-if [[ -f ${outfile} ]] ; then
-    set +e
-    tt=$(sdiff -s ${tmpfile} ${outfile})
-    set -e
-    if [[ "${tt}" != "" ]] ; then
-	mv ${tmpfile} ${outfile}
-    else
-	rm ${tmpfile}
-    fi
-else
-    mv ${tmpfile} ${outfile}
-fi
+mv ${tmpfile} ${outfile}
+
+# replace .d file if changed
+# outfile=${s2ofile/\.[fF]*/.d}
+# if [[ -f ${outfile} ]] ; then
+#     set +e
+#     tt=$(sdiff -s ${tmpfile} ${outfile})
+#     set -e
+#     if [[ "${tt}" != "" ]] ; then
+# 	mv ${tmpfile} ${outfile}
+#     else
+# 	rm ${tmpfile}
+#     fi
+# else
+#     mv ${tmpfile} ${outfile}
+# fi
 
 # Perform cleanup, i.e. all temporary files *.${pid} are deleted
 cleanup

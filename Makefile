@@ -684,24 +684,24 @@ $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
 	$(RANLIB) $(LIBNAME)
 
 # Get dependencies
-#$(DOBJS): $(SRCS)
-$(DOBJS):
+#$(DOBJS):
+$(DOBJS): $(SRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(DOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS) ; \
 	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
-#$(FDOBJS): $(FSRCS)
-$(FDOBJS):
+#$(FDOBJS):
+$(FDOBJS): $(FSRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS) ; \
 	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
-#$(CDOBJS): $(CSRCS)
-$(CDOBJS):
+#$(CDOBJS):
+$(CDOBJS): $(CSRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(CDOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
 	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
