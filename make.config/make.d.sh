@@ -103,8 +103,8 @@ fi
 
 # Write output file
 s2ofile="$(dirname ${thisfile})/${src2obj}/$(basename ${thisfile})"
-tmpfile=${s2ofile/\.[fF]*/.d}.${pid}
-printf "${s2ofile/\.[fF]*/.o} ${tmpfile} : ${thisfile}" > ${tmpfile}
+tmpfile=${s2ofile}.${pid}
+printf "${s2ofile/\.[fF]*/.o} ${s2ofile/\.[fF]*/.d} : ${thisfile}" > ${tmpfile}
 for i in ${olist} ; do
     is2ofile="$(dirname ${i})/${src2obj}/$(basename ${i})"
     printf " ${is2ofile/\.[fF]*/.o}" >> ${tmpfile}
@@ -117,7 +117,11 @@ if [[ -f ${outfile} ]] ; then
     set +e
     tt=$(sdiff -s ${tmpfile} ${outfile})
     set -e
-    if [[ "${tt}" != "" ]] ; then mv ${tmpfile} ${outfile} ; fi
+    if [[ "${tt}" != "" ]] ; then
+	mv ${tmpfile} ${outfile}
+    else
+	rm ${tmpfile}
+    fi
 else
     mv ${tmpfile} ${outfile}
 fi

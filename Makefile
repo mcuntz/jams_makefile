@@ -86,7 +86,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test_cfortran # where are the source files. Can be space separated list
+SRCPATH    := test_standard # where are the source files. Can be space separated list
 PROGPATH   := .           # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.sh script
@@ -684,21 +684,24 @@ $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
 	$(RANLIB) $(LIBNAME)
 
 # Get dependencies
-$(DOBJS): $(SRCS)
+#$(DOBJS): $(SRCS)
+$(DOBJS):
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(DOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS) ; \
 	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
-$(FDOBJS): $(FSRCS)
+#$(FDOBJS): $(FSRCS)
+$(FDOBJS):
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS) ; \
 	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
-$(CDOBJS): $(CSRCS)
+#$(CDOBJS): $(CSRCS)
+$(CDOBJS):
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(CDOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
 	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
@@ -707,7 +710,8 @@ $(CDOBJS): $(CSRCS)
 	gcc $(DEFINES) -MM $$src | sed "s|.*:|$(patsubst %.d,%.o,$@) $@ :|" > $@
 
 # Compile
-$(OBJS): $(DOBJS)
+#$(OBJS): $(DOBJS)
+$(OBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
@@ -722,7 +726,8 @@ else
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $$src -o $@
 endif
 
-$(FOBJS): $(FDOBJS)
+#$(FOBJS): $(FDOBJS)
+$(FOBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
@@ -737,7 +742,8 @@ else
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $$src -o $@
 endif
 
-$(COBJS): $(CDOBJS)
+#$(COBJS): $(CDOBJS)
+$(COBJS):
 	@nobj=$$(echo $(COBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
 	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $$src -o $@ ; \
