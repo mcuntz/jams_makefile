@@ -3,6 +3,9 @@ PROGRAM main
   USE kind, ONLY: dp, sp, i8, i4
   USE mo1,  ONLY: arr, alloc_arr, dealloc_arr, dosin, dosin2, dosin21, dosin3, dosin4, dosin5, dosin6
   USE mo2,  ONLY: arr2, struc, alloc_arr2, alloc_strucarr, dealloc_arr2, dealloc_strucarr
+#ifndef GFORTRAN
+  USE ieee_arithmetic, only: ieee_is_finite
+#endif
 
   ! test passing arrays
   INTEGER(i8) :: i, nx, ny, nt
@@ -21,6 +24,7 @@ PROGRAM main
   CHARACTER(len=256) :: strin256
   integer(i4), dimension(:), allocatable :: ii, jj
   real(dp), dimension(:), allocatable :: rii, rjj
+  logical, dimension(:), allocatable :: lii
 
   ! test passing arrays
   nx = 100
@@ -114,7 +118,22 @@ PROGRAM main
   write(*,*) 'Max**0 ', max(ztmp(:), ztmp2(:))**0
   write(*,*) 'Max**1 ', max(ztmp(:), ztmp2(:))**1
   write(*,*) 'Max**2 ', max(ztmp(:), ztmp2(:))**2
-
+#ifndef DEBUG
+  ! NaN and Inf
+  ztmp(1) = 0._dp
+  ztmp(1) = ztmp(1)/ztmp(1)
+  ztmp(2) = huge(1.0_dp)
+  ztmp(2) = ztmp(2)*ztmp(2)
+  write(*,*) 'Max4 ', ztmp
+#ifndef GFORTRAN
+  ztmp = merge(ztmp, huge(1.0_dp), ieee_is_finite(ztmp))
+#else
+  ztmp = merge(ztmp, huge(1.0_dp), ztmp == ztmp)
+#endif
+  write(*,*) 'Max5 ', ztmp
+#endif
+  
+ 
   ! test sum
   ! nx = 20_i8*60_i8*60_i8
   ! if (.not. allocated(eddy)) allocate(eddy(nx))
