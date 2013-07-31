@@ -53,6 +53,7 @@ else
 endif
 # -mismatch-all
 F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient
+#F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=full -ideclient
 MODFLAG  := -mdir # space significant
 FCFLAGS  +=
 CFLAGS   +=

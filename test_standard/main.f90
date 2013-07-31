@@ -122,8 +122,10 @@ PROGRAM main
   ! NaN and Inf
   ztmp(1) = 0._dp
   ztmp(1) = ztmp(1)/ztmp(1)
+  write(*,*) 'Max4.0 ', maxval(ztmp), minval(ztmp) ! max is 0.8
   ztmp(2) = huge(1.0_dp)
   ztmp(2) = ztmp(2)*ztmp(2)
+  write(*,*) 'Max4.1 ', maxval(ztmp), minval(ztmp) ! max is Inf
   write(*,*) 'Max4 ', ztmp
 #ifndef GFORTRAN
   ztmp = merge(ztmp, huge(1.0_dp), ieee_is_finite(ztmp))
