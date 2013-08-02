@@ -676,10 +676,12 @@ all: $(PROGNAME) $(LIBNAME)
 
 # Link program
 $(PROGNAME): $(OBJS) $(FOBJS) $(COBJS)
+	@echo "Linking program"
 	$(LD) $(LDFLAGS) -o $(PROGNAME) $(OBJS) $(FOBJS) $(COBJS) $(LIBS) $(LOBJS)
 
 # Link library
 $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
+	@echo "Linking library"
 	$(AR) $(ARFLAGS) $(LIBNAME) $(OBJS) $(FOBJS) $(COBJS)
 	$(RANLIB) $(LIBNAME)
 
@@ -899,5 +901,6 @@ endif
 
 # All dependencies created by perl script make.d.sh
 ifeq (False,$(iphonyall))
+    $(info Checking dependencies ...)
     -include $(DOBJS) $(FDOBJS) $(CDOBJS)
 endif
