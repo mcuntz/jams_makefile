@@ -125,6 +125,19 @@ static   := shared
 # the following EXTRA_* variables. This allows for example to set an extra compiler
 # option or define a preprocessor variable such as: EXTRA_DEFINES := -DNOGUI -DDPREC
 #
+#
+# Specific notes
+# If you encounter during linking error messages such as
+#     ... relocation truncated to fit: R_X86_64_PC32 against ...
+# then you ran out of memory address space, i.e. some hard-coded numbers in the code got too big.
+# Check that you have set the 64-bit addressing model in the F90FLAGS and LDFAGS: -m64
+# On *nix systems, you can set the addressing model with -mcmodel=medium (F90FLAGS and LDFAGS) for gfortran and intel.
+# Intel might also need -shared-intel at the LDFLAGS, i.e.
+#     EXTRA_F90FLAGS := -mcmodel=medium
+#     EXTRA_LDFLAGS  := -mcmodel=medium -shared-intel
+#
+#
+# Specific notes on optimisation and debugging
 # INTEL optimisation: -fast (=-ipo -O3 -static)
 #     -fast             Multifile interprocedure optimization
 # INTEL debug: -fpe=0 -fpe-all=0 -no-ftz -ftrapuv
