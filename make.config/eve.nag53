@@ -28,7 +28,7 @@
 # Define subdirectories if another structure
 
 # Paths
-NAGDIR := /opt/nag/5.3.1-919
+NAGDIR := /opt/nag/5.3.2-963
 NAGLIB := $(NAGDIR)/lib
 NAGBIN := $(NAGDIR)/bin
 
@@ -52,8 +52,8 @@ else
     CFLAGS   += -O3
 endif
 # -mismatch-all
-F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient
-#F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=full -ideclient
+#F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient
+F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=full -ideclient
 MODFLAG  := -mdir # space significant
 FCFLAGS  +=
 CFLAGS   +=
