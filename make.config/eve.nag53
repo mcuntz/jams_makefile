@@ -88,7 +88,7 @@ endif
 
 # PROJ
 PROJ4DIR := /usr/local/proj/4.7.0
-FPROJDIR := /usr/local/fproj/4.7.0_nag53
+FPROJDIR := /usr/local/fproj/4.7.0-1_nag53
 
 # LAPACK
 LAPACKDIR   := /usr
