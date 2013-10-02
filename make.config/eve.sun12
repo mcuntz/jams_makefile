@@ -34,19 +34,21 @@ SUNBIN := $(SUNDIR)/bin
 
 # Compiling
 F90 := $(SUNBIN)/sunf90
-FC  := $(F90)
+FC  := $(SUNBIN)/sunf77
 CC  := $(SUNBIN)/suncc
 ifeq ($(release),debug)
-    F90FLAGS += -fPIC -xtarget=generic -m64 -xarch=sse4_2 -g -xcheck=%all -C -u -traceback
-    CFLAGS   += -fPIC -xtarget=generic -m64 -xarch=sse4_2 -g -xcheck=%all -C -u -traceback
+    F90FLAGS += -g -xcheck=%all -C -u -traceback
+    FCFLAGS  += -g -xcheck=%all -C -u -traceback
+    CFLAGS   += -g -xcheck=%all -C -u -traceback
 else
-    F90FLAGS  += -fPIC -fast -xtarget=generic -m64 -xarch=sse4_2
-    CFLAGS    += -fPIC -fast -xtarget=generic -m64 -xarch=sse4_2
+    F90FLAGS += -fast
+    FCFLAGS  += -fast -ftrap=%none
+    CFLAGS   += -fast
 endif
-F90FLAGS += -fpp
+F90FLAGS += -fpp -fPIC -xtarget=generic -m64 -xarch=sse4_2
 MODFLAG  := -moddir=# space significant
-FCFLAGS  += $(F90FLAGS) -fixed-form -xlang=f77
-CFLAGS   +=
+FCFLAGS  += -fpp -fPIC -xtarget=generic -m64 -xarch=sse4_2 -errtags=INVOKE -fixed-form
+CFLAGS   += -fpp -fPIC -xtarget=generic -m64 -xarch=sse4_2
 DEFINES  += -DSUN
 
 # Linking
