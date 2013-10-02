@@ -7,7 +7,7 @@ MODULE mo1
   PRIVATE
 
   PUBLIC :: arr, &
-            alloc_arr, dealloc_arr, &
+            alloc_arr, dealloc_arr, alloc_test, &
             dosin, &  ! elemental pure
             dosin2, & ! pass array
             dosin21, & ! pass 1D-array
@@ -19,6 +19,18 @@ MODULE mo1
   REAL(dp), DIMENSION(:,:), ALLOCATABLE, TARGET :: arr
 
 CONTAINS
+
+  ! -------------------------------------------------------
+  SUBROUTINE alloc_test(nx,ny,arr1)
+
+    IMPLICIT NONE
+    
+    INTEGER(i8), INTENT(IN) :: nx, ny
+    real(dp),    dimension(:,:), allocatable, INTENT(IN) :: arr1
+
+    write(*,*) 'Array(1,1) ', arr1(1,1)
+
+  END SUBROUTINE alloc_test
 
   ! -------------------------------------------------------
   SUBROUTINE alloc_arr(nx,ny)

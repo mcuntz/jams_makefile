@@ -1,7 +1,7 @@
 PROGRAM main
 
   USE kind, ONLY: dp, sp, i8, i4
-  USE mo1,  ONLY: arr, alloc_arr, dealloc_arr, dosin, dosin2, dosin21, dosin3, dosin4, dosin5, dosin6
+  USE mo1,  ONLY: arr, alloc_arr, dealloc_arr, dosin, dosin2, dosin21, dosin3, dosin4, dosin5, dosin6, alloc_test
   USE mo2,  ONLY: arr2, struc, alloc_arr2, alloc_strucarr, dealloc_arr2, dealloc_strucarr
 #ifndef GFORTRAN
   USE ieee_arithmetic, only: ieee_is_finite
@@ -135,7 +135,13 @@ PROGRAM main
   write(*,*) 'Max5 ', ztmp
 #endif
   
- 
+  ! Stefans test for allocatable in
+  if (.not. allocated(local_arr)) allocate(local_arr(nx,ny))
+  local_arr(:,:) = 1.0_dp
+  call alloc_test(nx,ny,local_arr)
+  write(*,*) 'If you are here than all good.'
+
+
   ! test sum
   ! nx = 20_i8*60_i8*60_i8
   ! if (.not. allocated(eddy)) allocate(eddy(nx))

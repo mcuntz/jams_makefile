@@ -702,21 +702,27 @@ $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
 #	echo $(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS) ; \#
 $(DOBJS): $(SRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
-	@nobj=$$(echo $(DOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
+	@nobj=$$(echo $(DOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
 #	echo $(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS) ; \#
 $(FDOBJS): $(FSRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
-	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
+	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
+	obj=$$(echo $(FOBJS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	dobj=$$(echo $(FOBJS) | tr ' ' '\n' | sed -n $${nobj}p | sed 's|\.o[[:blank:]]*$$|.d|') ; \
+	echo "$$obj $$dobj : $$src" > $$dobj
+#	@dirname $@ | xargs mkdir -p 2>/dev/null
+#	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
+#	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+#	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
 #	echo "gcc $(DEFINES) -MM $$src | sed 's|.*:|$(patsubst %.d,%.o,$@) $@ :|' > $@" ; \#
 $(CDOBJS): $(CSRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
-	@nobj=$$(echo $(CDOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
+	@nobj=$$(echo $(CDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	pobj=$$(dirname $@) ; psrc=$$(dirname $$src) ; \
 	gcc $(DEFINES) -MM $$src | sed "s|.*:|$(patsubst %.d,%.o,$@) $@ :|" > $@
@@ -725,14 +731,14 @@ $(CDOBJS): $(CSRCS)
 #$(OBJS): $(DOBJS)
 $(OBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
-	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
+	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $$src > .tmp.gf3 ; \
 	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $$src > .tmp.gf3
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c .tmp.gf3 -o $@
 	rm .tmp.gf3
 else
-	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
+	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $$src -o $@ ; \
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $$src -o $@
@@ -741,14 +747,14 @@ endif
 #$(FOBJS): $(FDOBJS)
 $(FOBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
-	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
+	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $$src > .tmp.gf3 ; \
 	$(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $$src > .tmp.gf3
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c .tmp.gf3 -o $@
 	rm .tmp.gf3
 else
-	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
+	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $$src -o $@ ; \
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $$src -o $@
@@ -756,7 +762,7 @@ endif
 
 #$(COBJS): $(CDOBJS)
 $(COBJS):
-	@nobj=$$(echo $(COBJS) | tr ' ' '\n' | grep -n $@ | sed 's/:.*//') ; \
+	@nobj=$$(echo $(COBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $$src -o $@ ; \
 	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $$src -o $@
