@@ -86,22 +86,24 @@ srcfiles=$@
 # --------------------------------------------------------------------------------------------------
 # Dependencies
 #
-# Get all modules
+# All module names and filenames into a dictionary
 for i in ${srcfiles} ; do
     ismod=$(echo "${i}:$(sed -e 's/\!.*//' -e '/^[Cc]/d' ${i} | tr [A-Z] [a-z] | tr -s ' ' | grep -E '^[[:blank:]]*module[[:blank:]]+' | sed -e 's/module //' | sed -e 's/ .*//')")
     if [[ "${ismod}" != "${i}:" ]] ; then echo ${ismod} >> dict.${pid} ; fi
 done
 
-# modules used in input file
+# Modules used in the input file
 molist=$(sed -e 's/\!.*//' -e '/^[Cc]/d' ${thisfile} | tr [A-Z] [a-z] | tr -s ' ' | grep -E '^[[:blank:]]*use[[:blank:]]+' | sed 's/,.*//' | sed 's/.*use //' | sort | uniq)
 is=$(echo ${molist} | tr ' ' '|')
 
-# correpondant files to used modules
+# Query dictionary for filenames of modules used in input file
+# Remove own file name for circular dependencies if more than one module in input file
 if [[ "${is}" != "" ]] ; then
-    olist=$(cut -f 1 -d ':' dict.${pid} | sed -n $(echo $(grep -nEw "${is}" dict.${pid} | cut -f 1 -d ':') | sed -e 's/\([0-9]*\)/-e \1p/g') | tr '\n' ' ')
+    #olist=$(cut -f 1 -d ':' dict.${pid} | sed -n $(echo $(grep -nEw "${is}" dict.${pid} | cut -f 1 -d ':') | sed -e 's/\([0-9]*\)/-e \1p/g') | tr '\n' ' ')
+    olist=$(cut -f 1 -d ':' dict.${pid} | sed -n $(echo $(grep -nEw "${is}" dict.${pid} | cut -f 1 -d ':') | sed -e 's/\([0-9]*\)/-e \1p/g') | tr '\n' ' ' | sed "s|${thisfile}||")
 fi
 
-# Write output file
+# Write output .d file
 s2ofile="$(dirname ${thisfile})/${src2obj}/$(basename ${thisfile})"
 tmpfile=${s2ofile}.${pid}
 printf "${s2ofile/\.[fF]*/.o} ${s2ofile/\.[fF]*/.d} : ${thisfile}" > ${tmpfile}
@@ -110,8 +112,6 @@ for i in ${olist} ; do
     printf " ${is2ofile/\.[fF]*/.o}" >> ${tmpfile}
 done
 printf "\n" >> ${tmpfile}
-
-# replace .d file
 outfile=${s2ofile/\.[fF]*/.d}
 mv ${tmpfile} ${outfile}
 
