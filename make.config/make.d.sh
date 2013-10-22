@@ -87,10 +87,14 @@ srcfiles=$@
 # Dependencies
 #
 # All module names and filenames into a dictionary
-for i in ${srcfiles} ; do
-    ismod=$(echo "${i}:$(sed -e 's/\!.*//' -e '/^[Cc]/d' ${i} | tr [A-Z] [a-z] | tr -s ' ' | grep -E '^[[:blank:]]*module[[:blank:]]+' | sed -e 's/module //' | sed -e 's/ .*//')")
-    if [[ "${ismod}" != "${i}:" ]] ; then echo ${ismod} >> dict.${pid} ; fi
-done
+# One dictionary per input directory
+dict="$(dirname ${thisfile})/${src2obj}/${pprog}.dict"
+if [ ! -f ${dict} ] ; then # new dict only if it does not exist in directory yet.
+    for i in ${srcfiles} ; do
+	ismod=$(echo "${i}:$(sed -e 's/\!.*//' -e '/^[Cc]/d' ${i} | tr [A-Z] [a-z] | tr -s ' ' | grep -E '^[[:blank:]]*module[[:blank:]]+' | sed -e 's/module //' | sed -e 's/ .*//')")
+	if [[ "${ismod}" != "${i}:" ]] ; then echo ${ismod} >> ${dict} ; fi
+    done
+fi
 
 # Modules used in the input file
 molist=$(sed -e 's/\!.*//' -e '/^[Cc]/d' ${thisfile} | tr [A-Z] [a-z] | tr -s ' ' | grep -E '^[[:blank:]]*use[[:blank:]]+' | sed 's/,.*//' | sed 's/.*use //' | sort | uniq)
@@ -99,8 +103,8 @@ is=$(echo ${molist} | tr ' ' '|')
 # Query dictionary for filenames of modules used in input file
 # Remove own file name for circular dependencies if more than one module in input file
 if [[ "${is}" != "" ]] ; then
-    #olist=$(cut -f 1 -d ':' dict.${pid} | sed -n $(echo $(grep -nEw "${is}" dict.${pid} | cut -f 1 -d ':') | sed -e 's/\([0-9]*\)/-e \1p/g') | tr '\n' ' ')
-    olist=$(cut -f 1 -d ':' dict.${pid} | sed -n $(echo $(grep -nEw "${is}" dict.${pid} | cut -f 1 -d ':') | sed -e 's/\([0-9]*\)/-e \1p/g') | tr '\n' ' ' | sed "s|${thisfile}||")
+    #olist=$(cut -f 1 -d ':' ${dict} | sed -n $(echo $(grep -nEw "${is}" ${dict} | cut -f 1 -d ':') | sed -e 's/\([0-9]*\)/-e \1p/g') | tr '\n' ' ')
+    olist=$(cut -f 1 -d ':' ${dict} | sed -n $(echo $(grep -nEw "${is}" ${dict} | cut -f 1 -d ':') | sed -e 's/\([0-9]*\)/-e \1p/g') | tr '\n' ' ' | sed "s|${thisfile}||")
 fi
 
 # Write output .d file
