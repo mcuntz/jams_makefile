@@ -119,7 +119,7 @@ openmp   :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 # Always check for new dependencies: true, [anything else]
-newdepend :=
+newdepend := true
 
 # The Makefile sets the following variables depending on the above options:
 # FC, FCFLAGS, F90FLAGS, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
@@ -702,7 +702,6 @@ $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
 	$(RANLIB) $(LIBNAME)
 
 # Get dependencies
-#	echo $(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS) ; \#
 $(DOBJS): $(SRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 ifeq ($(newdepend),true)
@@ -712,7 +711,6 @@ endif
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
-#	echo $(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS) ; \#
 $(FDOBJS): $(FSRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
@@ -728,7 +726,6 @@ $(FDOBJS): $(FSRCS)
 #	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 #	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
-#	echo "gcc $(DEFINES) -MM $$src | sed 's|.*:|$(patsubst %.d,%.o,$@) $@ :|' > $@" ; \#
 $(CDOBJS): $(CSRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(CDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
@@ -737,23 +734,24 @@ $(CDOBJS): $(CSRCS)
 	gcc $(DEFINES) -MM $$src | sed "s|.*:|$(patsubst %.d,%.o,$@) $@ :|" > $@
 
 # Compile
-#$(OBJS): $(DOBJS)
-$(OBJS):
+define rule_objs
+$(1): $(1:.o=.d)
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
-	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	echo $(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $$src > .tmp.gf3 ; \
-	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $$src > .tmp.gf3
-	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c .tmp.gf3 -o $@
+	@nobj=$$$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $(1) | sed 's/:.*//') ; \
+	src=$$$$(echo $(SRCS) | tr ' ' '\n' | sed -n $$$${nobj}p) ; \
+	echo $(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $$$${src} > .tmp.gf3 ; \
+	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $$$${src} > .tmp.gf3
+	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $(1)) -c .tmp.gf3 -o $(1)
 	rm .tmp.gf3
 else
-	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	echo $(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $$src -o $@ ; \
-	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $$src -o $@
+	@nobj=$$$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $(1) | sed 's/:.*//') ; \
+	src=$$$$(echo $(SRCS) | tr ' ' '\n' | sed -n $$$${nobj}p) ; \
+	echo $(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $(1)) -c $$$${src} -o $(1) ; \
+	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $(1)) -c $$$${src} -o $(1)
 endif
+endef    
+$(foreach OBJ,$(OBJS),$(eval $(call rule_objs,$(OBJ))))
 
-#$(FOBJS): $(FDOBJS)
 $(FOBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
@@ -769,12 +767,14 @@ else
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $$src -o $@
 endif
 
-#$(COBJS): $(CDOBJS)
-$(COBJS):
-	@nobj=$$(echo $(COBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	echo $(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $$src -o $@ ; \
-	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $$src -o $@
+define rule_cobjs
+$(1): $(1:.o=.d)
+	@nobj=$$$$(echo $(COBJS) | tr ' ' '\n' | grep -n -w -F $(1) | sed 's/:.*//') ; \
+	src=$$$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $$$${nobj}p) ; \
+	echo $(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $$$${src} -o $(1) ; \
+	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $$$${src} -o $(1)
+endef    
+$(foreach OBJ,$(COBJS),$(eval $(call rule_cobjs,$(OBJ))))
 
 # Helper Targets
 clean:
