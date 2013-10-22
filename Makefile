@@ -119,7 +119,7 @@ openmp   :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 # Always check for new dependencies: true, [anything else]
-newdepend := true
+newdepend :=
 
 # The Makefile sets the following variables depending on the above options:
 # FC, FCFLAGS, F90FLAGS, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
@@ -706,7 +706,7 @@ $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
 $(DOBJS): $(SRCS)
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 ifeq ($(newdepend),true)
-	@rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(SRCPATH))
+	@rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(OBJPATH))
 endif
 	@nobj=$$(echo $(DOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
@@ -722,7 +722,7 @@ $(FDOBJS): $(FSRCS)
 	echo "$$obj $$dobj : $$src" > $$dobj
 #	@dirname $@ | xargs mkdir -p 2>/dev/null
 # ifeq ($(newdepend),true)
-# 	@rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(SRCPATH))
+#	@rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(OBJPATH))
 # endif
 #	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 #	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
@@ -783,7 +783,7 @@ ifeq (False,$(islib))
 	rm -f "$(PROGNAME)"
 endif
 	rm -f $(GOBJS) $(FGOBJS)
-	rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(SRCPATH))
+	rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(OBJPATH))
 #       Special cleaning of CHS library tests
         ifneq (,$(findstring $(SRCPATH),test_netcdf_imsl_proj))
 	    for i in $(SRCPATH) ; do \
