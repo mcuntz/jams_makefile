@@ -19,7 +19,7 @@
 #
 # TARGETS
 #     all (default), check (=test), clean, cleanclean, cleancheck (=cleantest=checkclean=testclean),
-#     html, pdf, latex, doxygen, info
+#     dependencies (=depend), html, pdf, latex, doxygen, info
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'.
@@ -91,7 +91,7 @@ PROGPATH   := .           # where shall be the executable
 CONFIGPATH := make.config # where are the $(system).$(compiler) files
 MAKEDPATH  := make.config # where is the make.d.sh script
 DOXPATH    := .           # where is doxygen.config
-TESTPATH   := .           # make will compile and run all $(TESTPATH))/test* directories if target is test (=check)
+CHECKPATH  := .           # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 #
 PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
@@ -118,8 +118,6 @@ imsl     :=
 openmp   :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
-# Always check for new dependencies: true, [anything else]
-newdepend := true
 
 # The Makefile sets the following variables depending on the above options:
 # FC, FCFLAGS, F90FLAGS, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
@@ -189,11 +187,11 @@ endif
 
 # Make absolute pathes from relative pathes - there should be no space nor comment at the end of the next lines
 SRCPATH    := $(abspath $(SRCPATH:~%=${HOME}%))
-TESTPATH   := $(abspath $(TESTPATH:~%=${HOME}%))
 PROGPATH   := $(abspath $(PROGPATH:~%=${HOME}%))
 CONFIGPATH := $(abspath $(CONFIGPATH:~%=${HOME}%))
 MAKEDPATH  := $(abspath $(MAKEDPATH:~%=${HOME}%))
 DOXPATH    := $(abspath $(DOXPATH:~%=${HOME}%))
+CHECKPATH  := $(abspath $(CHECKPATH:~%=${HOME}%))
 
 # Program names
 # Only Prog or Lib
@@ -220,7 +218,7 @@ MAKEDEPSPROG := $(MAKEDPATH)/$(MAKEDSCRIPT)
 # --- CHECK 1 ---------------------------------------------------
 #
 
-systems := $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.sh/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)
+systems := $(shell ls -1 $(CONFIGPATH) | sed -e "/$(MAKEDSCRIPT)/d" -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)
 ifeq (,$(findstring $(system),$(systems)))
     $(error Error: system '$(system)' not found: known systems are $(systems))
 endif
@@ -239,7 +237,7 @@ endif
 #
 # --- CHECK 2 ---------------------------------------------------
 #
-compilers := $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.sh/d' -e '/f2html/d' -e '/alias/d' | grep $(system) | cut -d '.' -f 2 | sort | uniq)
+compilers := $(shell ls -1 $(CONFIGPATH) | sed -e "/$(MAKEDSCRIPT)/d" -e '/f2html/d' -e '/alias/d' | grep $(system) | cut -d '.' -f 2 | sort | uniq)
 gnucompilers := $(filter gnu%, $(compilers))
 nagcompilers := $(filter nag%, $(compilers))
 ifeq (,$(findstring $(icompiler),$(compilers)))
@@ -702,31 +700,21 @@ $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
 	$(RANLIB) $(LIBNAME)
 
 # Get dependencies
-$(DOBJS): $(SRCS)
+$(DOBJS):
 	@dirname $@ | xargs mkdir -p 2>/dev/null
-ifeq ($(newdepend),true)
-	@rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(OBJPATH))
-endif
 	@nobj=$$(echo $(DOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
-$(FDOBJS): $(FSRCS)
+$(FDOBJS):
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	obj=$$(echo $(FOBJS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	dobj=$$(echo $(FOBJS) | tr ' ' '\n' | sed -n $${nobj}p | sed 's|\.o[[:blank:]]*$$|.d|') ; \
 	echo "$$obj $$dobj : $$src" > $$dobj
-#	@dirname $@ | xargs mkdir -p 2>/dev/null
-# ifeq ($(newdepend),true)
-#	@rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(OBJPATH))
-# endif
-#	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-#	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-#	$(MAKEDEPSPROG) $$src .$(strip $(icompiler)).$(strip $(release)) $(SRCS) $(FSRCS)
 
-$(CDOBJS): $(CSRCS)
+$(CDOBJS):
 	@dirname $@ | xargs mkdir -p 2>/dev/null
 	@nobj=$$(echo $(CDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
@@ -734,23 +722,20 @@ $(CDOBJS): $(CSRCS)
 	gcc $(DEFINES) -MM $$src | sed "s|.*:|$(patsubst %.d,%.o,$@) $@ :|" > $@
 
 # Compile
-define rule_objs
-$(1): $(1:.o=.d)
+$(OBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
-	@nobj=$$$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $(1) | sed 's/:.*//') ; \
-	src=$$$$(echo $(SRCS) | tr ' ' '\n' | sed -n $$$${nobj}p) ; \
-	echo $(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $$$${src} > .tmp.gf3 ; \
-	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $$$${src} > .tmp.gf3
-	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $(1)) -c .tmp.gf3 -o $(1)
+	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
+	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	echo $(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $${src} > .tmp.gf3 ; \
+	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $${src} > .tmp.gf3
+	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c .tmp.gf3 -o $@
 	rm .tmp.gf3
 else
-	@nobj=$$$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $(1) | sed 's/:.*//') ; \
-	src=$$$$(echo $(SRCS) | tr ' ' '\n' | sed -n $$$${nobj}p) ; \
-	echo $(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $(1)) -c $$$${src} -o $(1) ; \
-	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $(1)) -c $$$${src} -o $(1)
+	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
+	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	echo $(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $${src} -o $@ ; \
+	 $(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $${src} -o $@
 endif
-endef    
-$(foreach OBJ,$(OBJS),$(eval $(call rule_objs,$(OBJ))))
 
 $(FOBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
@@ -767,14 +752,11 @@ else
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $$src -o $@
 endif
 
-define rule_cobjs
-$(1): $(1:.o=.d)
-	@nobj=$$$$(echo $(COBJS) | tr ' ' '\n' | grep -n -w -F $(1) | sed 's/:.*//') ; \
-	src=$$$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $$$${nobj}p) ; \
-	echo $(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $$$${src} -o $(1) ; \
-	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $$$${src} -o $(1)
-endef    
-$(foreach OBJ,$(COBJS),$(eval $(call rule_cobjs,$(OBJ))))
+$(COBJS):
+	@nobj=$$(echo $(COBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
+	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	echo $(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $${src} -o $@ ; \
+	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c $${src} -o $@
 
 # Helper Targets
 clean:
@@ -803,7 +785,7 @@ ifeq (True,$(islib))
 endif
 
 cleancheck:
-	for i in $(shell ls -d $(TESTPATH)/test*) ; do \
+	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check*) ; do \
 	    $(MAKE) SRCPATH=$$i cleanclean ; \
 	done
 
@@ -817,7 +799,7 @@ check:
 ifeq (True,$(islib))
 	$(error Error: check and test must be done with PROGNAME not LIBNAME.)
 endif
-	for i in $(shell ls -d $(TESTPATH)/test*) ; do \
+	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check*) ; do \
 	    rm -f "$(PROGNAME)" ; \
 	    j=$${i/minpack/maxpack} ; \
 	    ldextra= ; \
@@ -844,7 +826,30 @@ endif
 
 test: check
 
-doxygen: 
+depend: dependencies
+
+dependencies:
+	@for i in $(DOBJS) ; do \
+	    nobj=$$(echo $(DOBJS) | tr ' ' '\n' | grep -n -w -F $${i} | sed 's/:.*//') ; \
+	    src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	    obj=$$(echo $(OBJS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	    if [ $${src} -nt $${obj} ] ; then rm $${i} ; fi ; \
+	done
+	@for i in $(FDOBJS) ; do \
+	    nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n -w -F $${i} | sed 's/:.*//') ; \
+	    src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	    obj=$$(echo $(FOBJS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	    if [ $${src} -nt $${obj} ] ; then rm $${i} ; fi ; \
+	done
+	@for i in $(CDOBJS) ; do \
+	    nobj=$$(echo $(CDOBJS) | tr ' ' '\n' | grep -n -w -F $${i} | sed 's/:.*//') ; \
+	    src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	    obj=$$(echo $(COBJS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	    if [ $${src} -nt $${obj} ] ; then rm $${i} ; fi ; \
+	done
+	@rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(OBJPATH))
+
+doxygen:
 	@cat $(DOXPATH)/"doxygen.config" | \
 	     sed -e "/^PERL_PATH/s|=.*|=$(PERLPATH)|" | \
 	     sed -e "/^DOT_PATH/s|=.*|=$(DOTPATH)|" | env PATH=${PATH}:$(TEXPATH) $(DOXYGEN) -
@@ -885,7 +890,7 @@ info:
 	@echo "PROGPATH   = $(PROGPATH)"
 	@echo "CONFIGPATH = $(CONFIGPATH)"
 	@echo "MAKEDPATH  = $(MAKEDPATH)"
-	@echo "TESTPATH   = $(TESTPATH)"
+	@echo "CHECKPATH  = $(CHECKPATH)"
 	@echo "PROGNAME   = $(basename $(PROGNAME))"
 	@echo "LIBNAME    = $(basename $(LIBNAME))"
 	@echo "FILES      = $(SRCS) $(FORSRCS) $(CSRCS) $(LASRCS)"
@@ -916,9 +921,27 @@ ifeq (exists, $(shell if [ -f $(ALIASINC) ] ; then echo 'exists' ; fi))
 	 paste - - | tr -d '\t' | tr -s ' '
 endif
 	@echo ""
+	@echo "Targets"
+	@echo "all (default)  Compile program or library"
+	@echo "check          Run all checks in $(CHECKPATH)/test* and $(CHECKPATH)/check* directories"
+	@echo "checkclean     alias for cleancheck"
+	@echo "clean          Clean compilation of current compiler and release"
+	@echo "cleancheck     Cleanclean all test directories $(CHECKPATH)/test* and $(CHECKPATH)/check*"
+	@echo "cleanclean     Clean compilations of all compilers and releases"
+	@echo "cleantest      alias for cleancheck"
+	@echo "depend         alias for dependencies"
+	@echo "dependencies   Redo dependencies"
+	@echo "doxygen        Run doxygen html with $(DOXPATH)/doxygen.config"
+	@echo "html           Run either doxygen html with $(DOXPATH)/doxygen.config or f2html of Jean-Marc Beroud"
+	@echo "info           Prints info about current settings and possibilities"
+	@echo "latex          alias for pdf"
+	@echo "pdf            Run doxygen PDF with $(DOXPATH)/doxygen.config"
+	@echo "test           alias for check"
+	@echo "testclean      alias for cleancheck"
+	@echo ""
 	@echo "All possibilities"
-	@echo "system      $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.sh/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)"
-	@echo "compiler    $(shell ls -1 $(CONFIGPATH) | sed -e '/make.d.sh/d' -e '/f2html/d' -e '/alias/d' | cut -d '.' -f 2 | sort | uniq)"
+	@echo "system      $(shell ls -1 $(CONFIGPATH) | sed -e '/"$(MAKEDSCRIPT)"/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)"
+	@echo "compiler    $(shell ls -1 $(CONFIGPATH) | sed -e '/"$(MAKEDSCRIPT)"/d' -e '/f2html/d' -e '/alias/d' | cut -d '.' -f 2 | sort | uniq)"
 	@echo "release     debug release"
 	@echo "netcdf      netcdf3 netcdf4 [anything else]"
 	@echo "lapack      true [anything else]"
