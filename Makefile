@@ -734,7 +734,7 @@ else
 	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
 	echo $(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $${src} -o $@ ; \
-	 $(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $${src} -o $@
+	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $${src} -o $@
 endif
 
 $(FOBJS):
@@ -765,16 +765,7 @@ ifeq (False,$(islib))
 	rm -f "$(PROGNAME)"
 endif
 	rm -f $(GOBJS) $(FGOBJS)
-	rm -f $(addsuffix /$(MAKEDSCRIPT).dict, $(OBJPATH))
-#       Special cleaning of CHS library tests
-        ifneq (,$(findstring $(SRCPATH),test_netcdf_imsl_proj))
-	    for i in $(SRCPATH) ; do \
-	        if [ -f $$i/test.nc ] ; then rm $$i/test.nc ; fi ; \
-	    done
-        endif
-	@if [ -f $(PROGPATH)/"Test.nc" ] ; then rm $(PROGPATH)/Test.nc ; fi
-	@if [ -f $(PROGPATH)/"1_tmp_parasets.nc" ]  ; then rm $(PROGPATH)/?_tmp_parasets.nc  ; fi
-	@if [ -f $(PROGPATH)/"10_tmp_parasets.nc" ] ; then rm $(PROGPATH)/??_tmp_parasets.nc ; fi
+	rm -f *make_check_test_file
 
 cleanclean: clean
 	rm -rf $(addsuffix /.*.r*, $(SRCPATH)) $(addsuffix /.*.d*, $(SRCPATH))
