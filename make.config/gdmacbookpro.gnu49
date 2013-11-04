@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for NAG compiler 5.3 at Giovanni's MacBook Pro
+# Setup file for Gnu compiler 4.9 at Giovanni's Macbook Pro
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.
@@ -28,41 +28,32 @@
 # Define subirectories if another structure
 
 # Paths
-NAGDIR := /usr/local
-NAGLIB := $(NAGDIR)/lib/NAG_Fortran
-NAGBIN := /usr/bin
-
 GNUDIR := /usr/local
 GNULIB := $(GNUDIR)/lib
 GNUBIN := $(GNUDIR)/bin
 
 # Compiling
-F90 := $(NAGBIN)/nagfor
+F90 := $(GNUBIN)/gfortran
 FC  := $(F90)
 CC  := $(GNUBIN)/gcc
 ifeq ($(release),debug)
-    #F90FLAGS += -C=all -g -gline -nan -O0 -strict95 -g90
-    F90FLAGS += -C -C=dangling -g -gline -nan -O0 -strict95 -g90
-    FCFLAGS  += $(F90FLAGS)
+    F90FLAGS += -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
+    FCFLAGS  += -pedantic-errors -ffixed-form -ffixed-line-length-132 -Wall -W -O -g
     CFLAGS   += -pedantic-errors -Wall -W -O -g
-    LDFLAGS  += -g90
 else
     F90FLAGS += -O3
-    FCFLAGS  += $(F90FLAGS)
+    FCFLAGS  += -ffixed-form -O3
     CFLAGS   += -O3
 endif
-# -mismatch-all
-F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient
-#F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=full -ideclient
-MODFLAG  := -mdir # space significant
+F90FLAGS += -cpp
+MODFLAG  := -J# space significant
 FCFLAGS  +=
 CFLAGS   +=
-LDFLAGS  += -ideclient -unsharedrts
-DEFINES  += -DNAG -DgFortran
+DEFINES  += -DGFORTRAN -DgFortran
 
 # Linking
-LIBS += -L$(NAGLIB) #$(NAGLIB)/thsafe.o
-RPATH += -Wl,-rpath,$(NAGLIB)
+LIBS += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
 
 # IMSL
 IMSLDIR :=
@@ -75,19 +66,19 @@ MKL95DIR :=
 ifeq ($(netcdf),netcdf3)
     NCDIR :=
 else
-    NCDIR    = /usr/local/netcdf_4.1.2_nag53
+    NCDIR    = /usr/local/netcdf_4.1.2_gfortran46
     CURLLIB := /usr/bin
     SZLIB   := /usr/local/lib
-    HDF5LIB := /usr/local/hdf5_1.8.11_nag53/lib
+    HDF5LIB := /usr/local/hdf5_1.8.11_gfortran46/lib
 endif
 
 # PROJ
-# PROJ4DIR := /usr/local
-# FPROJDIR := 
+#PROJ4DIR := #/usr/local/
+#FPROJDIR := 
 
 # LAPACK
-LAPACKDIR   :=
-GFORTRANDIR := /usr/local
+LAPACKDIR   := 
+GFORTRANDIR := $(GNUDIR)
 
 # Documentation
 DOXYGENDIR := /usr/local/bin
