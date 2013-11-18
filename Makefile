@@ -771,6 +771,7 @@ cleanclean: clean
 	rm -rf $(addsuffix /.*.r*, $(SRCPATH)) $(addsuffix /.*.d*, $(SRCPATH))
 	rm -rf "$(PROGNAME)".dSYM $(addsuffix /html, $(SRCPATH))
 	@if [ -f $(DOXPATH)/"doxygen.config" ] ; then rm -rf $(PROGPATH)/latex ; fi
+	@if [ -f $(DOXPATH)/"doxygen.config" ] ; then rm -rf $(PROGPATH)/html ; fi
 ifeq (True,$(islib))
 	rm -f "$(LIBNAME)"
 endif
