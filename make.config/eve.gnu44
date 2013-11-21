@@ -83,8 +83,8 @@ PROJ4DIR := /usr/local/proj/4.7.0
 FPROJDIR := /usr/local/fproj/4.7.0_gcc44
 
 # LAPACK
-LAPACKDIR   := /usr
-LAPACKLIB   := $(LAPACKDIR)/lib64
+LAPACKDIR   :=
+LAPACKLIB   :=
 GFORTRANDIR := $(GNUDIR)
 GFORTRANLIB := $(GNULIB)
 
