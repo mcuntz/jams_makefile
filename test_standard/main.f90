@@ -141,6 +141,25 @@ PROGRAM main
   call alloc_test(nx,ny,local_arr)
   write(*,*) 'If you are here than all good.'
 
+  ! Test masking of array dimensions
+  if (allocated(local_arr)) deallocate(local_arr)
+  if (allocated(local_arr1)) deallocate(local_arr1)
+  if (allocated(ii)) deallocate(ii)
+  if (allocated(lii)) deallocate(lii)
+  allocate(local_arr(2,3))
+  allocate(local_arr1(2,2))
+  allocate(ii(3))
+  allocate(lii(3))
+  local_arr(:,1) = 1.0_dp
+  local_arr(:,2) = 2.0_dp
+  local_arr(:,3) = 3.0_dp
+  lii = (/ .true., .false., .true. /)
+  forall(i=1:3) ii(i) = i
+  write(*,*) 'Unmasked ', local_arr
+  local_arr1 = local_arr(:,pack(ii,lii))
+  write(*,*) 'Masked   ', local_arr1
+
+  
 
   ! test sum
   ! nx = 20_i8*60_i8*60_i8
