@@ -6,6 +6,7 @@ PROGRAM main
 #ifndef GFORTRAN
   USE ieee_arithmetic, only: ieee_is_finite
 #endif
+  use iso_fortran_env, only : input_unit, output_unit, error_unit
 
   ! test passing arrays
   INTEGER(i8) :: i, nx, ny, nt
@@ -86,6 +87,15 @@ PROGRAM main
   call dealloc_arr2()
   call dealloc_strucarr()
 
+  ! non advancing ouput
+  write(*,'(A1)',advance='no') '.'
+  flush(output_unit)
+  write(*,'(A1)',advance='no') '.'
+  flush(output_unit)
+  write(*,'(A1)',advance='no') '.'
+  flush(output_unit)
+  write(*,*) ''
+
   ! test intrinsics
   write(*,*) 'Tiny sp ', tiny(1.0_sp)
   write(*,*) 'Tiny dp ', tiny(1.0_dp)
@@ -127,6 +137,10 @@ PROGRAM main
   ztmp(2) = ztmp(2)*ztmp(2)
   write(*,*) 'Max4.1 ', maxval(ztmp), minval(ztmp) ! max is Inf
   write(*,*) 'Max4 ', ztmp
+  if (ztmp(1) > 1.0_dp) write(*,*) 'NaN > 1.0'
+  if (ztmp(1) < 1.0_dp) write(*,*) 'NaN < 1.0'
+  if (ztmp(2) > 1.0_dp) write(*,*) 'Inf > 1.0'
+  if (ztmp(2) < 1.0_dp) write(*,*) 'Inf < 1.0'
 #ifndef GFORTRAN
   ztmp = merge(ztmp, huge(1.0_dp), ieee_is_finite(ztmp))
 #else
