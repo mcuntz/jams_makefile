@@ -439,25 +439,31 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
     endif
     iLIBS += -lnetcdf
 
-    ifeq (exists, $(shell if [ -d "$(NCDIR2)" ] ; then echo 'exists' ; fi))
-        NCINC2 ?= $(strip $(NCDIR2))/include
-        NCLIB2 ?= $(strip $(NCDIR2))/lib
+    ifeq (exists, $(shell if [ -d "$(NCFDIR)" ] ; then echo 'exists' ; fi))
+        NCFINC ?= $(strip $(NCFDIR))/include
+        NCFLIB ?= $(strip $(NCFDIR))/lib
 
-        INCLUDES += -I$(NCINC2)
+        INCLUDES += -I$(NCFINC)
         ifneq ($(ABSOFT),)
-            INCLUDES += -p $(NCINC2)
+            INCLUDES += -p $(NCFINC)
         endif
 
-        iLIBS += -L$(NCLIB2)
-        RPATH += -Wl,-rpath,$(NCLIB2)
-        ifeq (libnetcdff, $(shell ls $(NCLIB2)/libnetcdff.* 2> /dev/null | sed -n '1p' | sed -e 's/.*\(libnetcdff\)/\1/' -e 's/\(libnetcdff\).*/\1/'))
+        iLIBS += -L$(NCFLIB)
+        RPATH += -Wl,-rpath,$(NCFLIB)
+        ifeq (libnetcdff, $(shell ls $(NCFLIB)/libnetcdff.* 2> /dev/null | sed -n '1p' | sed -e 's/.*\(libnetcdff\)/\1/' -e 's/\(libnetcdff\).*/\1/'))
             iLIBS += -lnetcdff
         endif
     endif
 
     # other libraries for netcdf4, ignored for netcdf3
     ifeq ($(netcdf),netcdf4)
-        iLIBS += -L$(HDF5LIB) -lhdf5_hl -lhdf5 -L$(SZLIB) -lsz -lz
+        iLIBS += -L$(HDF5LIB) -lhdf5_hl -lhdf5 -L$(SZLIB) -lsz
+        ifneq ($(ZLIB),)
+            iLIBS += -L$(ZLIB) -lz
+            RPATH += -Wl,-rpath,$(ZLIB)
+        else
+            iLIBS += -lz
+        endif
         RPATH += -Wl,-rpath,$(SZLIB) -Wl,-rpath,$(HDF5LIB)
         ifneq ($(CURLLIB),)
             iLIBS += -L$(CURLLIB) -lcurl
