@@ -31,7 +31,7 @@
 EASYBUILD := /global/easybuild/software
 
 # Paths
-GNUDIR := $(EASYBUILD)/GCC/4.7.2
+GNUDIR := $(EASYBUILD)/GCC/4.8.1
 GNULIB := $(GNUDIR)/lib64
 GNUBIN := $(GNUDIR)/bin
 
@@ -80,11 +80,11 @@ MKL95LIB := $(MKL95DIR)/lib/intel64
 ifeq ($(netcdf),netcdf3)
     NCDIR := /usr/local/netcdf/3.6.3_gcc46
 else
-    ZLIB    := $(EASYBUILD)/zlib/1.2.7-goolf-1.4.10/lib
-    SZLIB   := $(EASYBUILD)/Szip/2.1-goolf-1.4.10/lib
-    HDF5LIB := $(EASYBUILD)/HDF5/1.8.10-goolf-1.4.10/lib
-    NCDIR   := $(EASYBUILD)/netCDF/4.2.1.1-goolf-1.4.10
-    NCFDIR  := $(EASYBUILD)/netCDF-Fortran/4.2-goolf-1.4.10
+    ZLIB    := $(EASYBUILD)/zlib/1.2.7-GCC-4.8.1/lib
+    SZLIB   := $(EASYBUILD)/Szip/2.1-GCC-4.8.1/lib
+    HDF5LIB := $(EASYBUILD)/HDF5/1.8.9-GCC-4.8.1/lib
+    NCDIR   := $(EASYBUILD)/netCDF/4.2.1.1-GCC-4.8.1
+    NCFDIR  := $(EASYBUILD)/netCDF-Fortran/4.2-GCC-4.8.1
 endif
 
 # PROJ
@@ -98,11 +98,11 @@ GFORTRANDIR := $(GNUDIR)
 GFORTRANLIB := $(GNULIB)
 
 # Documentation
-DOXYGENDIR := $(EASYBUILD)/Doxygen/1.8.3.1-goolf-1.4.10/bin
+DOXYGENDIR := $(EASYBUILD)/Doxygen/1.8.3.1-GCC-4.8.1/bin
 DOTDIR     := /usr/local/graphviz/2.28.0-2/bin
 TEXDIR     := /usr/local/texlive/2011/bin/x86_64-linux
 PERLDIR    := /usr/bin
-iiLDPATH := $(EASYBUILD)/flex/2.5.37-goolf-1.4.10/lib:$(EASYBUILD)/Bison/2.7-goolf-1.4.10/lib
+iiLDPATH := $(EASYBUILD)/flex/2.5.37-GCC-4.8.1/lib:$(EASYBUILD)/Bison/2.7-GCC-4.8.1/lib
 ifneq ($(LDPATH),)
     LDPATH += :$(iiLDPATH)
 else
