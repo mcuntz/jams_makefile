@@ -173,6 +173,10 @@ PROGRAM main
   local_arr1 = local_arr(:,pack(ii,lii))
   write(*,*) 'Masked   ', local_arr1
 
+  ztmp(1) = tiny(0.9_dp)
+  ztmp(2) = huge(0.8_dp)
+  write(*,*) 'L0: ', ztmp(1:2)
+  write(*,*) 'L1: ', log(ztmp(1:2))
   
 
   ! test sum
