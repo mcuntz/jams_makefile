@@ -732,8 +732,8 @@ $(OBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	echo $(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $${src} > .tmp.gf3 ; \
-	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $${src} > .tmp.gf3
+	echo $(CC) -E -x c $(DEFINES) $(INCLUDES) $(CFLAGS) $${src} > .tmp.gf3 ; \
+	$(CC) -E -x c $(DEFINES) $(INCLUDES) $(CFLAGS) $${src} > .tmp.gf3
 	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c .tmp.gf3 -o $@
 	rm .tmp.gf3
 else
@@ -747,8 +747,8 @@ $(FOBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	echo $(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $$src > .tmp.gf3 ; \
-	$(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $$src > .tmp.gf3
+	echo $(CC) -E -x c $(DEFINES) $(INCLUDES) $(CFLAGS) $$src > .tmp.gf3 ; \
+	$(CC) -E -x c $(DEFINES) $(INCLUDES) $(CFLAGS) $$src > .tmp.gf3
 	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c .tmp.gf3 -o $@
 	rm .tmp.gf3
 else

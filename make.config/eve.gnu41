@@ -48,7 +48,7 @@ endif
 MODFLAG  := -J# space significant
 FCFLAGS  +=
 CFLAGS   +=
-DEFINES  += -DGFORTRAN -DgFortran
+DEFINES  += -DGFORTRAN -DgFortran -DGFORTRAN41
 
 # Linking
 LIBS += -L$(GNULIB)
