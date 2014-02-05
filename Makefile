@@ -105,11 +105,11 @@ compiler := gnu
 # Releases: debug, release
 release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   := 
+netcdf   := netcdf4
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
-mkl      :=
+mkl      := mkl
 # Proj4 (Cartographic Projections Library): true, [anything else]
 proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
@@ -732,10 +732,12 @@ $(OBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	echo $(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $${src} > .tmp.gf3 ; \
-	$(F90) -E -x c $(DEFINES) $(INCLUDES) $(F90FLAGS) $${src} > .tmp.gf3
-	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c .tmp.gf3 -o $@
-	rm .tmp.gf3
+	tmp=$@.$$(echo $${src} | sed 's/.*\.//') ; \
+	echo "$(F90) -E $(DEFINES) $(INCLUDES) $(F90FLAGS) $${src} | sed 's/^#[[:blank:]]\{1,\}[[:digit:]]\{1,\}.*$$//' > $${tmp}" ; \
+	$(F90) -E $(DEFINES) $(INCLUDES) $(F90FLAGS) $${src} | sed 's/^#[[:blank:]]\{1,\}[[:digit:]]\{1,\}.*$$//' > $${tmp} ; \
+	echo "$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $${tmp} -o $@" ; \
+	$(F90) $(DEFINES) $(INCLUDES) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $${tmp} -o $@ ; \
+	rm $${tmp}
 else
 	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
@@ -747,10 +749,12 @@ $(FOBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	echo $(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $$src > .tmp.gf3 ; \
-	$(FC) -E -x c $(DEFINES) $(INCLUDES) $(FCFLAGS) $$src > .tmp.gf3
-	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c .tmp.gf3 -o $@
-	rm .tmp.gf3
+	tmp=$@.$$(echo $${src} | sed 's/.*\.//') ; \
+	echo "$(FC) -E $(DEFINES) $(INCLUDES) $(FCFLAGS) $${src} | sed 's/^#[[:blank:]]\{1,\}[[:digit:]]\{1,\}.*$$//' > $${tmp}" ; \
+	$(FC) -E $(DEFINES) $(INCLUDES) $(FCFLAGS) $${src} | sed 's/^#[[:blank:]]\{1,\}[[:digit:]]\{1,\}.*$$//' > $${tmp} ; \
+	echo "$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $${tmp} -o $@" ; \
+	$(FC) $(DEFINES) $(INCLUDES) $(FCFLAGS) -c $${tmp} -o $@ ; \
+	rm $${tmp}
 else
 	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
 	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
