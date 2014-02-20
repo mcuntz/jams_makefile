@@ -86,28 +86,27 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := . #../mHM/branches/mai/src ../mHM/branches/mai/lib # ../FORTRAN_chs_lib/test/test_mo_dds # where are the source files. Can be space separated list
-PROGPATH   := .                                    # where shall be the executable
-CONFIGPATH := make.config                          # where are the $(system).$(compiler) files
-MAKEDPATH  := make.config                          # where is the make.d.sh script
-DOXPATH    := .                                    # where is doxygen.config
-CHECKPATH  := ../FORTRAN_chs_lib/test/             # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+SRCPATH    := test_standard    # where are the source files; use test_??? to run a test directory
+PROGPATH   := .                # where shall be the executable
+CONFIGPATH := make.config      # where are the $(system).$(compiler) files
+MAKEDPATH  := make.config      # where is the make.d.sh script
+DOXPATH    := .                # where is doxygen.config
+CHECKPATH  := .                # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 #
-PROGNAME := Prog_SI_afterMUCM # Name of executable
+PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
-# Systems: eve and personal computers such as mcimac for Matthias Cuntz' iMac; look in $(MAKEDPATH) or type 'make info'
+# Systems: eve, mcimac, mcpowerbook, mcair, jcthinkpad, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet, lsimac, lsair
 system   := eve
-# Compiler: intelX, gnuX, nagX, sunX, where X stands for version number, e.g. intel13;
-#   look at $(MAKEDPATH)/$(system).alias for shortcuts or type 'make info'
+# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, gnu47, gnu48, absoft, nag51, nag52, nag53, sun12
 compiler := gnu
 # Releases: debug, release
-release  := release
+release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
 netcdf   := netcdf4
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   := 
+lapack   := true
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      := mkl
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -155,7 +154,7 @@ static   := shared
 #                  This means that all tests do not work which use netcdf and/or lapack.
 #     -C=intovf    check integer overflow, which is intentional in UFZ mo_xor4096.
 EXTRA_FCFLAGS  :=
-EXTRA_F90FLAGS :=
+EXTRA_F90FLAGS := #-C=undefined
 EXTRA_DEFINES  :=
 EXTRA_INCLUDES :=
 EXTRA_LDFLAGS  :=
@@ -826,7 +825,7 @@ endif
 	         CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
 	         release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
 	         imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
-	         openmp=$(openmp) EXTRA_LDFLAGS="$$ldextra" > /dev/null \
+	         openmp=$(openmp) NOMACWARN=true EXTRA_LDFLAGS="$$ldextra" > /dev/null \
 	    && { $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ;} ; status=$$? ; \
 	    if [ $$status != 0 ] ; then echo "$$i failed!" ; fi ; \
 	    $(MAKE) -s SRCPATH=$$i cleanclean ; \
