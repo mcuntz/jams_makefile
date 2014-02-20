@@ -86,14 +86,14 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test_standard # where are the source files. Can be space separated list
-PROGPATH   := .           # where shall be the executable
-CONFIGPATH := make.config # where are the $(system).$(compiler) files
-MAKEDPATH  := make.config # where is the make.d.sh script
-DOXPATH    := .           # where is doxygen.config
-CHECKPATH  := .           # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+SRCPATH    := . #../mHM/branches/mai/src ../mHM/branches/mai/lib # ../FORTRAN_chs_lib/test/test_mo_dds # where are the source files. Can be space separated list
+PROGPATH   := .                                    # where shall be the executable
+CONFIGPATH := make.config                          # where are the $(system).$(compiler) files
+MAKEDPATH  := make.config                          # where is the make.d.sh script
+DOXPATH    := .                                    # where is doxygen.config
+CHECKPATH  := ../FORTRAN_chs_lib/test/             # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 #
-PROGNAME := Prog # Name of executable
+PROGNAME := Prog_SI_afterMUCM # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
@@ -103,11 +103,11 @@ system   := eve
 #   look at $(MAKEDPATH)/$(system).alias for shortcuts or type 'make info'
 compiler := gnu
 # Releases: debug, release
-release  := debug
+release  := release
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
 netcdf   := netcdf4
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   :=
+lapack   := 
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      := mkl
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -115,7 +115,7 @@ proj     :=
 # IMSL (IMSL Numerical Libraries): vendor, imsl, [anything else]
 imsl     :=
 # OpenMP parallelization: true, [anything else]
-openmp   :=
+openmp   := 
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
 
@@ -240,6 +240,7 @@ endif
 compilers := $(shell ls -1 $(CONFIGPATH) | sed -e "/$(MAKEDSCRIPT)/d" -e '/f2html/d' -e '/alias/d' | grep $(system) | cut -d '.' -f 2 | sort | uniq)
 gnucompilers := $(filter gnu%, $(compilers))
 nagcompilers := $(filter nag%, $(compilers))
+intelcompilers := $(filter intel%, $(compilers))
 ifeq (,$(findstring $(icompiler),$(compilers)))
     $(error Error: compiler '$(icompiler)' not found: configured compilers for system $(system) are $(compilers))
 endif
@@ -416,6 +417,14 @@ ifneq (,$(findstring $(mkl),mkl mkl95))
         endif
     endif
     RPATH += -Wl,-rpath,$(MKLLIB)
+
+    ifeq ($(openmp),true)
+	ifeq (,$(findstring $(icompiler),$(intelcompilers)))
+            iLIBS += -L$(INTELLIB) -liomp5
+            RPATH += -Wl,-rpath,$(INTELLIB)
+        endif
+    endif
+
 endif
 
 # --- NETCDF ---------------------------------------------------
