@@ -46,6 +46,7 @@ else
     CFLAGS   += -O3
 endif
 F90FLAGS += -cpp
+F90FLAGS += -ffpe-summary=none
 MODFLAG  := -J# space significant
 FCFLAGS  +=
 CFLAGS   +=
