@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for NAG compiler 5.3 at Eve
+# Setup file for Gnu compiler 4.6 at Stephan's UFZ Ubuntu
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.
@@ -19,70 +19,61 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with the UFZ makefile project. If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2012 Matthias Cuntz
+#    Copyright 2012 Stephan Thober
 
 # The Makefile assumes the standard bin, include and lib directories
 # i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
 #   SOMEINC ?= SOMEDIR/include
 #   SOMELIB ?= SOMEDIR/lib
-# Define subdirectories if another structure
+# Define subirectories if another structure
 
 # Paths
-NAGDIR := /usr/local
-NAGLIB := $(NAGDIR)/lib
-NAGBIN := $(NAGDIR)/bin
-
 GNUDIR := /usr
 GNULIB := $(GNUDIR)/lib
 GNUBIN := $(GNUDIR)/bin
 
 # Compiling
-F90 := $(NAGBIN)/nagfor
+F90 := $(GNUBIN)/gfortran
 FC  := $(F90)
 CC  := $(GNUBIN)/gcc
+# GNU Fortran version >= 4.4
 ifeq ($(release),debug)
-    #F90FLAGS += -C=all -g -gline -nan -O0 -strict95 -g90
-    #F90FLAGS += -C -C=dangling -g -gline -nan -O0 -strict95 -g90
-    #F90FLAGS += -C -C=dangling -g -nan -O0 -strict95 -g90
-    F90FLAGS += -O3 -fpp -mismatch_all -kind=byte
-    FCFLAGS  += $(F90FLAGS)
+    F90FLAGS += -pedantic-errors -ffree-form -ffixed-line-length-132 -Wall -W -O -g
+    FCFLAGS  += -pedantic-errors -ffixed-form -ffixed-line-length-132 -Wall -W -O -g
     CFLAGS   += -pedantic-errors -Wall -W -O -g
-    LDFLAGS  += -g90
 else
     F90FLAGS += -O3
-    FCFLAGS  += $(F90FLAGS)
+    FCFLAGS  += -ffixed-form -O3
     CFLAGS   += -O3
 endif
-# -mismatch-all
-#F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient
-MODFLAG  := -mdir # space significant
+F90FLAGS += -cpp
+MODFLAG  := -J# space significant
 FCFLAGS  +=
 CFLAGS   +=
-LDFLAGS  += -ideclient -unsharedrts
-DEFINES  += -DNAG -DgFortran
+DEFINES  += -DGFORTRAN -DgFortran
 
 # Linking
-#LIBS += -L$(NAGLIB) #$(NAGLIB)/thsafe.o
-RPATH += -Wl,-rpath,$(NAGLIB)
+LIBS  += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
 
 # IMSL
 IMSLDIR :=
 
 # MKL
-# MKLDIR := /usr/local/intel/composer_xe_2011_sp1.9.293/mkl
-# MKLINC := $(MKLDIR)/include/intel64/lp64
-# MKLLIB := $(MKLDIR)/lib/intel64
-# MKL95DIR := $(MKLDIR)
-# MKL95INC := $(MKL95DIR)/include/intel64/lp64
-# MKL95LIB := $(MKL95DIR)/lib/intel64
+MKLDIR := /usr/local/intel/composer_xe_2011_sp1.9.293/mkl
+MKLINC := $(MKLDIR)/include/intel64/lp64
+MKLLIB := $(MKLDIR)/lib/intel64
+MKL95DIR := $(MKLDIR)
+MKL95INC := $(MKL95DIR)/include/intel64/lp64
+MKL95LIB := $(MKL95DIR)/lib/intel64
 
 # NETCDF
-NCDIR   := /usr/local/netcdf-fortran-4.2-nagfor
-SZLIB   := /usr/local
-HDF5LIB := /usr/local
+NCDIR   := /usr/local/netcdf-fortran-4.2-gfortran
+SZLIB   := 
+HDF5LIB := /usr/lib/x86_64-linux-gnu/
 
 # PROJ
-PROJ4DIR := /usr/local
+PROJ4DIR := 
 FPROJDIR := 
 
 # LAPACK
