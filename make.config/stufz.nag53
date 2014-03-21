@@ -41,11 +41,13 @@ F90 := $(NAGBIN)/nagfor
 FC  := $(F90)
 CC  := $(GNUBIN)/gcc
 ifeq ($(release),debug)
-    #F90FLAGS += -C=all -g -gline -nan -O0 -strict95 -g90
-    #F90FLAGS += -C -C=dangling -g -gline -nan -O0 -strict95 -g90
-    #F90FLAGS += -C -C=dangling -g -nan -O0 -strict95 -g90
-    F90FLAGS += -O3 -fpp -mismatch_all -kind=byte
+    ifeq ($(openmp),true)
+        F90FLAGS += -C -C=dangling -g -nan -O0 -strict95 -g90
+    else
+        F90FLAGS += -C -C=dangling -g -gline -nan -O0 -strict95 -g90
+    endif
     FCFLAGS  += $(F90FLAGS)
+    #FCFLAGS  += -C -C=dangling -g -nan -O0 -fixed
     CFLAGS   += -pedantic-errors -Wall -W -O -g
     LDFLAGS  += -g90
 else
@@ -54,7 +56,7 @@ else
     CFLAGS   += -O3
 endif
 # -mismatch-all
-#F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient
+F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient
 MODFLAG  := -mdir # space significant
 FCFLAGS  +=
 CFLAGS   +=
@@ -79,10 +81,10 @@ IMSLDIR :=
 # NETCDF
 NCDIR   := /usr/local/netcdf-fortran-4.2-nagfor
 SZLIB   := /usr/local
-HDF5LIB := /usr/local
+HDF5LIB := 
 
 # PROJ
-PROJ4DIR := /usr/local
+PROJ4DIR :=
 FPROJDIR := 
 
 # LAPACK
