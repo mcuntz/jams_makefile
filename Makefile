@@ -97,9 +97,10 @@ PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
-# Systems: eve, mcimac, mcpowerbook, mcair, jcthinkpad, jmmacbookpro, gdmacbookpro, stdesk, stubuntu, stufz, burnet, lsimac, lsair
+# Systems: eve and personal computers such as mcimac for Matthias Cuntz' iMac; look in $(MAKEDPATH) or type 'make info'
 system   := eve
-# Compiler: intel11, intel12, gnu41, gnu42, gnu44, gnu45, gnu46, gnu47, gnu48, absoft, nag51, nag52, nag53, sun12
+# Compiler: intelX, gnuX, nagX, sunX, where X stands for version number, e.g. intel13;
+#   look at $(MAKEDPATH)/$(system).alias for shortcuts or type 'make info'
 compiler := gnu
 # Releases: debug, release
 release  := debug
