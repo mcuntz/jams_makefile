@@ -237,8 +237,7 @@ endif
 #
 # --- CHECK 2 ---------------------------------------------------
 #
-compilers := $(shell ls -1 $(CONFIGPATH) | sed -e "/$(MAKEDSCRIPT)/d" -e '/f2html/d' -e '/alias/d' | grep $(system) | cut -d '.' -f 2 | sort | uniq)
-gnucompilers := $(filter gnu%, $(compilers))
+compilers := $(shell ls -1 $(CONFIGPATH) | sed -e "/$(MAKEDSCRIPT)/d" -e '/f2html/d' -e '/alias/d' -e '/~$$/d' | grep $(gnucompilers := $(filter gnu%, $(compilers))
 nagcompilers := $(filter nag%, $(compilers))
 intelcompilers := $(filter intel%, $(compilers))
 ifeq (,$(findstring $(icompiler),$(compilers)))
@@ -824,20 +823,20 @@ endif
 	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check*) ; do \
 	    rm -f "$(PROGNAME)" ; \
 	    j=$${i/minpack/maxpack} ; \
-	    ldextra= ; \
+	    libextra= ; \
 	    if [ $$i != $$j ] ; then \
 	    	 $(MAKE) -s MAKEDPATH=$(MAKEDPATH) SRCPATH="$$i"/../../minpack PROGPATH=$(PROGPATH) \
 	    	      CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=libminpack.a system=$(system) \
 	    	      release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
 	    	      imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
 	    	      openmp=$(openmp) > /dev/null ; \
-                 ldextra="-L. -lminpack" ; \
+                 libextra="-L. -lminpack" ; \
 	    fi ; \
 	    $(MAKE) -s MAKEDPATH=$(MAKEDPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
 	         CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
 	         release=$(release) netcdf=$(netcdf) static=$(static) proj=$(proj) \
 	         imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
-	         openmp=$(openmp) NOMACWARN=true EXTRA_LDFLAGS="$$ldextra" > /dev/null \
+	         openmp=$(openmp) NOMACWARN=true EXTRA_LIBS="$$libextra" > /dev/null \
 	    && { $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ;} ; status=$$? ; \
 	    if [ $$status != 0 ] ; then echo "$$i failed!" ; fi ; \
 	    $(MAKE) -s SRCPATH=$$i cleanclean ; \
