@@ -85,6 +85,10 @@ else
     SZLIB   := /usr/local/lib
     HDF5LIB := /usr/local/lib
 endif
+    # NCDIR   := /Users/cuntz/Desktop/local/netcdf-fortran-4.2-nagfor
+    # CURLLIB :=
+    # SZLIB   := /Users/cuntz/Desktop/local/lib
+    # HDF5LIB := /Users/cuntz/Desktop/local/lib
 
 # PROJ
 PROJ4DIR :=

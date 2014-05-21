@@ -177,7 +177,6 @@ PROGRAM main
   ztmp(2) = huge(0.8_dp)
   write(*,*) 'L0: ', ztmp(1:2)
   write(*,*) 'L1: ', log(ztmp(1:2))
-  
 
   ! test sum
   ! nx = 20_i8*60_i8*60_i8
@@ -212,5 +211,11 @@ PROGRAM main
   ! call cpu_time(ctime2)
   ! write(*,*) "Read ", cc, " # of lines in ", ctime2-ctime1, " seconds."
   ! close(20)
+
+  ! ! test power of negative numbers
+  ! ztmp(1) = 0.2_dp
+  ! ztmp(2) = -0.2_dp
+  ! write(*,*) '+-0.2^5: ', ztmp(1:2)**5
+  ! write(*,*) '(+-0.2^5)^(1/5): ', (ztmp(1:2)**5)**0.2_dp  
 
 END PROGRAM
