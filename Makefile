@@ -73,11 +73,13 @@
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public License
-#    along with the UFZ makefile project. If not, see <http://www.gnu.org/licenses/>.
+#    along with the UFZ makefile project (cf. gpl.txt and lgpl.txt).
+#    If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2011-2013 Matthias Cuntz, Juliane Mai, Stephan Thober
+#    Copyright 2011-2014 Matthias Cuntz
 #
-# Written Matthias Cuntz & Juliane Mai, UFZ Leipzig, Germany, Nov. 2011 - mc (at) macu.de
+# Written Matthias Cuntz, Nov. 2011 - mc (at) macu.de
+# Modified Matthias Cuntz, Juliane Mai, Stephan Thober, UFZ Leipzig, Germany
 
 SHELL = /bin/bash
 
@@ -86,12 +88,12 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test_standard    # where are the source files; use test_??? to run a test directory
-PROGPATH   := .                # where shall be the executable
-CONFIGPATH := make.config      # where are the $(system).$(compiler) files
-MAKEDPATH  := make.config      # where is the make.d.sh script
-DOXPATH    := .                # where is doxygen.config
-CHECKPATH  := .                # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+SRCPATH    := test/test_standard   # where are the source files; use test_??? to run a test directory
+PROGPATH   := .                	   # where shall be the executable
+CONFIGPATH := make.config      	   # where are the $(system).$(compiler) files
+MAKEDPATH  := make.config      	   # where is the make.d.sh script
+DOXPATH    := .                	   # where is doxygen.config
+CHECKPATH  := test             	   # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 #
 PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library

@@ -7,6 +7,7 @@ Permoserstr. 15
 04318 Leipzig, Germany
 
 The project tries to provide a portable, versatile way of compiling Fortran, C and mixed projects.
+It uses cfortran.h for Fortran-C interoperability.
 It is released under the GNU Lesser General Public License (see below).
 
 The library is maintained with a subversion system at:
@@ -18,9 +19,10 @@ The documentation of the library is maintained as a wiki at:
 The above wiki will be printed to a PDF file from time to time, which is provided in wiki.pdf.
 Be aware that the current PDF is not always up to date.
 
-Created 11.11.2011 by Matthias Cuntz and Juliane Mai
-Copyright 2011-2012 UFZ CHS
+Created 11.11.2011 by Matthias Cuntz
+Copyright 2011-2014 UFZ CHS
 Contact Matthias Cuntz - mc (at) macu.de
+
 
 License
 -------
@@ -32,12 +34,16 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 The UFZ makefile project is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU Lesser General Public License for more details.
+but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the UFZ makefile project. If not, see <http://www.gnu.org/licenses/>.
+along with the UFZ makefile project (cf. gpl.txt and lgpl.txt).
+If not, see <http://www.gnu.org/licenses/>.
+
+Copyright 2011-2014 Matthias Cuntz
+
 
 Literature
 ----------
@@ -57,38 +63,40 @@ The following links provide general documentation on used compiler and packages/
      PROJ4         http://trac.osgeo.org/proj/
      LAPACK        http://www.netlib.org/lapack/
 
+
 How to use the makefile
 -----------------------
 You have to checkout the Makefile and the directory make.config.
 Open the file Makefile and make the proper settings for your source code (select compiler, IMSL, MKL, LAPACK, etc.).
 Read the header of the makefile for targets, etc.
 'make info' gives detailed information.
+You can give most makefile switches on the command line as well, eg.
+make system=mcair compiler=gnu openmp=true
+
 
 How to add a new compiler on a given system
 -------------------------------------------
-Say you want to add the PGI compiler suite version 8.5 on the system eve.
-Choose the compiler abbreviation pgi8.5, i.e. system=eve, compiler=pgi8.5
-1. Copy a config file in make.config to the name eve.pgi85
-   Take a file that ends with an abbreviation which could be your compiler,
-   e.g. if there were the file mcair.pgi8.3.
-   If there is none, take eve.intel12.
+As an example, one wants to add the PGI compiler suite version 8.5 on the system eve.
+Choose the compiler abbreviation pgi85, i.e. leading to system=eve, compiler=pgi85
+1. Create a config file in make.config/ with the name eve.pgi85
+   One can copy an existing file and adapt it to the new compiler. Take a compiler close to the new one,
+   e.g. eve.pgi83.
+   If there is none, take eve.intel12 as a good starting point.
 2. Adapt the pathes and compiler switches in the config file.
-3. If wanted, you can give aliases for that compiler, e.g. simply pgi instead of also the version number.
-   Edit the file eve.alias. Follow the examples of sun or nag.
-4. For completeness: in Makefile add pgi85 at the end of the list above compiler := ...
+3. If wanted, you can give aliases for that compiler, e.g. simply 'pgi' instead of also the version number 'pgi85'.
+   Edit eve.alias, follow the examples of sun or nag.
+
 
 How to add a new system
 -----------------------
-You want to port the Makefile onto a new system. Say you have a system called 'Liclus'
-on which is a gnu compiler version 4.6, i.e. system=liclus, compiler=gnu46
-1. Copy a config file in make.config to the name liclus.gnu46
-   Take a file that ends with gnu46 or close to it,
-   e.g. the file mcair.gnu46 if Liclus is a Mac OSX or eve.gnu45 if Liclus is a Linux machine.
-   If there is none close to your compiler, take eve.intel12.
+As an example, one wants to port the Makefile onto a new system called 'Liclus'
+on which exists a gnu compiler version 4.7, i.e. leading to system=liclus, compiler=gnu47
+1. Create a config file in make.config/ with the name liclus.gnu47
+   One can copy an existing file of a similar system and a similar compiler.
+   For example if Liclus is Mac OS X, then mcair.gnu46 might be a good start and
+   if Liclus is Linux then eve.gnu48 might give a head start.
+   If there is none close to the compiler, start from eve.intel12.
 2. Adapt the pathes and compiler switches in the config file.
-3. You can give aliases for that compiler, e.g. simply gnu instead of also the version number.
-   Therefore we need the file liclus.alias. Create it in make.config, even empty if you do not want to give any aliases.
-   You can copy eve.alias for examples.
-4. In Makefile search for gnu and if there are some if-clauses with gnu45, for example, add gnu46 there as well.
-5. For completeness: in Makefile add liclus at the end of the list above system := ...
-                     add gnu46 (if not there yet) at the end of the list above compiler := ...
+3. One can give aliases for that compiler, e.g. simply 'gnu' instead of also the version number 'gnu47'.
+   Therefore a file liclus.alias is needed. Create it in make.config/; even an empty is possible if no alias is wanted.
+   One can copy eve.alias for examples.
