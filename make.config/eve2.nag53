@@ -95,9 +95,9 @@ else
     ZLIB    := /usr/local/zlib/1.2.8-2_gcc_4.8.1_CentOS6/lib
     SZLIB   := /usr/local/szip/2.1_gcc_4.8.1_CentOS6/lib
     HDF5LIB := /usr/local/hdf5/1.8.12-1_gcc_4.8.1_CentOS6/lib
-    # NCDIR   := /usr/local/netcdf/4.3.2_gcc_4.8.1_CentOS6
+    NCDIR   := /usr/local/netcdf/4.3.2_gcc_4.8.1_CentOS6
     # NCFDIR  := /usr/local/netcdf-fortran/???
-    NCDIR   := /usr/local/netcdf/4.1.1_nagfor
+    NCFDIR  := /usr/local/netcdf-fortran/4.2_gcc_4.8.1_nagfor_5.3.2_CentOS6
 endif
 
 # PROJ
