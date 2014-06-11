@@ -97,8 +97,7 @@ PROJ4DIR := /usr/local/proj/4.7.0
 FPROJDIR := /usr/local/fproj/4.7.0_intel11.1.075
 
 # LAPACK
-LAPACKDIR   :=
-LAPACKLIB   :=
+LAPACKDIR   := /usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
 GFORTRANDIR := /usr/local/gcc/4.8.1-3_CentOS6/
 GFORTRANLIB := $(GFORTRANDIR)/lib64
 

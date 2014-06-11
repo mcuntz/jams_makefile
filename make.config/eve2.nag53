@@ -105,7 +105,7 @@ PROJ4DIR := /usr/local/proj/4.7.0
 FPROJDIR := /usr/local/fproj/4.7.0-1_nag53
 
 # LAPACK
-LAPACKDIR   := /usr/local/lapack/3.4.2-4_gcc_4.8.1_CentOS6
+LAPACKDIR   := /usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
 GFORTRANDIR := $(GNUDIR)
 GFORTRANLIB := $(GNULIB)
 
