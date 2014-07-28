@@ -88,12 +88,12 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test/test_standard   # where are the source files; use test_??? to run a test directory
-PROGPATH   := .                	   # where shall be the executable
-CONFIGPATH := make.config      	   # where are the $(system).$(compiler) files
-MAKEDPATH  := make.config      	   # where is the make.d.sh script
-DOXPATH    := .                	   # where is doxygen.config
-CHECKPATH  := test             	   # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+SRCPATH    := test/test_standard # where are the source files; use test_??? to run a test directory
+PROGPATH   := .                  # where shall be the executable
+CONFIGPATH := make.config        # where are the $(system).$(compiler) files
+MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
+DOXPATH    := .                  # where is doxygen.config
+CHECKPATH  := test               # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 #
 PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
