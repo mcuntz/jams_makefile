@@ -73,7 +73,7 @@ endif
 
 
 # IMSL
-IMSLDIR :=
+IMSLDIR := /usr/local/imsl/imsl/fnl700/rdhin111e64
 
 # MKL
 MKLDIR := $(INTEL)/mkl
