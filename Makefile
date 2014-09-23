@@ -210,7 +210,7 @@ ifeq (,$(findstring $(static),static shared dynamic))
 endif
 
 #
-# --- PATHES ------------------------------------------------
+# --- PATHS ------------------------------------------------
 #
 
 # Make absolute pathes from relative pathes - there should be no space nor comment at the end of the next lines
