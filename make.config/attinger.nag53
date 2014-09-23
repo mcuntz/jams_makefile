@@ -1,15 +1,8 @@
 # -*- Makefile -*-
 
 #
-# Setup file for NAG compiler 6.0 at Matthias' MacBook Air
+# Setup file for NAG compiler 5.3 at Giovanni's MacBook Pro
 #
-
-# The Makefile assumes the standard bin, include and lib directories
-# i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
-#   SOMEINC ?= SOMEDIR/include
-#   SOMELIB ?= SOMEDIR/lib
-# Define subdirectories if another structure
-
 # LICENSE
 #    This file is part of the UFZ makefile project.
 #
@@ -26,7 +19,13 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with the UFZ makefile project. If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2012-2014 Matthias Cuntz
+#    Copyright 2012 Giovanni Dalmasso
+
+# The Makefile assumes the standard bin, include and lib directories
+# i.e. if SOMEDIR = /path/to/lib, the make file will define the two dirs
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# Define subirectories if another structure
 
 # Paths
 NAGDIR := /usr/local
@@ -42,29 +41,19 @@ F90 := $(NAGBIN)/nagfor
 FC  := $(F90)
 CC  := $(GNUBIN)/gcc
 ifeq ($(release),debug)
-    # The compiler switch "-w=ques" turns off the message:
-    #   Comment begins with the OpenMP sentinel but the -openmp option was not used
-    # but it also turns of 
-    #   Intrinsic function CMPLX with double precision argument and no KIND argument returns single precision result
-    #   KIND argument to intrinsic LBOUND specifies a small integer kind
-    #   KIND argument to intrinsic LEN specifies a small integer kind
-    #   Expression in OpenMP clause is always .TRUE.
-    #   Ordinary assignment of pointer function fname reference to pointer variable vname
-    #   Last statement of DO loop body is an unconditional jump
-    #   Array constructor has a polymorphic element but the constructor value will not be polymorphic
-    F90FLAGS += -C -C=dangling -g -nan -O0 -strict95 # -w=ques -g90
-    ifneq ($(openmp),true)
-        F90FLAGS += -gline
-    endif
+    #F90FLAGS += -C=all -g -gline -nan -O0 -strict95 -g90
+    F90FLAGS += -C -C=dangling -g -gline -nan -O0 -strict95 -g90
     FCFLAGS  += $(F90FLAGS)
     CFLAGS   += -pedantic -Wall -W -O -g
-    LDFLAGS  += #-g90
+    LDFLAGS  += -g90
 else
-    F90FLAGS += -O4
+    F90FLAGS += -O3
     FCFLAGS  += $(F90FLAGS)
     CFLAGS   += -O3
 endif
-F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient # -ieee=full -mismatch-all
+# -mismatch-all
+F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=stop -ideclient
+#F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ieee=full -ideclient
 MODFLAG  := -mdir # space significant
 FCFLAGS  +=
 CFLAGS   +=
@@ -84,18 +73,17 @@ MKL95DIR :=
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR := /usr/local/netcdf-3.6.3-nagfor
+    NCDIR :=
 else
-    NCDIR   := /usr/local
-    NCFDIR  := /usr/local/netcdf-fortran-4.4.1-nagfor
-    CURLLIB := /usr/lib
+    NCDIR    = /usr/local/netcdf_4.2_nag53
+    CURLLIB := /usr/bin
     SZLIB   := /usr/local/lib
-    HDF5LIB := /usr/local/hdf5_1.1.8_gfortran46/lib
+    HDF5LIB := /usr/local/lib
 endif
 
 # PROJ
-PROJ4DIR := /usr/local
-FPROJDIR := 
+# PROJ4DIR := /usr/local
+# FPROJDIR := 
 
 # LAPACK
 LAPACKDIR   :=
