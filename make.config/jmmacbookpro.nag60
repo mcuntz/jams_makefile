@@ -29,7 +29,7 @@
 
 # Paths 
 NAGDIR := /usr/local
-NAGLIB := $(NAGDIR)/lib/NAG_Fortran60
+NAGLIB := $(NAGDIR)/lib/NAG_Fortran
 NAGBIN := /usr/bin
 
 GNUDIR := /usr/local
