@@ -98,7 +98,7 @@ SRCPATH    := test/test_standard # where are the source files; use test_??? to r
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
-CHECKPATH  := test               # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+CHECKPATH  := ../FORTRAN_chs_lib/test               # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 DOXCONFIG  := ./doxygen.config   # the doxygen config file
 #
 PROGNAME := Prog # Name of executable
