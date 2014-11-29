@@ -35,12 +35,19 @@ trap cleanup 1 2 3 6
 # functions
 #
 function usage () {
-    printf "${pprog} [-h] FortranFile Source2ObjectPath AllSrcFiles\n\n"
+    printf "${pprog} [-h] FortranFile FortranFileName Source2ObjectPath AllSrcFiles\n"
+    printf "\n"
     printf "Produces makefile dependency files with file ending .d of Fortran files.\n"
-    printf "Looks for use statement in FortranFile and gets the files in AllSrcFiles that provides the modules.\n"
+    printf "\n"
+    printf "Look for USE statements in FortranFile "
+    printf "and search in AllSrcFiles for the files that provide the modules.\n"
+    printf "Write a dependency file .d in Source2ObjectPath for FortranFileName and not FortranFile. "
+    printf "This allows to check preprocessed Fortran files but write the dependency for the original files. "
+    printf "Use the filename twice if no preprocessed file.\n"
     printf "\n"
     printf "Input\n"
     printf "    FortranFile         Fortran file for which dependency file will be produced.\n"
+    printf "    FortranFileName     Fortran file name used in dependency file.\n"
     printf "    Source2ObjectPath   Script assumes that object path is $(dirname ${FortranFile})/${Source2ObjectPath}).\n"
     printf "    AllSrcFIles         All source file of project that will be scanned for dependencies.\n"
     printf "\n"
@@ -48,7 +55,9 @@ function usage () {
     printf "    -h          Prints this help screen.\n"
     printf "\n"
     printf "Examples\n"
-    printf "    ${pprog} src/main.f90 .gnu.release src/*.f90\n"
+    printf "    ${pprog} src/main.f90     src/main.f90 .gnu.release src/*.f90\n"
+    printf "or\n"
+    printf "    ${pprog} src/main.f90.pre src/main.f90 .gnu.release src/*.f90\n"
 }
 #
 # cleanup at end wnd when interupted
@@ -78,8 +87,9 @@ fi
 
 # infile and objectpath
 thisfile=$1
-src2obj=$2
-shift 2
+thisfilename=$2
+src2obj=$3
+shift 3
 # all source files
 srcfiles=$@
 
@@ -117,9 +127,9 @@ if [[ "${is}" != "" ]] ; then
 fi
 
 # Write output .d file
-s2ofile="$(dirname ${thisfile})/${src2obj}/$(basename ${thisfile})"
+s2ofile="$(dirname ${thisfilename})/${src2obj}/$(basename ${thisfilename})"
 tmpfile=${s2ofile}.${pid}
-printf "${s2ofile/\.[fF]*/.d} : ${thisfile}\n" > ${tmpfile}
+printf "${s2ofile/\.[fF]*/.d} : ${thisfilename}\n" > ${tmpfile}
 printf "${s2ofile/\.[fF]*/.o} : ${s2ofile/\.[fF]*/.d}" >> ${tmpfile}
 for i in ${olist} ; do
     is2ofile="$(dirname ${i})/${src2obj}/$(basename ${i})"
