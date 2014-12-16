@@ -49,7 +49,7 @@ function usage () {
     printf "    FortranFile         Fortran file for which dependency file will be produced.\n"
     printf "    FortranFileName     Fortran file name used in dependency file.\n"
     printf "    Source2ObjectPath   Script assumes that object path is $(dirname ${FortranFile})/${Source2ObjectPath}).\n"
-    printf "    AllSrcFIles         All source file of project that will be scanned for dependencies.\n"
+    printf "    AllSrcFiles         All source files of project that will be scanned for dependencies.\n"
     printf "\n"
     printf "Options\n"
     printf "    -h          Prints this help screen.\n"
