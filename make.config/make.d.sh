@@ -98,9 +98,7 @@ srcfiles=$@
 #
 # All module names and filenames into a dictionary
 # Same dictionary for all input directories
-alldirs=''
-for i in $srcfiles ; do alldirs="${alldirs}\n$(dirname ${i})" ; done
-firstdir=$(printf ${alldirs} | sort | uniq | sed '/^$/d' | tr '\n' '\t' | cut -f 1)
+firstdir=$(dirname $(echo ${srcfiles} | tr ' ' '\n' | sort | uniq | sed '/^$/d' | tr '\n' '\t' | cut -f 1))
 # dictionary in first input directory
 dict="${firstdir}/${src2obj}/${pprog}.dict"
 if [[ ! -f ${dict} ]] ; then # new dict only if it does not exist in directory yet
