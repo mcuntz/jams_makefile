@@ -59,9 +59,9 @@ else
 endif
 # -mismatch-all
 #F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ideclient -ieee=stop
-F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ideclient -ieee=full
+F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ideclient -ieee=full -free
 MODFLAG  := -mdir # space significant
-FCFLAGS  +=
+FCFLAGS  += -fixed
 CFLAGS   +=
 LDFLAGS  += -ideclient -unsharedrts
 DEFINES  += -DNAG -DgFortran

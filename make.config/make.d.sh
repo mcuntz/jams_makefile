@@ -121,7 +121,7 @@ is=$(echo ${molist} | tr ' ' '|')
 # Query dictionary for filenames of modules used in input file
 # Remove own file name for circular dependencies if more than one module in input file
 if [[ "${is}" != "" ]] ; then
-    olist=$(cut -f 1 -d ':' ${dict} | sed -n $(echo $(grep -nEw "${is}" ${dict} | cut -f 1 -d ':') | sed -e 's/\([0-9]*\)/-e \1p/g') | tr '\n' ' ' | sed "s|${thisfile}||")
+    olist=$(cut -f 1 -d ':' ${dict} | sed -n $(echo $(grep -nEw "${is}" ${dict} | cut -f 1 -d ':') | sed -e 's/\([0-9]*\)/-e \1p/g') | tr '\n' ' ' | sed "s|${thisfilename}||")
 fi
 
 # Write output .d file
