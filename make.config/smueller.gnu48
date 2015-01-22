@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for Gnu compiler 4.6 at Stephan's UFZ Ubuntu
+# Setup file for Gnu compiler 4.8 at Sebastians Laptop
 #
 # LICENSE
 #    This file is part of the UFZ makefile project.
