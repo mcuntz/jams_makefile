@@ -351,7 +351,7 @@ endif
 
 # --- COMPILER ---------------------------------------------------
 ifneq (,$(findstring $(icompiler),$(gnucompilers)))
-    ifeq ("$(wildcard $(GFORTRANDIR))","")
+    ifeq ("$(wildcard $(GFORTRANDIR)*)","")
         $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
     endif
     GFORTRANLIB ?= $(GFORTRANDIR)/lib
@@ -361,7 +361,7 @@ endif
 
 # --- IMSL ---------------------------------------------------
 ifneq (,$(findstring $(imsl),vendor imsl))
-    ifeq ("$(wildcard $(IMSLDIR))","")
+    ifeq ("$(wildcard $(IMSLDIR)*)","")
         $(error Error: IMSL path '$(IMSLDIR)' not found.)
     endif
     IMSLINC ?= $(IMSLDIR)/include
@@ -420,7 +420,7 @@ endif
 # --- MKL ---------------------------------------------------
 ifneq (,$(findstring $(mkl),mkl mkl95))
     ifeq ($(mkl),mkl95) # First mkl95 then mkl for .mod files other then intel
-        ifeq ("$(wildcard $(MKL95DIR))","")
+        ifeq ("$(wildcard $(MKL95DIR)*)","")
             $(error Error: MKL95 path '$(MKL95DIR)' not found.)
         endif
         MKL95INC ?= $(MKL95DIR)/include
@@ -439,7 +439,7 @@ ifneq (,$(findstring $(mkl),mkl mkl95))
         endif
     endif
 
-    ifeq ("$(wildcard $(MKLDIR))","")
+    ifeq ("$(wildcard $(MKLDIR)*)","")
         $(error Error: MKL path '$(MKLDIR)' not found.)
     endif
     MKLINC ?= $(MKLDIR)/include
@@ -474,7 +474,7 @@ endif
 
 # --- NETCDF ---------------------------------------------------
 ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
-    ifeq ("$(wildcard $(NCDIR))","")
+    ifeq ("$(wildcard $(NCDIR)*)","")
         $(error Error: NETCDF path '$(NCDIR)' not found.)
     endif
     NCINC ?= $(strip $(NCDIR))/include
@@ -493,7 +493,7 @@ ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
     endif
     iLIBS += -lnetcdf
 
-    ifneq ("$(wildcard $(NCFDIR))","")
+    ifneq ("$(wildcard $(NCFDIR)*)","")
         NCFINC ?= $(strip $(NCFDIR))/include
         NCFLIB ?= $(strip $(NCFDIR))/lib
 
@@ -539,14 +539,14 @@ endif
 
 # --- PROJ --------------------------------------------------
 ifeq ($(proj),true)
-    ifeq ("$(wildcard $(PROJ4DIR))","")
+    ifeq ("$(wildcard $(PROJ4DIR)*)","")
         $(error Error: PROJ4 path '$(PROJ4DIR)' not found.)
     endif
     PROJ4LIB ?= $(PROJ4DIR)/lib
     iLIBS    += -L$(PROJ4LIB) -lproj
     RPATH    += -Wl,-rpath=$(PROJ4LIB)
 
-    ifeq ("$(wildcard $(FPROJDIR))","")
+    ifeq ("$(wildcard $(FPROJDIR)*)","")
         $(error Error: FPROJ path '$(FPROJDIR)' not found.)
     endif
     FPROJINC ?= $(FPROJDIR)/include
@@ -567,7 +567,7 @@ ifeq ($(lapack),true)
     ifneq (,$(findstring $(iOS),Darwin))
         iLIBS += -framework veclib
     else
-        ifeq ("$(wildcard $(LAPACKDIR))","")
+        ifeq ("$(wildcard $(LAPACKDIR)*)","")
             $(error Error: LAPACK path '$(LAPACKDIR)' not found.)
         endif
         LAPACKLIB ?= $(LAPACKDIR)/lib
@@ -579,7 +579,7 @@ endif
 
 # --- MPI ---------------------------------------------------
 ifeq ($(mpi),true)
-    ifeq ("$(wildcard $(MPIDIR))","")
+    ifeq ("$(wildcard $(MPIDIR)*)","")
         $(error Error: MPI path '$(MPIDIR)' not found.)
     endif
     MPIINC   ?= $(MPIDIR)/include
@@ -595,7 +595,7 @@ ifneq (,$(filter doxygen html latex pdf, $(MAKECMDGOALS)))
     ifneq ("$(wildcard $(DOXCONFIG))","")
         ISDOX := True
         ifneq ($(DOXYGENDIR),)
-            ifeq ("$(wildcard $(DOXYGENDIR))","")
+            ifeq ("$(wildcard $(DOXYGENDIR)*)","")
                 $(error Error: doxygen not found in $(strip $(DOXYGENDIR)).)
             else
                 DOXYGEN := $(strip $(DOXYGENDIR))/"doxygen"
@@ -608,7 +608,7 @@ ifneq (,$(filter doxygen html latex pdf, $(MAKECMDGOALS)))
             endif
         endif
         ifneq ($(DOTDIR),)
-            ifeq ("$(wildcard $(DOTDIR))","")
+            ifeq ("$(wildcard $(DOTDIR)*)","")
                 $(error Error: dot not found in $(strip $(DOTDIR)).)
             else
                 DOTPATH := $(strip $(DOTDIR))
