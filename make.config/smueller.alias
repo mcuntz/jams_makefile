@@ -2,3 +2,6 @@
 ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran48 gcc48))
     icompiler := gnu48
 endif
+ifneq (,$(findstring $(compiler),nag nag52 nag53 nagfor))
+    icompiler := nag60
+endif
