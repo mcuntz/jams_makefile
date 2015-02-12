@@ -94,28 +94,28 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := .                  # where are the source files; use test_??? to run a test directory
+SRCPATH    := test/test_standard # where are the source files; use test_??? to run a test directory
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
-CHECKPATH  := .                  # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
-DOXCONFIG  := .                  # the doxygen config file
+CHECKPATH  := ../FORTRAN_chs_lib/test               # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+DOXCONFIG  := ./doxygen.config   # the doxygen config file
 #
 PROGNAME := Prog # Name of executable
 LIBNAME  := #libminpack.a # Name of library
 #
 # Options
 # Systems: eve and personal computers such as mcimac for Matthias Cuntz' iMac; look in $(MAKEDPATH) or type 'make info'
-system   := smueller
+system   := eve2
 # Compiler: intelX, gnuX, nagX, sunX, where X stands for version number, e.g. intel13;
 #   look at $(MAKEDPATH)/$(system).alias for shortcuts or type 'make info'
-compiler := gnu48
+compiler := gnu
 # Releases: debug, release
 release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   :=
+netcdf   := netcdf4
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   := true
+lapack   :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # Proj4 (Cartographic Projections Library): true, [anything else]
