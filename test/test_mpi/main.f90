@@ -1,6 +1,6 @@
 ! PROGRAM main
 
-!   use kind, only: i4
+!   use mo_kind, only: i4
 
 !   use mpi
 
