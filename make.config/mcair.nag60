@@ -102,6 +102,9 @@ FPROJDIR :=
 LAPACKDIR   :=
 GFORTRANDIR := /usr/local
 
+# MPI
+MPIDIR := /usr/local/openmpi-1.8.4-nagfor
+
 # Documentation
 DOXYGENDIR := /usr/local/bin
 DOTDIR     := /usr/local/bin
