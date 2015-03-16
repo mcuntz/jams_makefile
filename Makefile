@@ -82,7 +82,7 @@
 #    along with the UFZ makefile project (cf. gpl.txt and lgpl.txt).
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2011-2014 Matthias Cuntz
+#    Copyright 2011-2015 Matthias Cuntz
 #
 # Written Matthias Cuntz, Nov. 2011 - mc (at) macu.de
 # Modified Matthias Cuntz, Juliane Mai, Stephan Thober, UFZ Leipzig, Germany
