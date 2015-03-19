@@ -185,7 +185,7 @@ static   := shared
 EXTRA_FCFLAGS  :=
 EXTRA_F90FLAGS := #-C=undefined
 EXTRA_DEFINES  :=
-EXTRA_INCLUDES := -I/usr/local/openmpi-1.8.4-gfortran/include
+EXTRA_INCLUDES :=
 EXTRA_LDFLAGS  :=
 EXTRA_LIBS     :=
 EXTRA_CFLAGS   :=
