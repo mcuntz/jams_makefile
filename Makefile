@@ -109,7 +109,7 @@ LIBNAME  := #libminpack.a # Name of library
 system   := eve2
 # Compiler: intelX, gnuX, nagX, sunX, where X stands for version number, e.g. intel13;
 #   look at $(MAKEDPATH)/$(system).alias for shortcuts or type 'make info'
-compiler := gnu
+compiler := intel
 # Releases: debug, release
 release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
@@ -668,14 +668,27 @@ ifeq ($(mpi),true)
     MPIINC   ?= $(MPIDIR)/include
     MPILIB   ?= $(MPIDIR)/lib
     MPIBIN   ?= $(MPIDIR)/bin
-    MPI_F90FLAGS += $(shell $(MPIBIN)/mpifort --showme:compile)
-    MPI_FCFLAGS  += $(shell $(MPIBIN)/mpif77 --showme:compile)
-    MPI_CFLAGS   += $(shell $(MPIBIN)/mpicc --showme:compile)
-    ifeq ($(LD),$(F90))
-        MPI_LDFLAGS += $(shell $(MPIBIN)/mpifort --showme:link)
+    ifeq (,$(findstring $(icompiler),$(intelcompilers)))
+        MPI_F90FLAGS += $(shell $(MPIBIN)/mpifort --showme:compile)
+        MPI_FCFLAGS  += $(shell $(MPIBIN)/mpif77 --showme:compile)
+        MPI_CFLAGS   += $(shell $(MPIBIN)/mpicc --showme:compile)
+        ifeq ($(LD),$(F90))
+            MPI_LDFLAGS += $(shell $(MPIBIN)/mpifort --showme:link)
+        else
+            MPI_LDFLAGS += $(shell $(MPIBIN)/mpicc --showme:link)
+        endif
     else
-        MPI_LDFLAGS += $(shell $(MPIBIN)/mpicc --showme:link)
+        ILDPATH = "/usr/local/intel/13.1.0/mkl/lib/intel64:/usr/local/intel/13.1.0:/opt/intel/mic/coi/host-linux-release/lib:/opt/intel/mic/myo/lib:/opt/intel/composer_xe_2013.2.146/compiler/lib/intel64:/opt/intel/composer_xe_2013.2.146/tbb/lib/intel64:/opt/intel/composer_xe_2013.2.146/compiler/lib/intel64:/opt/intel/composer_xe_2013.2.146/mkl/lib/intel64:/opt/intel/composer_xe_2013.2.146/ipp/lib/intel64"
+        MPI_F90FLAGS += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpifort --showme:compile)
+        MPI_FCFLAGS  += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpif77 --showme:compile)
+        MPI_CFLAGS   += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpicc --showme:compile)
+        ifeq ($(LD),$(F90))
+            MPI_LDFLAGS += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpifort --showme:link)
+        else
+            MPI_LDFLAGS += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpicc --showme:link)
+        endif
     endif
+
     # iLIBS    += -L$(MPILIB) # -lproj
     RPATH    += -Wl,-rpath=$(MPILIB)
     INCLUDES += -I$(MPIINC) -I$(MPILIB) # mpi.h in lib and not include <- strange
