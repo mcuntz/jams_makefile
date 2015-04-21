@@ -389,6 +389,14 @@ RANLIB   := ranlib
 # Set path where all the .mod, .o, etc. files will be written, set before include $(MAKEINC)
 OBJPATH := $(addsuffix /.$(strip $(icompiler)).$(strip $(release)), $(SRCPATH))
 
+# Mac OS X is special, there is (almost) no static linking.
+# Mac OS X does not work with -rpath. Set DYLD_LIBRARY_PATH if needed.
+iOS := $(shell uname -s)
+istatic := $(static)
+ifneq (,$(findstring $(iOS),Darwin))
+    istatic := dynamic
+endif
+
 # Include the individual configuration files
 MAKEINC := $(addsuffix /$(system).$(icompiler), $(abspath $(CONFIGPATH:~%=${HOME}%)))
 #$(info "MAKEINC: "$(MAKEINC))
@@ -399,14 +407,6 @@ include $(MAKEINC)
 
 # Always use -DCFORTRAN for mixed C and Fortran compilations
 DEFINES  += -DCFORTRAN
-
-# Mac OS X is special, there is (almost) no static linking.
-# Mac OS X does not work with -rpath. Set DYLD_LIBRARY_PATH if needed.
-iOS := $(shell uname -s)
-istatic := $(static)
-ifneq (,$(findstring $(iOS),Darwin))
-    istatic := dynamic
-endif
 
 # Start group for cyclic search in static linking
 iLIBS :=
@@ -668,7 +668,7 @@ ifeq ($(mpi),true)
     MPIINC   ?= $(MPIDIR)/include
     MPILIB   ?= $(MPIDIR)/lib
     MPIBIN   ?= $(MPIDIR)/bin
-    ifeq (,$(findstring $(icompiler),$(intelcompilers)))
+    # ifeq (,$(findstring $(icompiler),$(intelcompilers)))
         MPI_F90FLAGS += $(shell $(MPIBIN)/mpifort --showme:compile)
         MPI_FCFLAGS  += $(shell $(MPIBIN)/mpif77 --showme:compile)
         MPI_CFLAGS   += $(shell $(MPIBIN)/mpicc --showme:compile)
@@ -677,17 +677,17 @@ ifeq ($(mpi),true)
         else
             MPI_LDFLAGS += $(shell $(MPIBIN)/mpicc --showme:link)
         endif
-    else
-        ILDPATH = "/usr/local/intel/13.1.0/mkl/lib/intel64:/usr/local/intel/13.1.0:/opt/intel/mic/coi/host-linux-release/lib:/opt/intel/mic/myo/lib:/opt/intel/composer_xe_2013.2.146/compiler/lib/intel64:/opt/intel/composer_xe_2013.2.146/tbb/lib/intel64:/opt/intel/composer_xe_2013.2.146/compiler/lib/intel64:/opt/intel/composer_xe_2013.2.146/mkl/lib/intel64:/opt/intel/composer_xe_2013.2.146/ipp/lib/intel64"
-        MPI_F90FLAGS += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpifort --showme:compile)
-        MPI_FCFLAGS  += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpif77 --showme:compile)
-        MPI_CFLAGS   += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpicc --showme:compile)
-        ifeq ($(LD),$(F90))
-            MPI_LDFLAGS += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpifort --showme:link)
-        else
-            MPI_LDFLAGS += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpicc --showme:link)
-        endif
-    endif
+    # else
+    #     ILDPATH = "/usr/local/intel/13.1.0/mkl/lib/intel64:/usr/local/intel/13.1.0:/opt/intel/mic/coi/host-linux-release/lib:/opt/intel/mic/myo/lib:/opt/intel/composer_xe_2013.2.146/compiler/lib/intel64:/opt/intel/composer_xe_2013.2.146/tbb/lib/intel64:/opt/intel/composer_xe_2013.2.146/compiler/lib/intel64:/opt/intel/composer_xe_2013.2.146/mkl/lib/intel64:/opt/intel/composer_xe_2013.2.146/ipp/lib/intel64"
+    #     MPI_F90FLAGS += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpifort --showme:compile)
+    #     MPI_FCFLAGS  += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpif77 --showme:compile)
+    #     MPI_CFLAGS   += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpicc --showme:compile)
+    #     ifeq ($(LD),$(F90))
+    #         MPI_LDFLAGS += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpifort --showme:link)
+    #     else
+    #         MPI_LDFLAGS += $(shell LD_LIBRARY_PATH=$(ILDPATH) $(MPIBIN)/mpicc --showme:link)
+    #     endif
+    # endif
 
     # iLIBS    += -L$(MPILIB) # -lproj
     RPATH    += -Wl,-rpath=$(MPILIB)
