@@ -116,7 +116,7 @@ if [[ ! -f ${dict} ]] ; then # new dict only if it does not exist in directory y
 fi
 
 # Modules used in the input file
-molist=$(sed -e 's/\!.*//' -e '/^[Cc]/d' ${thisfilename} | tr [A-Z] [a-z] | tr -s ' ' | grep -E '^[[:blank:]]*use[[:blank:]]+' | sed 's/,.*//' | sed 's/.*use //' | sort | uniq)
+molist=$(sed -e 's/\!.*//' -e '/^[Cc]/d' ${thisfile} | tr [A-Z] [a-z] | tr -s ' ' | grep -E '^[[:blank:]]*use[[:blank:]]+' | sed 's/,.*//' | sed 's/.*use //' | sort | uniq)
 is=$(echo ${molist} | tr ' ' '|')
 
 # Query dictionary for filenames of modules used in input file
