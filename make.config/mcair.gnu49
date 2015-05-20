@@ -40,10 +40,10 @@ CPP := /usr/bin/cpp # could be   gcc -E -cpp   on Linux but does not work on Mac
 ifeq ($(release),debug)
     F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized
     FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized
-    CFLAGS   += -pedantic -Wall -W -O -g -Wno-maybe-uninitialized
+    CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized
 else
-    F90FLAGS += -O3
-    FCFLAGS  += -O3
+    F90FLAGS += -O3 -Wno-aggressive-loop-optimizations
+    FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
     CFLAGS   += -O3
 endif
 F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
@@ -76,10 +76,10 @@ endif
 
 # PROJ
 PROJ4DIR := /usr/local/
-FPROJDIR := 
+FPROJDIR :=
 
 # LAPACK
-LAPACKDIR   := 
+LAPACKDIR   :=
 GFORTRANDIR := $(GNUDIR)
 
 # MPI
