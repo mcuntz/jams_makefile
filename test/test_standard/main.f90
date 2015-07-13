@@ -27,6 +27,23 @@ PROGRAM main
   real(dp), dimension(:), allocatable :: rii, rjj
   logical, dimension(:), allocatable :: lii
 
+  ! test namelist
+  real(dp), dimension(10) :: tst1
+  integer(i4) :: tst2
+  integer(i8) :: tst3
+  logical :: tst4
+#ifdef pgiFortran
+  character(len=299) :: tst5 ! pgfortran limit 299 characters on namelist input
+#else
+  character(len=1024) :: tst5
+#endif
+  real(dp), dimension(:), allocatable :: tst6
+  real(dp), dimension(:,:), allocatable :: tst7
+  real(dp) :: tst8
+
+  namelist /restartnml1/ tst1, tst2, tst3, tst4, tst5, tst6
+  namelist /restartnml2/ tst7, tst8
+
   ! test passing arrays
   nx = 100
   ny = 100
@@ -49,7 +66,6 @@ PROGRAM main
   end do
   !$OMP end do
   !$OMP end parallel
-
   
   if (.not. allocated(local_arr)) allocate(local_arr(nx,ny))
   if (.not. allocated(local_arr1)) allocate(local_arr1(nx,ny))
@@ -95,6 +111,28 @@ PROGRAM main
   write(*,'(A1)',advance='no') '.'
   flush(output_unit)
   write(*,*) ''
+
+  ! read/write namelist
+  tst1 = 1.
+  tst2 = 2
+  tst3 = 3
+  tst4 = .true.
+  tst5 = 'Test'
+  allocate(tst6(20))
+  allocate(tst7(3,5))
+  tst6 = 6.
+  tst7 = 7.
+  tst8 = 8.
+  open(999, file='namelist_make_check_test_file', status='unknown', action='write', delim='QUOTE')
+  write(999, restartnml1)
+  write(999, restartnml2)
+  close(999)
+
+  open(999, file='namelist_make_check_test_file', status='old', action='read', delim='QUOTE')
+  read(999, nml=restartnml1)
+  close(999)
+  deallocate(tst6)
+  deallocate(tst7)
 
   ! test intrinsics
   write(*,*) 'Tiny sp ', tiny(1.0_sp)
