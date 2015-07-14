@@ -44,8 +44,9 @@ ifeq ($(release),debug)
     FCFLAGS  += -C -g -Mbounds -Mchkptr -Mchkstk -traceback -Mchkfpstk -Mstandard -Mdclchk
     CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
 else
-    F90FLAGS += -fast -Mipa=fast,inline
-    FCFLAGS  += -fast -Mipa=fast,inline
+    # -Mvect=sse gives problems with xor4096, other CHS modules work with flag
+    F90FLAGS += -fast -Mipa=fast,inline -Mnovect
+    FCFLAGS  += -fast -Mipa=fast,inline -Mnovect
     CFLAGS   += -O3
 endif
 F90FLAGS += -Mpreprocess -Mfreeform -tp=p7-64
