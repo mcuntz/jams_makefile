@@ -94,7 +94,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../FORTRAN_chs_lib/test/test_mo_netcdf # test/test_standard # where are the source files; use test_??? to run a test directory
+SRCPATH    := ../FORTRAN_chs_lib/test/test_mo_ncwrite # test/test_standard # where are the source files; use test_??? to run a test directory
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -798,10 +798,7 @@ ifeq (,$(findstring $(iOS),Darwin))
     LIBS += $(iRPATH)
 endif
 
-# The Absoft compiler needs that ABSOFT is set to the Absoft base path
-ifneq ($(ABSOFT),)
-    export ABSOFT
-endif
+# export LD_LIBRARY_PATH of make.config files
 ifneq ($(LDPATH),)
     empty:=
     space:= $(empty) $(empty)
