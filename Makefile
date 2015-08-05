@@ -644,7 +644,7 @@ endif
 ifeq ($(lapack),true)
     # Mac OS X uses frameworks
     ifneq (,$(findstring $(iOS),Darwin))
-        iLIBS += -framework veclib
+        iLIBS += -framework Accelerate
     else
         ifeq ("$(wildcard $(LAPACKDIR)*)","")
             $(error Error: LAPACK path '$(LAPACKDIR)' not found.)
