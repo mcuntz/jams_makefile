@@ -51,8 +51,8 @@ else
     FCFLAGS  += -fast -Mipa=fast,inline -Mnovect
     CFLAGS   += -O3
 endif
-F90FLAGS += -Mpreprocess -Mfreeform -tp=x64
-FCFLAGS  += -Mfixed -tp=x64
+F90FLAGS += -Mpreprocess -Mfreeform -tp=p7-64
+FCFLAGS  += -Mfixed -tp=p7-64
 CFLAGS   +=
 MODFLAG  := -module # space significant
 DEFINES  += -DpgiFortran
@@ -71,19 +71,14 @@ MKL95DIR :=
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    # NCDIR := /usr/local/netcdf/3.6.3_pgi_15.9
+    # NCDIR := /usr/local/netcdf/3.6.3_pgi-15.9
     NCDIR :=
 else
-    # ZLIB    := /usr/local/zlib/1.2.8_pgi_15.9/lib
-    # SZLIB   := /usr/local/szip/2.1_pgi_15.9/lib
-    # HDF5LIB := /usr/local/hdf5/1.8.12_pgi_15.9/lib
-    # NCDIR   := /usr/local/netcdf/4.3.2_pgi_15.9
-    # NCFDIR  := /usr/local/netcdf-fortran/4.2_pgi_15.9
-    ZLIB    :=
-    SZLIB   :=
-    HDF5LIB :=
-    NCDIR   :=
-    NCFDIR  :=
+    ZLIB    := /lib64
+    SZLIB   := /usr/local/szip/2.1-7/lib
+    HDF5LIB := /usr/local/hdf5/1.8.14-1/lib
+    NCDIR   := /usr/local/netcdf/4.3.3-1
+    NCFDIR  := /usr/local/netcdf-fortran/4.4.1-2_pgi-15.9
 endif
 
 # PROJ
@@ -92,7 +87,7 @@ FPROJDIR :=
 
 # LAPACK
 LAPACKDIR   := $(PGILIB)
-GFORTRANDIR := /usr/local/gcc/4.8.1-3_CentOS6/
+GFORTRANDIR := /usr/local/gcc/4.9.2-2
 GFORTRANLIB := $(GFORTRANDIR)/lib64
 
 # MPI
