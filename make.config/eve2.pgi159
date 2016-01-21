@@ -47,7 +47,7 @@ else
     # -fast = -O2 -Munroll=c:1 -Mnoframe -Mlre -Mautoinline -Mvect=sse -Mcache_align -Mflushz -Mpre
     # -Mipa=fast = -Mipa=align,arg,const,f90ptr,shape,libc,globals,localarg,alias,ptr,pure
     # -Mvect=sse gives problems with xor4096, other CHS modules work with flag
-    F90FLAGS += -fast -Mipa=fast,inline -Mnovect
+    F90FLAGS += -fast -Mipa=fast,inline -Mnovect # for SCE remove -Mipa=
     FCFLAGS  += -fast -Mipa=fast,inline -Mnovect
     CFLAGS   += -O3
 endif
