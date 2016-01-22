@@ -94,7 +94,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../FORTRAN_chs_lib/test/test_mo_sce # test/test_standard # where are the source files; use test_??? to
+SRCPATH    := ../FORTRAN_chs_lib/test/test_mo_qhull # test/test_standard # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -373,7 +373,7 @@ CC       :=
 CFLAGS   := $(EXTRA_CFLAGS)
 CPP      :=
 DEFINES  := $(EXTRA_DEFINES)
-INCLUDES := $(EXTRA_INCLUDES)
+INCLUDES := $(EXTRA_INCLUDES) $(addprefix -I,$(SRCPATH))
 # and link, and therefore set below
 LD       :=
 LDFLAGS  := $(EXTRA_LDFLAGS)
