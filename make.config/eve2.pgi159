@@ -37,19 +37,24 @@ F90 := $(PGIBIN)/pgfortran
 FC  := $(F90)
 CC  := /usr/bin/gcc
 CPP := /usr/bin/cpp
-# -Ktrap=align|denorm|divz|fp|inexact|inv|none|ovf|unf
-#                     Determine IEEE Trap conditions
 ifeq ($(release),debug)
+    # Controls the behavior of the processor when exceptions occur:
+    #   -Ktrap=align|denorm|divz|fp|inexact|inv|none|ovf|unf
+    #    -> ignored|denormalized operands|divide by zero|floating point exceptions|
+    #       inexact result|invalid operation|Disable all traps|overflow|underflow
+    # -Ktrap=fp is equivalent to -Ktrap=divz,inv,ovf
     F90FLAGS += -C -g -Mbounds -Mchkptr -Mchkstk -traceback -Mchkfpstk -Mstandard -Mdclchk
     FCFLAGS  += -C -g -Mbounds -Mchkptr -Mchkstk -traceback -Mchkfpstk -Mstandard -Mdclchk
-    CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized
+    LDFLAGS  += -g
 else
     # -fast = -O2 -Munroll=c:1 -Mnoframe -Mlre -Mautoinline -Mvect=sse -Mcache_align -Mflushz -Mpre
     # -Mipa=fast = -Mipa=align,arg,const,f90ptr,shape,libc,globals,localarg,alias,ptr,pure
     # -Mvect=sse gives problems with xor4096, other CHS modules work with flag
-    F90FLAGS += -fast -Mipa=fast,inline -Mnovect # for SCE remove -Mipa=
+    F90FLAGS += -fast -Mipa=fast,inline -Mnovect # for SCE remove -Mipa=...
     FCFLAGS  += -fast -Mipa=fast,inline -Mnovect
     CFLAGS   += -O3
+    LDFLAGS  += -Mipa=fast,inline -Mnovect
 endif
 F90FLAGS += -Mpreprocess -Mfreeform -tp=p7-64 -Mallocatable=03
 FCFLAGS  += -Mfixed -tp=p7-64
