@@ -69,9 +69,9 @@ ifeq ($(netcdf),netcdf3)
 else
     NCDIR   := /usr/local
     NCFDIR  := /usr/local/netcdf-fortran-4.4.1-gfortran
-    CURLLIB := /usr/lib
-    SZLIB   := /usr/local/lib
     HDF5LIB := /usr/local/lib
+    SZLIB   := /usr/local/lib
+    CURLLIB := /usr/lib
 endif
 
 # PROJ
