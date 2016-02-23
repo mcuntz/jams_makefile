@@ -94,7 +94,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../FORTRAN_chs_lib/test/test_mo_string_utils # where are the source files; use test_??? to
+SRCPATH    := ../FORTRAN_chs_lib/test/test_mo_linear_algebra # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script

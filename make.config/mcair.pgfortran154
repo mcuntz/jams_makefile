@@ -103,7 +103,9 @@ FPROJDIR :=
 
 # LAPACK
 LAPACKDIR   :=
-GFORTRANDIR := /usr/local/gfortran
+
+# MPI
+MPIDIR := /usr/local/openmpi-1.10.2-pgfortran
 
 # MPI
 MPIDIR :=
