@@ -1,0 +1,132 @@
+# -*- Makefile -*-
+
+#
+# Setup file for GNU gfortran 4.8 with easybuild/goolf/1.4.10 on eve.ufz.de
+#
+
+# The Makefile assumes the standard bin, include and lib directories for instaled libraries,
+# i.e. if SOMEDIR = /path/to/library, the make file will define the two dirs if not given:
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# It also looks for SOMEFLAG and SOMEDEF for library linker and CPP flags, resp.
+
+# LICENSE
+#    This file is part of the JAMS makefile project.
+#
+#    The JAMS makefile project is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    The JAMS makefile project is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with the JAMS makefile project. If not, see <http://www.gnu.org/licenses/>.
+#
+#    Copyright 2012-2016 Matthias Cuntz
+
+# Paths
+GNUDIR := /usr/local/gcc/4.8.1-3_CentOS6/
+GNULIB := $(GNUDIR)/lib64
+GNUBIN := $(GNUDIR)/bin
+
+# Compiling
+F90 := $(GNUBIN)/gfortran
+FC  := $(F90)
+CC  := $(GNUBIN)/gcc
+CPP := /usr/bin/cpp
+# GNU Fortran version >= 4.4
+ifeq ($(release),debug)
+    F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+else
+    F90FLAGS += -O3 -Wno-aggressive-loop-optimizations
+    FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
+    CFLAGS   += -O3
+endif
+F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
+FCFLAGS  += -ffixed-form -ffixed-line-length-132
+CFLAGS   +=
+MODFLAG  := -J# space significant
+DEFINES  += -DGFORTRAN -DgFortran
+# OpenMP
+F90OMPFLAG := -fopenmp
+FCOMPFLAG  := -fopenmp
+COMPFLAG   := -fopenmp
+LDOMPFLAG  := -fopenmp
+OMPDEFINE  := -DOPENMP
+
+# Linking
+LIBS  += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
+iLDPATH = $(GNUDIR)/lib/gcc/x86_64-unknown-linux-gnu/4.8.1:/usr/local/cloog/0.18.0-2/lib:/usr/local/isl/0.11.1-2/lib:/usr/local/mpc/1.0.1-3/lib:/usr/local/mpfr/3.1.2-2/lib:/usr/local/gmp/5.1.2-1/lib
+ifneq ($(LDPATH),)
+    LDPATH += :$(iLDPATH)
+else
+    LDPATH := $(iLDPATH)
+endif
+
+# MKL
+INTEL  := /usr/local/intel/composerxe-2011.4.191
+MKLDIR := $(INTEL)/mkl
+MKLINC := $(MKLDIR)/include/intel64/lp64
+MKLLIB := $(MKLDIR)/lib/intel64
+ifeq ($(openmp),true)
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
+else
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
+endif
+MKLDEF := -DMKL
+INTELLIB  := $(INTEL)/compiler/lib/intel64
+MKL95DIR  :=
+MKL95FLAG := #-lmkl_blas95_lp64 -lmkl_lapack95_lp64
+MKL95DEF  := #-DMKL95
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR :=
+else
+    NCDIR    := /usr/local/netcdf/4.3.2_gcc_4.8.1_CentOS6
+    NCFLAG   := -lnetcdf
+    NCDEF    := -DNETCDF
+    NCFDIR   := /usr/local/netcdf-fortran/4.2_gcc_4.8.1_CentOS6
+    NCFFLAG  := -lnetcdff
+    HDF5LIB  := /usr/local/hdf5/1.8.12-1_gcc_4.8.1_CentOS6/lib
+    HDF5FLAG := -lhdf5_hl -lhdf5
+    SZLIB    := /usr/local/szip/2.1_gcc_4.8.1_CentOS6/lib
+    SZFLAG   := -lsz
+    ZLIB     := /usr/local/zlib/1.2.8-2_gcc_4.8.1_CentOS6/lib
+    ZFLAG    := -lz
+endif
+
+# PROJ
+PROJ4DIR  := /usr/local/proj/4.8.0-2_gcc_4.8.1_CentOS6
+PROJ4FLAG := -lproj
+FPROJDIR  :=
+FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
+FPROJDEF  := #-DFPROJ
+
+# LAPACK
+LAPACKDIR  := /usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
+LAPACKFLAG := -lblas -llapack
+LAPACKDEF  := -DLAPACK
+
+# MPI
+MPIDIR := /usr/local/openmpi/gcc/1.8.4-2
+MPIDEF := -DMPI
+
+# Documentation
+DOXYGENDIR := /usr/local/doxygen/1.8.7-1_gcc_4.8.1_CentOS6/bin
+DOTDIR     := /usr/bin
+TEXDIR     := /usr/local/texlive/2011/bin/x86_64-linux
+PERLDIR    := /usr/bin
+iiLDPATH := /usr/local/flex/2.5.39-1_gcc_4.8.1_CentOS6/lib:/usr/local/bison/3.0.2-1_gcc_4.8.1_CentOS6/lib
+ifneq ($(LDPATH),)
+    LDPATH += :$(iiLDPATH)
+else
+    LDPATH := $(iiLDPATH)
+endif

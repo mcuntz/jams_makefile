@@ -1,0 +1,109 @@
+# -*- Makefile -*-
+
+#
+# Setup file for Intel compiler 12.0.0 on Stephan's Ubuntu desktop
+#
+
+# The Makefile assumes the standard bin, include and lib directories for instaled libraries,
+# i.e. if SOMEDIR = /path/to/library, the make file will define the two dirs if not given:
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# It also looks for SOMEFLAG and SOMEDEF for library linker and CPP flags, resp.
+
+# LICENSE
+#    This file is part of the JAMS makefile project.
+#
+#    The JAMS makefile project is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    The JAMS makefile project is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with the JAMS makefile project. If not, see <http://www.gnu.org/licenses/>.
+#
+#    Copyright 2012-2016 Matthias Cuntz
+
+# Paths
+INTEL    := /opt/intel/composer_xe_2011_sp1.10.319
+INTELDIR := $(INTEL)/compiler
+INTELLIB := $(INTELDIR)/lib
+INTELBIN := $(INTEL)/bin/intel64
+
+# Compiling
+F90 := $(INTELBIN)/ifort
+FC  := $(F90)
+CC  := $(INTELBIN)/icc
+CPP := /usr/bin/cpp
+ifeq ($(release),debug)
+    F90FLAGS += -warn all -g -debug -traceback -fp-stack-check -O0 -debug
+    F90FLAGS += -check all
+    # F90FLAGS += -check all,noarg_temp_created
+    FCFLAGS  += -g -debug -traceback -fp-stack-check -O0 -debug
+    CFLAGS   += -g -debug -traceback -fp-stack-check -O0 -debug -Wall -Wcheck
+else
+    # -fast (=-ipo -O3 -static) Multifile interprocedure optimization
+    # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
+    F90FLAGS += -O3 -vec-report0 -override-limits
+    FCFLAGS  += -O3 -vec-report0 -override-limits
+    CFLAGS   += -O3
+endif
+F90FLAGS += -nofixed -assume byterecl -cpp -fp-model source -m64 -assume realloc-lhs # precise -> source: suppress warning, computation identical
+MODFLAG  := -module # space significant
+FCFLAGS  += -assume byterecl -cpp -fp-model source -m64 -fixed
+CFLAGS   += -m64 -std=c99
+DEFINES  += -DINTEL -DINTEL_COMPILER
+# OpenMP
+F90OMPFLAG := -openmp
+FCOMPFLAG  := -openmp
+COMPFLAG   := -openmp
+LDOMPFLAG  := -openmp
+OMPDEFINE  := -DOPENMP
+
+# Linking
+ifeq ($(istatic),static)
+    LIBS += -static-intel
+endif
+LIBS += -L$(INTELLIB) -limf -lm -lsvml
+ifneq ($(istatic),static)
+     LIBS += -lintlc
+endif
+RPATH += -Wl,-rpath,$(INTELLIB)
+
+# MKL
+MKLDIR := $(INTEL)/mkl
+MKLINC := $(MKLDIR)/include/intel64/lp64
+ifeq ($(openmp),true)
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
+else
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
+endif
+MKLDEF := -DMKL
+MKL95DIR  := $(MKLDIR)
+MKL95INC  := $(MKL95DIR)/include/intel64/lp64
+MKL95LIB  := $(MKL95DIR)/lib/intel64
+MKL95FLAG := -lmkl_blas95_lp64 -lmkl_lapack95_lp64
+MKL95DEF  := -DMKL95
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR  :=
+else
+    NCDIR    := /usr/local/netcdf4.1.2_intel
+    NCFLAG   := -lnetcdf
+    NCDEF    := -DNETCDF
+    NCFFLAG  := #-lnetcdff
+    HDF5LIB  := /usr/local
+    HDF5FLAG := -lhdf5_hl -lhdf5
+    SZLIB    := /usr/local
+    SZFLAG   := -lsz
+    ZFLAG    := -lz
+endif
+
+# PROJ
+PROJ4DIR := /usr/local/
+PROJ4FLAG := -lproj

@@ -1,0 +1,94 @@
+# -*- Makefile -*-
+
+#
+# Setup file for Gnu compiler 5.2 on msys2 with mingw-w64 on Windows
+#
+
+# The Makefile assumes the standard bin, include and lib directories for instaled libraries,
+# i.e. if SOMEDIR = /path/to/library, the make file will define the two dirs if not given:
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# It also looks for SOMEFLAG and SOMEDEF for library linker and CPP flags, resp.
+
+# LICENSE
+#    This file is part of the JAMS makefile project.
+#
+#    The JAMS makefile project is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    The JAMS makefile project is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with the JAMS makefile project. If not, see <http://www.gnu.org/licenses/>.
+#
+#    Copyright 2012-2016 Matthias Cuntz
+
+# Paths
+GNUDIR := /mingw64
+GNULIB := $(GNUDIR)/lib
+GNUBIN := $(GNUDIR)/bin
+
+# Compiling
+F90 := $(GNUBIN)/gfortran
+FC  := $(F90)
+CC  := $(GNUBIN)/gcc
+CPP := $(GNUBIN)/cpp
+# GNU Fortran version >= 4.4
+ifeq ($(release),debug)
+    F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+else
+    F90FLAGS += -O3 -Wno-aggressive-loop-optimizations
+    FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
+    CFLAGS   += -O3
+endif
+F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
+FCFLAGS  += -ffixed-form -ffixed-line-length-132
+CFLAGS   +=
+MODFLAG  := -J# space significant
+DEFINES  += -DGFORTRAN -DgFortran -DCYGWIN
+# OpenMP
+F90OMPFLAG := -fopenmp
+FCOMPFLAG  := -fopenmp
+COMPFLAG   := -fopenmp
+LDOMPFLAG  := -fopenmp
+OMPDEFINE  := -DOPENMP
+
+# Linking
+LIBS  += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR :=
+else
+    NCDIR    := /usr/local
+    NCFLAG   := -lnetcdf
+    NCDEF    := -DNETCDF
+    NCFDIR   := /usr/local/netcdf-fortran-4.4.2-gfortran
+    NCFFLAG  := -lnetcdff
+    HDF5LIB  := /mingw64/lib
+    HDF5FLAG := -lhdf5_hl -lhdf5
+    SZLIB    := /mingw64/lib
+    SZFLAG   := -lsz
+    ZLIB     := /mingw64/lib
+    ZFLAG    := -lz
+endif
+
+# LAPACK
+LAPACKDIR  := /mingw64/lib
+LAPACKLIB  := /mingw64/lib
+LAPACKFLAG := -lblas -llapack
+LAPACKDEF  := -DLAPACK
+
+# Documentation
+DOXYGENDIR := /usr/bin
+DOTDIR     := /usr/bin
+TEXDIR     :=
+PERLDIR    := /usr/bin

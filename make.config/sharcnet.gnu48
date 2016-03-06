@@ -1,0 +1,106 @@
+# -*- Makefile -*-
+
+#
+# Setup file for GNU compiler 4.8 on Sharnet
+#
+
+# The Makefile assumes the standard bin, include and lib directories for instaled libraries,
+# i.e. if SOMEDIR = /path/to/library, the make file will define the two dirs if not given:
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# It also looks for SOMEFLAG and SOMEDEF for library linker and CPP flags, resp.
+
+# LICENSE
+#    This file is part of the JAMS makefile project.
+#
+#    The JAMS makefile project is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    The JAMS makefile project is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with the JAMS makefile project. If not, see <http://www.gnu.org/licenses/>.
+#
+#    Copyright 2012-2016 Matthias Cuntz
+
+# Paths
+GNUDIR := /opt/sharcnet/gcc/4.8.4/
+GNULIB := $(GNUDIR)/lib64
+GNUBIN := $(GNUDIR)/bin
+
+# Compiling
+F90 := $(GNUBIN)/gfortran
+FC  := $(F90)
+CC  := $(GNUBIN)/gcc
+CPP := /opt/sharcnet/gcc/4.8.4/bin/cpp
+# GNU Fortran version >= 4.4
+ifeq ($(release),debug)
+    F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+else
+    F90FLAGS += -O3 -Wno-aggressive-loop-optimizations
+    FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
+    CFLAGS   += -O3
+endif
+F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
+FCFLAGS  += -ffixed-form -ffixed-line-length-132
+CFLAGS   +=
+MODFLAG  := -J# space significant
+DEFINES  += -DGFORTRAN -DgFortran
+# OpenMP
+F90OMPFLAG := -fopenmp
+FCOMPFLAG  := -fopenmp
+COMPFLAG   := -fopenmp
+LDOMPFLAG  := -fopenmp
+OMPDEFINE  := -DOPENMP
+
+# Linking
+LIBS  += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
+iLDPATH = $(GNUDIR)/lib/gcc/x86_64-unknown-linux-gnu/4.8.4
+ifneq ($(LDPATH),)
+    LDPATH += :$(iLDPATH)
+else
+    LDPATH := $(iLDPATH)
+endif
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR :=
+else
+    NCDIR    := /opt/sharcnet/netcdf/4.2/gcc
+    NCFLAG   := -lnetcdf
+    NCDEF    := -DNETCDF
+    NCFDIR   :=
+    NCFFLAG  := #-lnetcdff
+    HDF5LIB  := /opt/sharcnet/hdf/5.1.8.11/serial/lib
+    HDF5FLAG := -lhdf5_hl -lhdf5
+    SZLIB    :=
+    SZFLAG   := #-lsz
+    CURLLIB  :=
+    CURLFLAG := #-lcurl
+    ZFLAG    := -lz
+endif
+
+# LAPACK
+LAPACKDIR  := #/usr/lib
+LAPACKLIB  := #$(LAPACKDIR)/lapack
+LAPACKFLAG := #-lblas -llapack
+LAPACKDEF  := #-DLAPACK
+
+# MPI
+MPIDIR := /usr/local/openmpi/gcc/1.8.4-2
+MPIDEF := -DMPI
+
+iiLDPATH   := 
+ifneq ($(LDPATH),)
+    LDPATH += :$(iiLDPATH)
+else
+    LDPATH := $(iiLDPATH)
+endif
