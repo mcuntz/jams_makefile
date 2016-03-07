@@ -82,7 +82,7 @@
 #    along with the JAMS makefile project (cf. gpl.txt and lgpl.txt).
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2011-2015 Matthias Cuntz
+#    Copyright 2011-2016 Matthias Cuntz
 #
 # Written and maintained Matthias Cuntz, Nov. 2011 - mc (at) macu.de
 
@@ -93,11 +93,11 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test/test_standard # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_spline # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
-CHECKPATH  := test               # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+CHECKPATH  := ../fortran/test    # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 TOOLPATH   := tools              # tools such as f2html
 DOXCONFIG  := ./doxygen.config   # the doxygen config file
 #
@@ -658,7 +658,7 @@ ifneq ($(LIBNAME),)
 endif
 
 cleancheck:
-	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check*) ; do \
+	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
 	    $(MAKE) SRCPATH=$$i cleanclean ; \
 	done
 
@@ -672,7 +672,7 @@ check:
 ifeq ($(PROGNAME),)
 	$(error Error: check and test must be done with given PROGNAME.)
 endif
-	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check*) ; do \
+	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
 	    rm -f "$(PROGNAME)" ; \
 	    j=$${i/minpack/maxpack} ; \
 	    libextra= ; \
