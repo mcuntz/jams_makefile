@@ -327,22 +327,36 @@ def make_d(prefile, opath, srcfiles, ffile=None):
 
 if __name__ == '__main__':
 
-    import argparse
+    import sys
 
-    ffile = None
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     description='Make dependency files for Fortran90 projects.')
-    parser.add_argument('-f', '--ffile', action='store',
-                        default=ffile, dest='ffile', metavar='FortranFile',
-                        help='Not preprocessed Fortran source filename. If missing prefile[:-4] is assumed.')
-    parser.add_argument('files', nargs='*', default=None, metavar='InputFile OutputPath SourceFiles',
-                       help='Preprocessed input file, relative output directory (script assumes compilation into dirname(InputFile)/opath), all source files.')
+    if sys.version.split()[0] < '2.7':
+        import optparse # deprecated with Python rev 2.7
 
-    args  = parser.parse_args()
-    ffile = args.ffile
-    allin = args.files
+        ffile = None
+        usage = "Make dependency files for Fortran90 projects.\nUsage: %prog [options] InputFile OutputPath SourceFiles"
+        parser = optparse.OptionParser(usage=usage)
+        parser.add_option('-f', '--ffile', action='store',
+                          default=ffile, dest='ffile', metavar='FortranFile',
+                          help='Not preprocessed Fortran source filename. If missing prefile[:-4] is assumed.')
 
-    del parser, args
+        (options, args) = parser.parse_args()
+        ffile = options.ffile
+        allin = args
+    else:
+        import argparse
+
+        ffile = None
+        parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                         description='Make dependency files for Fortran90 projects.')
+        parser.add_argument('-f', '--ffile', action='store',
+                            default=ffile, dest='ffile', metavar='FortranFile',
+                            help='Not preprocessed Fortran source filename. If missing prefile[:-4] is assumed.')
+        parser.add_argument('files', nargs='*', default=None, metavar='InputFile OutputPath SourceFiles',
+                           help='Preprocessed input file, relative output directory (script assumes compilation into dirname(InputFile)/opath), all source files.')
+
+        args  = parser.parse_args()
+        ffile = args.ffile
+        allin = args.files
 
     if len(allin) < 3:
         print('Arguments: ', allin)
@@ -351,5 +365,7 @@ if __name__ == '__main__':
     prefile  = allin[0]
     opath    = allin[1]
     srcfiles = allin[2:]
+
+    del parser, args
 
     make_d(prefile, opath, srcfiles, ffile=ffile)
