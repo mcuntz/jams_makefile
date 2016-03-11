@@ -1,259 +1,210 @@
-PROGRAM main
+! ------------------------------------------------------------------------------
+!
+! Test Program for writing nc files using the netcdf4 library.
+!
+! author: Stephan Thober & Matthias Cuntz
+!
+! created: 04.11.2011
+! last update: 29.05.2015
+!
+! ------------------------------------------------------------------------------
+program standard
 
-  USE kind, ONLY: dp, sp, i8, i4
-  USE mo1,  ONLY: arr, alloc_arr, dealloc_arr, dosin, dosin2, dosin21, dosin3, dosin4, dosin5, dosin6, alloc_test
-  USE mo2,  ONLY: arr2, struc, alloc_arr2, alloc_strucarr, dealloc_arr2, dealloc_strucarr
-#ifndef GFORTRAN
-  USE ieee_arithmetic, only: ieee_is_finite
-#endif
-  use iso_fortran_env, only : input_unit, output_unit, error_unit
+  use mo_kind,           only: i4, sp, dp
+  use mo_ncread,         only: Get_NcVar, Get_NcDim
+  use mo_ncwrite,        only: dump_netcdf, var2nc
+  use mo_mainvar,        only: lat, lon, data, t
+  use mo_utils,          only: notequal, ne
+  use mo_linear_algebra, only: diag, inverse
+  USE mo_cfortran,       ONLY: fctest
 
-  ! test passing arrays
-  INTEGER(i8) :: i, nx, ny, nt
-  REAL(dp), ALLOCATABLE, DIMENSION(:,:) :: local_arr
-  REAL(dp), ALLOCATABLE, DIMENSION(:,:) :: local_arr1
-  REAL(dp), POINTER, DIMENSION(:,:) :: local_arr2
-  REAL(dp), ALLOCATABLE, DIMENSION(:) :: local_arr1d
-  REAL(dp) :: ztmp(3), ztmp2(3)
-  ! test sum
-  ! INTEGER(i8) :: n1
-  ! REAL(dp), ALLOCATABLE, DIMENSION(:) :: eddy, eddy1
-  ! test count line numbers
-  REAL :: ctime1, ctime2
-  INTEGER(i8) :: ierr, cc
-  CHARACTER(len=1) :: strin1
-  CHARACTER(len=256) :: strin256
-  integer(i4), dimension(:), allocatable :: ii, jj
-  real(dp), dimension(:), allocatable :: rii, rjj
-  logical, dimension(:), allocatable :: lii
+  implicit none
 
-  ! test namelist
-  real(dp), dimension(10) :: tst1
-  integer(i4) :: tst2
-  integer(i8) :: tst3
-  logical :: tst4
-#ifdef pgiFortran
-  character(len=299) :: tst5 ! pgfortran limit 299 characters on namelist input
-#else
-  character(len=1024) :: tst5
-#endif
-  real(dp), dimension(:), allocatable :: tst6
-  real(dp), dimension(:,:), allocatable :: tst7
-  real(dp) :: tst8
+  integer(i4) :: i,j 
+  logical     :: isgood, allgood
+  ! netCDF
+  integer(i4), dimension(5)               :: dimlen
+  character(256)                          :: filename
+  character(256)                          :: varname
+  character(256), dimension(5)            :: dimname
+  character(256), dimension(1)            :: tname
+  real(sp), dimension(:,:,:),     allocatable :: data1, data2
+  real(sp), dimension(:),         allocatable :: data7
+  character(256), dimension(:,:), allocatable :: attributes
 
-  namelist /restartnml1/ tst1, tst2, tst3, tst4, tst5, tst6
-  namelist /restartnml2/ tst7, tst8
+  ! LAPACK
+  integer(i4), parameter :: nn = 100
+  real(dp),    dimension(nn,nn) :: dat
+  real(dp),    dimension(:,:), allocatable :: idat!, tdat ! test invers
+  integer(i4) :: nseed
+  integer(i4), dimension(:), allocatable :: iseed
 
-  ! test passing arrays
-  nx = 100
-  ny = 100
-  nt = 200
+  ! cfortran
+  integer(i4), parameter :: d1 = 5
+  integer(i4), parameter :: d2 = 4
+  integer(i4), parameter :: n1 = 2
+  integer(i4), parameter :: n2 = 3
+  real(dp), dimension(d1,d2) :: a
+  real(dp), parameter :: c=2.0
 
-  call alloc_arr(nx,ny)
-  call alloc_arr2(nx,ny)
-  call alloc_strucarr(nx,ny)
-  !$OMP parallel
-  arr(:,:) = 0.9_dp
-  arr2(:,:) = 0.9_dp
-  struc%arr(:,:) = 0.9_dp
-  !$OMP end parallel
+  isgood      = .true.
+  allgood     = .true.
+  filename    = '../makefile/test/test_standard/pr_1961-2000.nc'
 
-  !$OMP parallel default(shared) &
-  !$OMP private(i)
-  !$OMP do
-  do i=1, ny
-     arr(:,i) = 2.0_dp*arr(:,i)
-  end do
-  !$OMP end do
-  !$OMP end parallel
+  ! --------------------------------------------------------------------
+  ! Read netCDF file
+
+  varname  = 'pr'
+  dimlen = Get_NcDim(filename,varname)
+
+  allocate(data(dimlen(1),dimlen(2),dimlen(3)))
+  allocate(lat(dimlen(1),dimlen(2)))
+  allocate(lon(dimlen(1),dimlen(2)))
+  allocate(t(dimlen(3)))
+
+  call Get_NcVar(filename, varname, data)
   
-  if (.not. allocated(local_arr)) allocate(local_arr(nx,ny))
-  if (.not. allocated(local_arr1)) allocate(local_arr1(nx,ny))
-  if (.not. allocated(local_arr1d)) allocate(local_arr1d(nx*ny))
-  local_arr1(:,:) = arr(:,:)
-  local_arr2 => arr
-  local_arr1d = reshape(arr,(/nx*ny/))
-  if (.not. allocated(ii)) allocate(ii(nx/2))
-  if (.not. allocated(jj)) allocate(jj(nx/2*ny))
-  if (.not. allocated(rii)) allocate(rii(nx/2))
-  if (.not. allocated(rjj)) allocate(rjj(nx/2*ny))
+  Varname = 'lat'
+  call Get_NcVar(filename, varname, lat)
+  Varname = 'lon'
+  call Get_NcVar(filename, varname, lon)
+  Varname = 'time'
+  call Get_NcVar(filename, varname, t)
 
-  call random_number(rii)
-  call random_number(rjj)
-  ii = 1 + int(rii*real(nx,dp))
-  jj = 1 + int(rjj*real(nx*ny,dp))
-  do i=1_i8, nt
-!     local_arr(:,:) = dosin(local_arr1(:,:))       ! elemental with local array
-     local_arr(:,:) = dosin(arr(:,:))              ! elemental with module array
-      ! The next two commands do not work with nag
-      ! because ii could have the same value twice so LHS does not know what to do
-!     local_arr1(ii,:) = dosin2(local_arr1(ii,:))      ! pass local array
-!     local_arr1d(jj) = dosin21(local_arr1d(jj))      ! pass local array
-!     local_arr(:,:) = dosin2(local_arr2(:,:))      ! pass module array
-!     local_arr(:,:) = dosin3(nx,ny,arr(1:nx,1:ny)) ! pass direct array
-!     local_arr(:,:) = dosin4()                     ! use internal module array
-!     local_arr(:,:) = dosin5()                     ! use external module array
-!     local_arr(:,:) = dosin6()                     ! use external module array of structure
-  end do
+  ! --------------------------------------------------------------------
+  ! var2nc file
+  !
 
-  if (allocated(local_arr)) deallocate(local_arr)
-  if (allocated(local_arr1)) deallocate(local_arr1)
-  nullify(local_arr2)
-  call dealloc_arr()
-  call dealloc_arr2()
-  call dealloc_strucarr()
+  filename = 'standard_make_check_test_file'
+  dimname(1) = 'lat'
+  dimname(2) = 'lon'
+  dimname(3) = 'time'
+  dimname(4) = 'tile'
+  dimname(5) = 'depth'
+  tname(1)   = 'time' ! tname must be array
+  ! create attributes
+  allocate( attributes(4,2) )
+  attributes(1,1) = 'long_name'
+  attributes(1,2) = 'precipitation'
+  attributes(2,1) = 'units'
+  attributes(2,2) = '[mm/d]'
+  attributes(3,1) = 'missing_value'
+  attributes(3,2) = '-9999.'
+  attributes(4,1) = 'scale_factor'
+  attributes(4,2) = '1.'
 
-  ! non advancing ouput
-  write(*,'(A1)',advance='no') '.'
-  flush(output_unit)
-  write(*,'(A1)',advance='no') '.'
-  flush(output_unit)
-  write(*,'(A1)',advance='no') '.'
-  flush(output_unit)
-  write(*,*) ''
+  ! write static data
+  call var2nc(filename, data(:,:,1), dimname(1:2), 'pre_static', &
+       long_name = 'precipitation', units = '[mm/d]', missing_value = -9999., create=.true. )
+  Varname = 'pre_static'
+  allocate(data1(size(data,1),size(data,2),size(data,3)))
+  call Get_NcVar(filename,varname,data1)
+  if (any(notequal(data(:,:,1),data1(:,:,1)))) isgood = .false.
 
-  ! read/write namelist
-  tst1 = 1.
-  tst2 = 2
-  tst3 = 3
-  tst4 = .true.
-  tst5 = 'Test'
-  allocate(tst6(20))
-  allocate(tst7(3,5))
-  tst6 = 6.
-  tst7 = 7.
-  tst8 = 8.
-  open(999, file='namelist_make_check_test_file', status='unknown', action='write', delim='QUOTE')
-  write(999, restartnml1)
-  write(999, restartnml2)
-  close(999)
+  ! write time - 1d unlimit
+  call var2nc(filename, int(t,i4), tname, 'time', dim_unlimited = 1_i4, &
+       units = 'days since 1984-08-28', missing_value=-9999 )
+  ! write variable
+  call var2nc(filename, data(14,14,:), tname, 'pre_1d', dim_unlimited = 1_i4 , &
+       attributes = attributes(:2,:) )
 
-  open(999, file='namelist_make_check_test_file', status='old', action='read', delim='QUOTE')
-  read(999, nml=restartnml1)
-  close(999)
-  deallocate(tst6)
-  deallocate(tst7)
+  ! read again
+  varname = 'pre_1d'
+  dimlen  = Get_NcDim(filename,varname)
+  allocate( data7( dimlen(1) ) )
+  call Get_NcVar(filename,varname,data7)
+  if (any(notequal(data(14,14,:),data7))) isgood = .false.
 
-  ! test intrinsics
-  write(*,*) 'Tiny sp ', tiny(1.0_sp)
-  write(*,*) 'Tiny dp ', tiny(1.0_dp)
-  write(*,*) 'Eps sp  ',  epsilon(1.0_sp)
-  write(*,*) 'Eps dp  ',  epsilon(1.0_dp)
-  write(*,*) 'Prec sp ',  precision(1.0_sp)
-  write(*,*) 'Prec dp ',  precision(1.0_dp)
+  ! write 3d - sp - specify append, if save variable should not be used
+  call var2nc(filename, data, dimname(1:3), 'pre_3d', dim_unlimited = 3_i4 , &
+       long_name = 'precipitation', units = '[mm/d]' )
+  Varname = 'pre_3d'
+  call Get_NcVar(filename,varname,data1)
+  if (any(notequal(data,data1))) isgood = .false.
 
-  ! ztmp(1) = huge(0.9_dp)
-  ! write(*,*) 'H0: ', ztmp(1)
-  ! write(*,*) 'H1: ', nearest(ztmp(1), 1._dp)
-  ! write(*,*) 'H2: ', nearest(ztmp(1),-1._dp)
-  ! write(*,*) 'H3: ', nearest(1e6_dp*ztmp(1), 1._dp)
-  ! write(*,*) 'H4: ', nearest(1e6_dp*ztmp(1),-1._dp)
-  ztmp(1) = tiny(0.9_dp)
-  write(*,*) 'H0: ', ztmp(1)
-  write(*,*) 'H1: ', nearest(ztmp(1), 1._dp)
-  write(*,*) 'H2: ', nearest(ztmp(1),-1._dp)
-  write(*,*) 'H3: ', nearest(ztmp(1)*ztmp(1), 1._dp)
-  write(*,*) 'H4: ', nearest(ztmp(1)**2,-1._dp)
-  write(*,*) 'H5: ', ztmp(1)**2
-  ztmp(2) = 0.8_dp
-  ztmp(3) = 0.7_dp
-  write(*,*) 'Max1 ', ztmp
-  write(*,*) 'Max2 ', max(ztmp(:), 0.8_dp)
-  ztmp2(1) = 1.0_dp
-  ztmp2(2) = 0.7_dp
-  ztmp2(3) = 0.8_dp
-  write(*,*) 'Max3 ', max(ztmp(:), ztmp2(:))
-  write(*,*) 'Max**0 ', max(ztmp(:), ztmp2(:))**0
-  write(*,*) 'Max**1 ', max(ztmp(:), ztmp2(:))**1
-  write(*,*) 'Max**2 ', max(ztmp(:), ztmp2(:))**2
-#ifndef DEBUG
-  ! NaN and Inf
-  ztmp(1) = 0._dp
-  ztmp(1) = ztmp(1)/ztmp(1)
-  write(*,*) 'Max4.0 ', maxval(ztmp), minval(ztmp) ! max is 0.8
-  ztmp(2) = huge(1.0_dp)
-  ztmp(2) = ztmp(2)*ztmp(2)
-  write(*,*) 'Max4.1 ', maxval(ztmp), minval(ztmp) ! max is Inf
-  write(*,*) 'Max4 ', ztmp
-  if (ztmp(1) > 1.0_dp) write(*,*) 'NaN > 1.0'
-  if (ztmp(1) < 1.0_dp) write(*,*) 'NaN < 1.0'
-  if (ztmp(2) > 1.0_dp) write(*,*) 'Inf > 1.0'
-  if (ztmp(2) < 1.0_dp) write(*,*) 'Inf < 1.0'
-#ifndef GFORTRAN
-  ztmp = merge(ztmp, huge(1.0_dp), ieee_is_finite(ztmp))
-#else
-  ztmp = merge(ztmp, huge(1.0_dp), ztmp == ztmp)
-#endif
-  write(*,*) 'Max5 ', ztmp
-#endif
-  
-  ! Stefans test for allocatable in
-  if (.not. allocated(local_arr)) allocate(local_arr(nx,ny))
-  local_arr(:,:) = 1.0_dp
-  call alloc_test(nx,ny,local_arr)
-  write(*,*) 'If you are here than all good.'
+  ! clean up
+  deallocate(data7)
 
-  ! Test masking of array dimensions
-  if (allocated(local_arr)) deallocate(local_arr)
-  if (allocated(local_arr1)) deallocate(local_arr1)
-  if (allocated(ii)) deallocate(ii)
-  if (allocated(lii)) deallocate(lii)
-  allocate(local_arr(2,3))
-  allocate(local_arr1(2,2))
-  allocate(ii(3))
-  allocate(lii(3))
-  local_arr(:,1) = 1.0_dp
-  local_arr(:,2) = 2.0_dp
-  local_arr(:,3) = 3.0_dp
-  lii = (/ .true., .false., .true. /)
-  forall(i=1:3) ii(i) = i
-  write(*,*) 'Unmasked ', local_arr
-  local_arr1 = local_arr(:,pack(ii,lii))
-  write(*,*) 'Masked   ', local_arr1
+  allgood = allgood .and. isgood
+  if (isgood) then
+     write(*,*) 'var2nc o.k.'
+  else
+     write(*,*) 'var2nc failed!'
+  endif
 
-  ztmp(1) = tiny(0.9_dp)
-  ztmp(2) = huge(0.8_dp)
-  write(*,*) 'L0: ', ztmp(1:2)
-  write(*,*) 'L1: ', log(ztmp(1:2))
+  ! --------------------------------------------------------------------
+  ! Dump netCDF file
 
-  ! test sum
-  ! nx = 20_i8*60_i8*60_i8
-  ! if (.not. allocated(eddy)) allocate(eddy(nx))
-  ! if (.not. allocated(eddy1)) allocate(eddy1(nx))
-  
-  ! call random_number(eddy)
-  ! do i=1_i8, 50_i8*50_i8
-  !    !eddy1(i) = sum(sqrt(eddy(mod(i,10_i8):nx:10_i8)*eddy(mod(i,10_i8):nx:10_i8)))
-  !    n1 = mod(i,10_i8)+1_i8
-  !    eddy1(i) = sum(sqrt(eddy(n1:nx)*eddy(n1:nx)))
-  ! enddo
-  ! write(*,*) 'Eddy: ', eddy1
+  isgood   = .true.
+  filename = 'standard_make_check_test_file'
+  varname  = 'var'
 
-  ! test count line numbers
-  ! write(*,*) ''
-  ! call cpu_time(ctime1)
-  ! open(unit=20, file="fortran_test/test1e6.txt", status="old", form="formatted", action="read")
-  ! !open(unit=20, file="fortran_test/test1e7.txt", status="old", form="formatted", action="read")
-  ! !open(unit=20, file="fortran_test/test1e8.txt", status="old", form="formatted", action="read")
-  ! ierr = 0
-  ! cc   = 0
-  ! do while (ierr==0)
-  !    cc = cc + 1
-  !    read(20,"(A1)",iostat=ierr) strin1
-  !    !read(20,"(A)",iostat=ierr) strin1
-  !    !read(20,"(A)",iostat=ierr) strin256
-  !    !read(20,*,iostat=ierr) strin1
-  !    !read(20,*,iostat=ierr) strin256
-  ! end do
-  ! cc = cc - 1
-  ! call cpu_time(ctime2)
-  ! write(*,*) "Read ", cc, " # of lines in ", ctime2-ctime1, " seconds."
-  ! close(20)
+  ! 3D
+  call dump_netcdf(filename, data)
+  dimlen = Get_NcDim(Filename,Varname)
+  allocate(data2(dimlen(1),dimlen(2),dimlen(3)))
+  call Get_NcVar(filename,varname,data2)
+  if (any(notequal(data,data2))) isgood = .false.
 
-  ! ! test power of negative numbers
-  ! ztmp(1) = 0.2_dp
-  ! ztmp(2) = -0.2_dp
-  ! write(*,*) '+-0.2^5: ', ztmp(1:2)**5
-  ! write(*,*) '(+-0.2^5)^(1/5): ', (ztmp(1:2)**5)**0.2_dp  
+  allgood = allgood .and. isgood
+  if (isgood) then
+     write(*,*) 'dump_netcdf o.k.'
+  else
+     write(*,*) 'dump_netcdf failed!'
+  endif
 
-END PROGRAM
+  ! --------------------------------------------------------------------
+  ! Linear algebra with LAPACK
+
+  isgood   = .true.
+  Filename = 'standard_make_check_test_file'
+  Varname  = 'var'
+
+  call random_seed(size=nseed)
+  allocate(iseed(nseed))
+  forall(i=1:nseed) iseed(i) = i*10
+  call random_seed(put=iseed)
+  deallocate(iseed)
+
+  call random_number(dat)
+  allocate(idat(nn,nn))
+  idat = inverse(dat)
+  ! allow eps in each element of diag -> very close but can be slightly higher -> *100
+  if (abs(sum(diag(matmul(dat,idat))) - real(size(dat,1),dp)) > (real(size(dat,1),dp)*epsilon(1.0_dp))*100._dp) isgood = .false.
+  ! allow eps in each element of matrix -> very close but can be slightly higher -> *10
+  if (abs(sum(matmul(dat,idat)) - real(size(dat,1),dp)) > (real(size(dat,1),dp)**2*epsilon(1.0_dp))*100._dp) isgood = .false.
+
+  allgood = allgood .and. isgood
+  if (isgood) then
+     write(*,*) 'lapack o.k.'
+  else
+     write(*,*) 'lapack failed!'
+  endif
+
+  ! --------------------------------------------------------------------
+  ! cfortran
+
+  isgood = .true.
+
+  forall(i=1:d1, j=1:d2) A(i,j) = real(i**j,dp)
+  ! Beware C-indexes start with 0
+  ! Also C is colunm-major so that one wants to transpose A, perhaps
+  if (ne(fctest(A, n1, n2, c), 14.0_dp)) isgood = .false.
+
+  allgood = allgood .and. isgood
+  if (isgood) then
+     write(*,*) 'cfortran o.k.'
+  else
+     write(*,*) 'cfortran failed!'
+  endif
+
+  ! --------------------------------------------------------------------
+  ! Finish
+
+  if (allgood) then
+     write(*,*) '-> standard o.k.'
+  else
+     write(*,*) '-> standard failed!'
+  endif
+
+end program standard

@@ -1,1 +1,133 @@
-eve2.pgi159
+# -*- Makefile -*-
+
+#
+# Setup file for PGI compiler 15.9-0 on eve.ufz.de
+#
+
+# The Makefile assumes the standard bin, include and lib directories for instaled libraries,
+# i.e. if SOMEDIR = /path/to/library, the make file will define the two dirs if not given:
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# It also looks for SOMEFLAG and SOMEDEF for library linker and CPP flags, resp.
+
+# LICENSE
+#    This file is part of the JAMS makefile project.
+#
+#    The JAMS makefile project is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    The JAMS makefile project is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with the JAMS makefile project. If not, see <http://www.gnu.org/licenses/>.
+#
+#    Copyright 2012-2016 Matthias Cuntz
+
+# Paths
+PGIDIR := /usr/local/pgi/linux86-64/15.9
+PGILIB := $(PGIDIR)/lib
+PGIBIN := $(PGIDIR)/bin
+
+# Compiling
+F90 := $(PGIBIN)/pgfortran
+FC  := $(F90)
+CC  := /usr/bin/gcc
+CPP := /usr/bin/cpp
+ifeq ($(release),debug)
+    # Controls the behavior of the processor when exceptions occur:
+    #   -Ktrap=align|denorm|divz|fp|inexact|inv|none|ovf|unf
+    #    -> ignored|denormalized operands|divide by zero|floating point exceptions|
+    #       inexact result|invalid operation|Disable all traps|overflow|underflow
+    # -Ktrap=fp is equivalent to -Ktrap=divz,inv,ovf
+    F90FLAGS += -C -g -Mbounds -Mchkptr -Mchkstk -traceback -Mchkfpstk -Mstandard -Mdclchk
+    FCFLAGS  += -C -g -Mbounds -Mchkptr -Mchkstk -traceback -Mchkfpstk -Mstandard -Mdclchk
+    CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized
+    LDFLAGS  += -g
+else
+    # -fast = -O2 -Munroll=c:1 -Mnoframe -Mlre -Mautoinline -Mvect=sse -Mcache_align -Mflushz -Mpre
+    # -Mipa=fast = -Mipa=align,arg,const,f90ptr,shape,libc,globals,localarg,alias,ptr,pure
+    # -Mvect=sse gives problems with xor4096, other CHS modules work with flag
+    F90FLAGS += -fast -Mipa=fast,inline -Mnovect # for SCE remove -Mipa=...
+    FCFLAGS  += -fast -Mipa=fast,inline -Mnovect
+    CFLAGS   += -O3
+    LDFLAGS  += -Mipa=fast,inline -Mnovect
+endif
+F90FLAGS += -Mpreprocess -Mfreeform -tp=p7-64 -Mallocatable=03
+FCFLAGS  += -Mfixed -tp=p7-64
+CFLAGS   +=
+MODFLAG  := -module # space significant
+DEFINES  += -DpgiFortran -DpgiFortran154
+LDFLAGS  += -pgf90libs
+# OpenMP
+F90OMPFLAG := -openmp
+FCOMPFLAG  := -openmp
+COMPFLAG   := -openmp
+LDOMPFLAG  := -openmp
+OMPDEFINE  := -DOPENMP
+
+# Linking
+LIBS  += -L$(PGILIB)
+RPATH += -Wl,-rpath,$(PGILIB)
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    # NCDIR  := /usr/local/netcdf/3.6.3_pgi-15.9
+    NCDIR  :=
+    NCFLAG := #-lnetcdf -lnetcdff
+    NCDEF  := #-DNETCDF
+else
+    NCDIR    := /usr/local/netcdf/4.3.3-1
+    NCFLAG   := -lnetcdf
+    NCDEF    := -DNETCDF
+    NCFDIR   := /usr/local/netcdf-fortran/4.4.1-2_pgi-15.9
+    NCFFLAG  := -lnetcdff
+    HDF5LIB  := /usr/local/hdf5/1.8.14-1/lib
+    HDF5FLAG := -lhdf5_hl -lhdf5
+    SZLIB    := /usr/local/szip/2.1-7/lib
+    SZFLAG   := -lsz
+    ZLIB     := /lib64
+    ZFLAG    := -lz
+endif
+
+# PROJ
+PROJ4DIR  := /usr/local/proj/4.7.0
+PROJ4FLAG := -lproj
+
+# LAPACK
+LAPACKDIR  := /usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
+LAPACKFLAG := -lblas -llapack
+LAPACKDEF  := -DLAPACK
+
+# MPI
+# MPIDIR := /usr/local/openmpi/pgi/1.8.4
+# MPIDEF := -DMPI
+MPIDIR :=
+
+# Documentation
+DOXYGENDIR := /usr/local/doxygen/1.8.7-1_gcc_4.8.1_CentOS6/bin
+DOTDIR     := /usr/bin
+TEXDIR     := /usr/local/texlive/2011/bin/x86_64-linux
+PERLDIR    := /usr/bin
+iiLDPATH := /usr/local/flex/2.5.39-1_gcc_4.8.1_CentOS6/lib:/usr/local/bison/3.0.2-1_gcc_4.8.1_CentOS6/lib
+ifneq ($(LDPATH),)
+    LDPATH += :$(iiLDPATH)
+else
+    LDPATH := $(iiLDPATH)
+endif
+
+# Lapack on eve needs libgfortran
+GFORTRANDIR := /usr/local/gcc/4.8.1-3_CentOS6/
+GFORTRANLIB := $(GFORTRANDIR)/lib64
+ifeq ($(lapack),true)
+    ifneq (exists, $(shell if [ -d "$(GFORTRANDIR)" ] ; then echo 'exists' ; fi))
+        $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
+    endif
+    GFORTRANLIB ?= $(GFORTRANDIR)/lib
+    iLIBS       += -L$(GFORTRANLIB) -lgfortran
+    RPATH       += -Wl,-rpath,$(GFORTRANLIB)
+endif
