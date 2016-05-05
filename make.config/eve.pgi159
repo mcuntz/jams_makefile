@@ -57,7 +57,8 @@ else
     CFLAGS   += -O3
     LDFLAGS  += -Mipa=fast,inline -Mnovect
 endif
-F90FLAGS += -Mpreprocess -Mfreeform -tp=p7-64 -Mallocatable=03
+F90FLAGS += -Mpreprocess -Mfreeform -tp=p7-64
+# F90FLAGS += -Mallocatable=03 # allow automatic allocation of left-hand-side
 FCFLAGS  += -Mfixed -tp=p7-64
 CFLAGS   +=
 MODFLAG  := -module # space significant

@@ -1,1 +1,1 @@
-../../../FORTRAN_chs_lib/mo_kind.f90
+../../../fortran/mo_kind.f90
