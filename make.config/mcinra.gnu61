@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for GNU compiler 4.9 at Rohini's MacBook Pro
+# Setup file for Gnu compiler 6.1 at Matthias' Macbook Pro at INRA
 #
 
 # The Makefile assumes the standard bin, include and lib directories for instaled libraries,
@@ -36,8 +36,8 @@ GNUBIN := $(GNUDIR)/bin
 # Compiling
 F90 := $(GNUBIN)/gfortran
 FC  := $(F90)
-CC  := /usr/bin/gcc
-CPP := /usr/bin/cpp # could be   gcc -E -cpp   on Linux but does not work on Mac
+CC  := /usr/bin/cc  # clang, same as /usr/bin/gcc
+CPP := /usr/bin/cpp # could be 'gcc -E -cpp' on Linux but does not work on Mac
 ifeq ($(release),debug)
     F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
     FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
@@ -63,14 +63,33 @@ OMPDEFINE  := -DOPENMP
 LIBS  += -L$(GNULIB)
 RPATH += -Wl,-rpath,$(GNULIB)
 
+# IMSL
+IMSLDIR  :=
+IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
+IMSLDEF  := #-DIMSL
+
+# MKL
+MKLDIR  :=
+ifeq ($(openmp),true)
+    MKLFLAG := #-lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
+else
+    MKLFLAG := #-lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
+endif
+MKLDEF  := #-DMKL
+MKL95DIR  :=
+MKL95FLAG := #-lmkl_blas95_lp64 -lmkl_lapack95_lp64
+MKL95DEF  := #-DMKL95
+
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR :=
+    NCDIR  := /usr/local/netcdf-3.6.3-gfortran
+    NCFLAG := -lnetcdf -lnetcdff
+    NCDEF  := -DNETCDF
 else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
     NCDEF    := -DNETCDF
-    NCFDIR   := /usr/local/netcdf-fortran-4.4.2-gfortran
+    NCFDIR   := /usr/local/netcdf-fortran-4.4.4-gfortran
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
@@ -84,6 +103,10 @@ endif
 # PROJ
 PROJ4DIR  := /usr/local/
 PROJ4FLAG := -lproj
+FPROJDIR  :=
+FPROJLIB  :=
+FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
+FPROJDEF  := #-DFPROJ
 
 # LAPACK
 LAPACKDIR  :=
@@ -91,11 +114,11 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR := /usr/local/openmpi-1.8.7-gfortran
+MPIDIR := /usr/local/openmpi-2.0.1-gfortran
 MPIDEF := -DMPI
 
 # Documentation
-DOXYGENDIR := /usr/local/bin
+DOXYGENDIR := /Applications/Doxygen.app/Contents/Resources
 DOTDIR     := /usr/local/bin
-TEXDIR     := /usr/texbin
+TEXDIR     := /Library/TeX/texbin
 PERLDIR    := /usr/bin

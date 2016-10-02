@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for NAG compiler 6.0 on Matthias' MacBook Air
+# Setup file for Intel compiler 2017 at Matthias' MacBook Pro at INRA
 #
 
 # The Makefile assumes the standard bin, include and lib directories for instaled libraries,
@@ -29,54 +29,49 @@
 #    Copyright 2012-2016 Matthias Cuntz
 
 # Paths
-NAGDIR := /usr/local
-NAGLIB := $(NAGDIR)/lib/NAG_Fortran
-NAGBIN := $(NAGDIR)/bin
+INTEL    := /opt/intel/compilers_and_libraries_2017/mac
+INTELBIN := $(INTEL)/bin
+INTELDIR := $(INTEL)/compiler
+# INTELINC := $(INTELDIR)/include/intel64
+INTELLIB := $(INTELDIR)/lib
 
 # Compiling
-F90 := $(NAGBIN)/nagfor
+F90 := $(INTELBIN)/ifort
 FC  := $(F90)
-CC  := /usr/bin/gcc
-CPP := /usr/bin/cpp
+CC  := /usr/bin/cc  # clang, same as /usr/bin/gcc
+CPP := /usr/bin/cpp # could be 'gcc -E -cpp' on Linux but does not work on Mac
 ifeq ($(release),debug)
-    # The compiler switch "-w=ques" turns off the message:
-    #   Comment begins with the OpenMP sentinel but the -openmp option was not used
-    # but it also turns of 
-    #   Intrinsic function CMPLX with double precision argument and no KIND argument returns single precision result
-    #   KIND argument to intrinsic LBOUND specifies a small integer kind
-    #   KIND argument to intrinsic LEN specifies a small integer kind
-    #   Expression in OpenMP clause is always .TRUE.
-    #   Ordinary assignment of pointer function fname reference to pointer variable vname
-    #   Last statement of DO loop body is an unconditional jump
-    #   Array constructor has a polymorphic element but the constructor value will not be polymorphic
-    F90FLAGS += -C -C=dangling -g -nan -O0 -strict95 # -w=ques -g90
-    ifneq ($(openmp),true)
-        F90FLAGS += -gline
-    endif
-    FCFLAGS  += $(F90FLAGS)
+    F90FLAGS += -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
+    FCFLAGS  += -g -debug -traceback -fp-stack-check -O0 -debug
     CFLAGS   += -pedantic -Wall -W -O -g
-    LDFLAGS  += #-g90
 else
-    F90FLAGS += -O4
-    FCFLAGS  += $(F90FLAGS)
+    F90FLAGS += -O3 # old/deprecated: -vec-report0 -override-limits
+    FCFLAGS  += -O3
     CFLAGS   += -O3
 endif
-F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ideclient -ieee=full -free # -ieee=stop -ieee=full -mismatch -mismatch-all
-MODFLAG  := -mdir # space significant
-FCFLAGS  += -fixed
-CFLAGS   +=
-LDFLAGS  += -ideclient -unsharedrts
-DEFINES  += -DNAG -DNAGf90Fortran
+# -xHost displays on this Mac - ifort: command line remark #10382: option '-xHOST' setting '-xCORE-AVX2'
+# disable with -diag-disable=10382  ;   another remark (e.g. #9823) can be disabled with -diag-disable=10382,9823
+F90FLAGS += -fpp -nofixed -assume byterecl -fp-model precise -m64 -ip -xHost -diag-disable=10382
+FCFLAGS  += -assume byterecl -cpp -fp-model precise -m64 -fixed -ip -xHost -diag-disable=10382
+CFLAGS   += -m64 -std=c99
+MODFLAG  := -module # space significant
+DEFINES  += -DINTEL -DINTEL_COMPILER
 # OpenMP
-F90OMPFLAG := -openmp
-FCOMPFLAG  := -openmp
-COMPFLAG   := -openmp
-LDOMPFLAG  := -openmp
+F90OMPFLAG := -fopenmp
+FCOMPFLAG  := -fopenmp
+COMPFLAG   := -fopenmp
+LDOMPFLAG  := -fopenmp
 OMPDEFINE  := -DOPENMP
 
 # Linking
-LIBS  += -L$(NAGLIB) #$(NAGLIB)/thsafe.o
-RPATH += -Wl,-rpath,$(NAGLIB)
+ifeq ($(istatic),static)
+    LIBS += -static-intel
+endif
+# LIBS += -L$(INTELLIB) -limf -lm -lsvml
+# ifneq ($(istatic),static)
+#      LIBS += -lintlc
+# endif
+RPATH += -Wl,-rpath,$(INTELLIB)
 
 # IMSL
 IMSLDIR  :=
@@ -97,14 +92,14 @@ MKL95DEF  := #-DMKL95
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR  := /usr/local/netcdf-3.6.3-nagfor
+    NCDIR  := /usr/local/netcdf-3.6.3-ifort
     NCFLAG := -lnetcdf -lnetcdff
     NCDEF  := -DNETCDF
 else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
     NCDEF    := -DNETCDF
-    NCFDIR   := /usr/local/netcdf-fortran-4.4.3-nagfor
+    NCFDIR   := /usr/local/netcdf-fortran-4.4.4-ifort
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
@@ -129,11 +124,11 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR := /usr/local/openmpi-1.10.2-nagfor
+MPIDIR := /usr/local/openmpi-2.0.1-ifort
 MPIDEF := -DMPI
 
 # Documentation
-DOXYGENDIR := /Applications/Program/Doxygen.app/Contents/Resources
+DOXYGENDIR := /Applications/Doxygen.app/Contents/Resources
 DOTDIR     := /usr/local/bin
 TEXDIR     := /Library/TeX/texbin
 PERLDIR    := /usr/bin
