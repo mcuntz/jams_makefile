@@ -659,7 +659,7 @@ endif
 
 cleancheck:
 	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
-	    $(MAKE) SRCPATH=$$i cleanclean ; \
+	    $(MAKE) system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
 	done
 
 cleantest: cleancheck
@@ -691,7 +691,7 @@ endif
 	         openmp=$(openmp) NOMACWARN=true EXTRA_LIBS="$$libextra" > /dev/null \
 	    && { $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ;} ; status=$$? ; \
 	    if [ $$status != 0 ] ; then echo "$$i failed!" ; fi ; \
-	    $(MAKE) -s SRCPATH=$$i cleanclean ; \
+	    $(MAKE) -s system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
 	    if [ $$i != $$j ] ; then \
 	    	 $(MAKE) -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a cleanclean ; \
 	    fi ; \
