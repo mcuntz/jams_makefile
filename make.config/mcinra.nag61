@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for NAG compiler 6.1 on Matthias' MacBook Air
+# Setup file for NAG compiler 6.1 at Matthias' MacBook Pro at INRA
 #
 
 # The Makefile assumes the standard bin, include and lib directories for instaled libraries,
@@ -36,7 +36,7 @@ NAGBIN := $(NAGDIR)/bin
 # Compiling
 F90 := $(NAGBIN)/nagfor
 FC  := $(F90)
-CC  := /usr/bin/gcc
+CC  := /usr/bin/cc # clang, same as /usr/bin/gcc
 CPP := /usr/bin/cpp
 ifeq ($(release),debug)
     # The compiler switch "-w=ques" turns off the message:
@@ -104,7 +104,7 @@ else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
     NCDEF    := -DNETCDF
-    NCFDIR   := /usr/local/netcdf-fortran-4.4.3-nagfor
+    NCFDIR   := /usr/local/netcdf-fortran-4.4.4-nagfor
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
@@ -129,11 +129,11 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR := /usr/local/openmpi-1.10.2-nagfor
+MPIDIR := /usr/local/openmpi-2.0.1-nagfor
 MPIDEF := -DMPI
 
 # Documentation
-DOXYGENDIR := /Applications/Program/Doxygen.app/Contents/Resources
+DOXYGENDIR := /Applications/Doxygen.app/Contents/Resources
 DOTDIR     := /usr/local/bin
 TEXDIR     := /Library/TeX/texbin
 PERLDIR    := /usr/bin
