@@ -84,16 +84,19 @@ IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpist
 IMSLDEF  := #-DIMSL
 
 # MKL
-MKLDIR  :=
+INTEL  := /opt/intel/compilers_and_libraries_2017/mac
+MKLDIR := $(INTEL)/mkl
 ifeq ($(openmp),true)
-    MKLFLAG := #-lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
 else
-    MKLFLAG := #-lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
 endif
-MKLDEF  := #-DMKL
-MKL95DIR  :=
-MKL95FLAG := #-lmkl_blas95_lp64 -lmkl_lapack95_lp64
-MKL95DEF  := #-DMKL95
+MKLDEF := -DMKL
+MKL95DIR  := /opt/lib/mkl95_lapack/nagfor
+MKL95LIB  := $(MKL95DIR)/lib
+MKL95INC  := $(MKL95DIR)/include/intel64/lp64
+MKL95FLAG := -lmkl_lapack95_lp64
+MKL95DEF  := -DMKL95
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
