@@ -93,11 +93,11 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../jams_fortran/test/test_mo_kernel # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_kernel # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
-CHECKPATH  := ../jams_fortran/test    # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+CHECKPATH  := ../fortran/test    # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 TOOLPATH   := tools              # tools such as f2html
 DOXCONFIG  := ./doxygen.config   # the doxygen config file
 #

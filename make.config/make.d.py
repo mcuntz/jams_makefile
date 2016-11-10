@@ -21,6 +21,7 @@ optional arguments:
 History
 -------
 Written,  MC, Mar 2016
+Modified, MC, Nov 2016 - read/write 'r'/'w' instead of 'rb'/'wb' for Python3
 """
 
 __all__ = ['make_d']
@@ -59,19 +60,20 @@ def make_dict(modfile, srcfiles):
     History
     -------
     Written,  MC, Mar 2016
+    Modified, MC, Nov 2016 - write 'w' instead of 'wb' for Python3
     """
     import os
     import re
-    
+
     if not os.path.exists(os.path.dirname(modfile)): os.mkdir(os.path.dirname(modfile))
-    of = open(modfile, 'wb')
+    of = open(modfile, 'w')
     for ff in srcfiles:
         # Go through line by line, remove comments and strings because the latter can include ';'.
         # Then split at at ';', if given.
         # The stripped line should start with 'module ' and there should be nothing after the module name,
         # as for example in lines such as 'module procedure ...'
         olist = list()
-        fi = open(ff, 'rb')
+        fi = open(ff, 'r')
         for line in fi:
             ll = line.rstrip().lower()   # everything lower case
             ll = re.sub('!.*$', '', ll)  # remove F90 comment
@@ -98,7 +100,7 @@ def make_dict(modfile, srcfiles):
                 print('', ll, end='', file=of)
             print('', file=of)
     of.close()
-    
+
     return
 
 
@@ -128,9 +130,10 @@ def get_dict(modfile):
     History
     -------
     Written,  MC, Mar 2016
+    Modified, MC, Nov 2016 - read 'r' instead of 'rb' for Python3
     """
     odict = dict()
-    of = open(modfile, 'rb')
+    of = open(modfile, 'r')
     for line in of:
         # Dictionary lines should be like: /path/filename.suffix: mo_mod1 mo_mod2
         ll = line.rstrip().split(':')
@@ -139,7 +142,7 @@ def get_dict(modfile):
         for m in mods:
             odict[m] = fname
     of.close()
-    
+
     return odict
 
 
@@ -166,6 +169,7 @@ def used_mods(ffile):
     History
     -------
     Written,  MC, Mar 2016
+    Modified, MC, Nov 2016 - read 'r' instead of 'rb' for Python3
     """
     import re
 
@@ -173,7 +177,7 @@ def used_mods(ffile):
     # Then split at at ';', if given.
     # The stripped line should start with 'use ' and after module name should only be ', only: ...'
     olist = list()
-    of = open(ffile, 'rb')
+    of = open(ffile, 'r')
     for line in of:
         ll = line.rstrip().lower()   # everything lower case
         ll = re.sub('!.*$', '', ll)  # remove F90 comment
@@ -193,7 +197,7 @@ def used_mods(ffile):
                 imod = re.sub(',.*$', '', imod) # remove after , if: use mod, only: func
                 olist.append(imod.strip())
     of.close()
-    
+
     return olist
 
 
@@ -225,12 +229,12 @@ def f2suff(forfile, opath, suff):
     Written,  MC, Mar 2016
     """
     import os
-    
+
     idir  = os.path.dirname(forfile)
     ifile = os.path.basename(forfile)
     odir  = idir +'/' + opath
     ofile = ifile[0:ifile.rfind('.')] + '.' + suff
-    
+
     return odir + '/' + ofile
 
 
@@ -278,13 +282,14 @@ def make_d(prefile, opath, srcfiles, ffile=None):
     Dictionary file of modules found in source files: dirname(FirstFortranFile)/opath/make.d.dict
     Dependency file dirname(FortranFile)/opath/basename(FortranFile).d
 
-    
+
     History
     -------
     Written,  MC, Mar 2016
+    Modified, MC, Nov 2016 - write 'w' instead of 'wb' for Python3
     """
     import os
-    
+
     # If Fortran file ffile not given, assume that preprocessed file is ffile.pre,
     # or any other three letter suffix.
     if ffile:
@@ -302,7 +307,7 @@ def make_d(prefile, opath, srcfiles, ffile=None):
 
     # List of modules used in input file
     imods = used_mods(prefile)
-    
+
     # Query dictionary for filenames of modules used in fortran file.
     # Remove own file name for circular dependencies if more than one module in fortran file.
     if imods:
@@ -316,7 +321,7 @@ def make_d(prefile, opath, srcfiles, ffile=None):
     # Write output .d file
     dfile = f2d(forfile,opath)
     ofile = f2o(forfile,opath)
-    df = open(dfile, 'wb')
+    df = open(dfile, 'w')
     print(dfile, ':', forfile, file=df)
     print(ofile, ':', dfile, end='', file=df)
     for im in imodfiles:
