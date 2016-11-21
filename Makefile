@@ -93,7 +93,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_kernel # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_netcdf # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -419,6 +419,7 @@ ifeq ($(proj),true)
 endif
 ifeq ($(lapack),true)
     SDIRS += LAPACKDIR
+    SDIRS += BLASDIR
 endif
 ifeq ($(mpi),true)
     SDIRS += MPIDIR
@@ -494,7 +495,7 @@ else ifneq (,$(findstring $(imsl),vendor imsl))
 endif
 
 # --- DOXYGEN ---------------------------------------------------
-DOXYGEN  := $(if $(DOXYGENDIR),$(strip $(DOXYGENDIR))/doxygen,$(shell which doxygen))
+DOXYGEN  := $(if $(DOXYGENDIR),$(strip $(DOXYGENDIR))/doxygen,$(shell which doxygen 2>/dev/null))
 DOTPATH  := $(if $(DOTDIR),$(strip $(DOTDIR)),$(dir $(shell which dot)))
 TEXPATH  := $(if $(TEXDIR),$(strip $(TEXDIR)),$(dir $(shell which latex)))
 PERLPATH := $(if $(PERLDIR),$(strip $(PERLDIR)),$(dir $(shell which perl)))
