@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 from __future__ import print_function
 """
-usage: make.d.py [-h] [-f FortranFile] InputFile OutputPath SourceFiles
+usage: make.d.py [-h] [-f FortranFile] InputFile OutputPath SourceFileList
 
 Make dependency files for Fortran90 projects.
 
 positional arguments:
-  InputFile OutputPath SourceFiles
+  InputFile OutputPath SourceFileList
                         Preprocessed input file, relative output directory
                         (script assumes compilation into
-                        dirname(InputFile)/opath), all source files.
+                        dirname(InputFile)/opath), file(s) with list(s) of all source files.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -22,6 +22,7 @@ History
 -------
 Written,  MC, Mar 2016
 Modified, MC, Nov 2016 - read/write 'r'/'w' instead of 'rb'/'wb' for Python3
+Modified, MC, Nov 2016 - read list ofsource file names from file instead of command line
 """
 
 __all__ = ['make_d']
@@ -253,28 +254,28 @@ def f2o(forfile, opath):
 
 
 # main
-def make_d(prefile, opath, srcfiles, ffile=None):
+def make_d(prefile, opath, srcfilelist, ffile=None):
     """
     Make dependency files for Fortran90 projects.
 
 
     Definition
     ----------
-    def make_d(prefile, opath, srcfiles, ffile=None):
+    def make_d(prefile, opath, srcfilelist, ffile=None):
 
 
     Input
     -----
-    prefile     Preprocessed input file
-    opath       Relative output directory
-                Script assumes compilation into dirname(InputFile)/opath
-    srcfiles    All source files
+    prefile       Preprocessed input file
+    opath         Relative output directory
+                  Script assumes compilation into dirname(InputFile)/opath
+    srcfilelist   File(s) with list(s) of all source files
 
 
     Optional Input
     --------------
-    ffile       Not-preprocessed Fortran file name
-                If not given prefile[:-4] will be assumed.
+    ffile         Not-preprocessed Fortran file name
+                  If not given prefile[:-4] will be assumed.
 
 
     Output
@@ -287,6 +288,7 @@ def make_d(prefile, opath, srcfiles, ffile=None):
     -------
     Written,  MC, Mar 2016
     Modified, MC, Nov 2016 - write 'w' instead of 'wb' for Python3
+    Modified, MC, Nov 2016 - read list of source file names from file instead of command line
     """
     import os
 
@@ -296,6 +298,12 @@ def make_d(prefile, opath, srcfiles, ffile=None):
         forfile = ffile
     else:
         forfile = prefile[:-4]
+
+    # Get source file names from file list
+    srcfiles = []
+    for ff in srcfilelist:
+        srcfiles.extend(open(ff).read().split('\n'))
+    srcfiles = [ ss for ss in srcfiles if ss.strip() != '' ]
 
     # Only one dictionary file for all files in first object directory
     firstdir = os.path.dirname(srcfiles[0])
@@ -338,7 +346,7 @@ if __name__ == '__main__':
         import optparse # deprecated with Python rev 2.7
 
         ffile = None
-        usage = "Make dependency files for Fortran90 projects.\nUsage: %prog [options] InputFile OutputPath SourceFiles"
+        usage = "Make dependency files for Fortran90 projects.\nUsage: %prog [options] InputFile OutputPath SourceFileList"
         parser = optparse.OptionParser(usage=usage)
         parser.add_option('-f', '--ffile', action='store',
                           default=ffile, dest='ffile', metavar='FortranFile',
@@ -356,8 +364,8 @@ if __name__ == '__main__':
         parser.add_argument('-f', '--ffile', action='store',
                             default=ffile, dest='ffile', metavar='FortranFile',
                             help='Not preprocessed Fortran source filename. If missing prefile[:-4] is assumed.')
-        parser.add_argument('files', nargs='*', default=None, metavar='InputFile OutputPath SourceFiles',
-                           help='Preprocessed input file, relative output directory (script assumes compilation into dirname(InputFile)/opath), all source files.')
+        parser.add_argument('files', nargs='*', default=None, metavar='InputFile OutputPath SourceFileList',
+                           help='Preprocessed input file, relative output directory (script assumes compilation into dirname(InputFile)/opath), file(s) with list(s) of all source files.')
 
         args  = parser.parse_args()
         ffile = args.ffile
@@ -365,12 +373,12 @@ if __name__ == '__main__':
 
     if len(allin) < 3:
         print('Arguments: ', allin)
-        raise IOError('Script needs: InputFile OutputPath SourceFiles.')
+        raise IOError('Script needs: InputFile OutputPath SourceFileList.')
 
     prefile  = allin[0]
     opath    = allin[1]
-    srcfiles = allin[2:]
+    srcfilelist = allin[2:]
 
     del parser, args
 
-    make_d(prefile, opath, srcfiles, ffile=ffile)
+    make_d(prefile, opath, srcfilelist, ffile=ffile)

@@ -113,7 +113,7 @@ compiler := gnu
 # Releases: debug, release, true (last two are equal)
 release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   := netcdf3
+netcdf   := netcdf4
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   := true
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
@@ -207,6 +207,8 @@ LIBSUFFIXES := .a .so .dylib
 #
 
 # Make absolute paths from relative paths - there should be no space nor comment at the end of the next lines
+SRCPATH1   := $(word 1, $(SRCPATH))
+SRCPATH1   := $(abspath $(SRCPATH1:~%=${HOME}%))
 SRCPATH    := $(abspath $(SRCPATH:~%=${HOME}%))
 PROGPATH   := $(abspath $(PROGPATH:~%=${HOME}%))
 CONFIGPATH := $(abspath $(CONFIGPATH:~%=${HOME}%))
@@ -233,7 +235,7 @@ irelease := $(if $(debug),debug,$(release:true=release))
 
 # dependency files creation script 
 MAKEDSCRIPT  := make.d.py
-MAKEDEPSPROG := $(MAKEDPATH)/$(MAKEDSCRIPT)
+MAKEDPROG    := $(MAKEDPATH)/$(MAKEDSCRIPT)
 
 # .PHONY targets
 # some targets should not compile the code, e.g. documentation
@@ -360,6 +362,20 @@ RANLIB   := ranlib
 
 # Set path where all the .mod, .o, etc. files will be written, set before include $(MAKEINC)
 OBJPATH := $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)), $(SRCPATH))
+
+# Files with lists of file names
+OBJPATH1 := $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)), $(SRCPATH1))
+SRCSFILE := $(OBJPATH1)/make.d.srcs
+OBJSFILE := $(OBJPATH1)/make.d.objs
+DOBJSFILE := $(OBJPATH1)/make.d.dobjs
+FSRCSFILE := $(OBJPATH1)/make.d.fsrcs
+FOBJSFILE := $(OBJPATH1)/make.d.fobjs
+FDOBJSFILE := $(OBJPATH1)/make.d.fdobjs
+CSRCSFILE := $(OBJPATH1)/make.d.csrcs
+COBJSFILE := $(OBJPATH1)/make.d.cobjs
+CDOBJSFILE := $(OBJPATH1)/make.d.cdobjs
+LSRCSFILE := $(OBJPATH1)/make.d.lsrcs
+LOBJSFILE := $(OBJPATH1)/make.d.lobjs
 
 # Mac OS X is special, there is (almost) no static linking.
 # Mac OS X does not work with -rpath. Set DYLD_LIBRARY_PATH if needed.
@@ -569,34 +585,44 @@ $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
 
 # Get dependencies
 $(DOBJS):
-	@dirname $@ | xargs mkdir -p 2>/dev/null
-	@nobj=$$(echo $(DOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
+	@if [[ ! -f $(SRCSFILE) ]] ; then echo $(SRCS) | tr ' ' '\n' >> $(SRCSFILE) ; fi
+	@if [[ ! -f $(OBJSFILE) ]] ; then echo $(OBJS) | tr ' ' '\n' >> $(OBJSFILE) ; fi
+	@if [[ ! -f $(DOBJSFILE) ]] ; then echo $(DOBJS) | tr ' ' '\n' >> $(DOBJSFILE) ; fi
+	@if [[ ! -f $(FSRCSFILE) ]] ; then echo $(FSRCS) | tr ' ' '\n' >> $(FSRCSFILE) ; fi
+	@nobj=$$(grep -n -w -F $@  $(DOBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(SRCSFILE)) ; \
 	$(CPP) -C -P $(DEFINES) $(INCLUDES) $$src > $$src.pre 2>/dev/null ; \
-	$(MAKEDEPSPROG) -f $$src $$src.pre .$(strip $(icompiler)).$(strip $(irelease)) $(SRCS) $(FSRCS) ; \
+	$(MAKEDPROG) -f $$src $$src.pre .$(strip $(icompiler)).$(strip $(irelease)) $(SRCSFILE) $(FSRCSFILE) ; \
 	\rm $$src.pre
 
 $(FDOBJS):
-	@dirname $@ | xargs mkdir -p 2>/dev/null
-	@nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	obj=$$(echo $(FOBJS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	dobj=$$(echo $(FOBJS) | tr ' ' '\n' | sed -n $${nobj}p | sed 's|\.o[[:blank:]]*$$|.d|') ; \
+	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
+	@if [[ ! -f $(FSRCSFILE) ]] ; then echo $(FSRCS) | tr ' ' '\n' >> $(FSRCSFILE) ; fi
+	@if [[ ! -f $(FOBJSFILE) ]] ; then echo $(FOBJS) | tr ' ' '\n' >> $(FOBJSFILE) ; fi
+	@if [[ ! -f $(FDOBJSFILE) ]] ; then echo $(FDOBJS) | tr ' ' '\n' >> $(FDOBJSFILE) ; fi
+	@nobj=$$(grep -n -w -F $@ $(FDOBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(FSRCSFILE)) ; \
+	obj=$$(sed -n $${nobj}p $(FOBJSFILE)) ; \
+	dobj=$$(sed -n $${nobj}p $(FOBJSFILE) | sed 's|\.o[[:blank:]]*$$|.d|') ; \
 	echo "$$obj $$dobj : $$src" > $$dobj
 
 $(CDOBJS):
-	@dirname $@ | xargs mkdir -p 2>/dev/null
-	@nobj=$$(echo $(CDOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	pobj=$$(dirname $@) ; psrc=$$(dirname $$src) ; \
+	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
+	@if [[ ! -f $(CSRCSFILE) ]] ; then echo $(CSRCS) | tr ' ' '\n' >> $(CSRCSFILE) ; fi
+	@if [[ ! -f $(COBJSFILE) ]] ; then echo $(COBJS) | tr ' ' '\n' >> $(COBJSFILE) ; fi
+	@if [[ ! -f $(CDOBJSFILE) ]] ; then echo $(CDOBJS) | tr ' ' '\n' >> $(CDOBJSFILE) ; fi
+	@nobj=$$(grep -n -w -F $@ $(CDOBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(CSRCSFILE)) ; \
+	pobj=$(dir $@) ; psrc=$(dir $$src) ; \
 	$(CC) -E $(DEFINES) $(INCLUDES) -MM $$src | sed "s|.*:|$(patsubst %.d,%.o,$@) $@ :|" > $@
 
 # Compile
 $(OBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
-	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	ssrc=$$(basename $$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p)) ; \
+	@nobj=$$(grep -n -w -F $@ $(OBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(SRCSFILE)) ; \
+	ssrc=$$(basename $$(sed -n $${nobj}p $(SRCSFILE))) ; \
 	tmp=$@.$$(echo $${src} | sed 's/.*\.//') ; \
 	doex=$$(echo $(INTEL_EXCLUDE) | grep -i "$${ssrc}" -) ; \
 	f90flag=$$(if [[ "$${doex}" != "" ]] ; then echo "$(F90FLAGS1)" ; else echo "$(F90FLAGS)" ; fi) ; \
@@ -606,9 +632,9 @@ ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(F90) $(DEFINES) $(INCLUDES) $(MPI_F90FLAGS) $(F90FLAGS) $(MODFLAG)$(dir $@) -c $${tmp} -o $@ ; \
 	rm $${tmp}
 else
-	@nobj=$$(echo $(OBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	ssrc=$$(basename $$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p)) ; \
+	@nobj=$$(grep -n -w -F $@ $(OBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(SRCSFILE)) ; \
+	ssrc=$$(basename $$(sed -n $${nobj}p $(SRCSFILE))) ; \
 	doex=$$(echo $(INTEL_EXCLUDE) | grep -i "$${ssrc}" -) ; \
 	f90flag=$$(if [[ "$${doex}" != "" ]] ; then echo "$(F90FLAGS1)" ; else echo "$(F90FLAGS)" ; fi) ; \
 	echo $(F90) $(DEFINES) $(INCLUDES) $(MPI_F90FLAGS) $${f90flag} $(MODFLAG)$(dir $@) -c $${src} -o $@ ; \
@@ -617,8 +643,8 @@ endif
 
 $(FOBJS):
 ifneq (,$(findstring $(icompiler),gnu41 gnu42))
-	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	@nobj=$$(grep -n -w -F $@ $(FOBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(FSRCSFILE)) ; \
 	tmp=$@.$$(echo $${src} | sed 's/.*\.//') ; \
 	echo "$(FC) -E $(DEFINES) $(INCLUDES) $(FCFLAGS) $${src} | sed 's/^#[[:blank:]]\{1,\}[[:digit:]]\{1,\}.*$$//' > $${tmp}" ; \
 	$(FC) -E $(DEFINES) $(INCLUDES) $(FCFLAGS) $${src} | sed 's/^#[[:blank:]]\{1,\}[[:digit:]]\{1,\}.*$$//' > $${tmp} ; \
@@ -626,31 +652,40 @@ ifneq (,$(findstring $(icompiler),gnu41 gnu42))
 	$(FC) $(DEFINES) $(INCLUDES) $(MPI_FCFLAGS) $(FCFLAGS) -c $${tmp} -o $@ ; \
 	rm $${tmp}
 else
-	@nobj=$$(echo $(FOBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	@nobj=$$(grep -n -w -F $@ $(FOBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(FSRCSFILE)) ; \
 	echo $(FC) $(DEFINES) $(INCLUDES) $(MPI_FCFLAGS) $(FCFLAGS) -c $$src -o $@ ; \
 	$(FC) $(DEFINES) $(INCLUDES) $(MPI_FCFLAGS) $(FCFLAGS) -c $$src -o $@
 endif
 
 $(COBJS):
-	@nobj=$$(echo $(COBJS) | tr ' ' '\n' | grep -n -w -F $@ | sed 's/:.*//') ; \
-	src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	@nobj=$$(grep -n -w -F $@ $(COBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(CSRCSFILE)) ; \
 	echo $(CC) $(DEFINES) $(INCLUDES) $(MPI_CFLAGS) $(CFLAGS) -c $${src} -o $@ ; \
 	$(CC) $(DEFINES) $(INCLUDES) $(MPI_CFLAGS) $(CFLAGS) -c $${src} -o $@
 
 # Helper Targets
 clean:
-	rm -f $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS) $(addsuffix /*.mod, $(OBJPATH)) $(addsuffix /*.pre, $(SRCPATH))
+	rm -f $(DOBJS)
+	rm -f $(FDOBJS)
+	rm -f $(CDOBJS)
+	rm -f $(OBJS)
+	rm -f $(FOBJS)
+	rm -f $(COBJS)
+	rm -f $(addsuffix /*.mod, $(OBJPATH))
+	rm -f $(addsuffix /*.pre, $(SRCPATH))
 ifneq ($(PROGNAME),)
 	rm -f "$(PROGNAME)"
 endif
 ifneq ($(strip $(GOBJS) $(FGOBJS)),)
-	rm -f $(GOBJS) $(FGOBJS)
+	rm -f $(GOBJS)
+	rm -f $(FGOBJS)
 endif
 	rm -f *make_check_test_file
 
 cleanclean: clean
-	rm -rf $(addsuffix /.*.r*, $(SRCPATH)) $(addsuffix /.*.d*, $(SRCPATH))
+	rm -rf $(addsuffix /.*.r*, $(SRCPATH))
+	rm -rf $(addsuffix /.*.d*, $(SRCPATH))
 	rm -rf "$(PROGNAME)".dSYM $(addsuffix /html, $(SRCPATH))
 	@if [ -f "$(DOXCONFIG)" ] ; then rm -rf $(PROGPATH)/latex ; fi
 	@if [ -f "$(DOXCONFIG)" ] ; then rm -rf $(PROGPATH)/html ; fi
@@ -704,21 +739,21 @@ depend: dependencies
 
 dependencies:
 	@for i in $(DOBJS) ; do \
-	    nobj=$$(echo $(DOBJS) | tr ' ' '\n' | grep -n -w -F $${i} | sed 's/:.*//') ; \
-	    src=$$(echo $(SRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	    obj=$$(echo $(OBJS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	    nobj=$$(grep -n -w -F $${i} $(DOBJSFILE) | sed 's/:.*//') ; \
+	    src=$$(sed -n $${nobj}p $(SRCSFILE)) ; \
+	    obj=$$(sed -n $${nobj}p $(OBJSFILE)) ; \
 	    if [ $${src} -nt $${obj} ] ; then rm $${i} ; fi ; \
 	done
 	@for i in $(FDOBJS) ; do \
-	    nobj=$$(echo $(FDOBJS) | tr ' ' '\n' | grep -n -w -F $${i} | sed 's/:.*//') ; \
-	    src=$$(echo $(FSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	    obj=$$(echo $(FOBJS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	    nobj=$$(grep -n -w -F $${i} $(FDOBJSFILE) | sed 's/:.*//') ; \
+	    src=$$(sed -n $${nobj}p $(FSRCSFILE)) ; \
+	    obj=$$(sed -n $${nobj}p $(FOBJSFILE)) ; \
 	    if [ $${src} -nt $${obj} ] ; then rm $${i} ; fi ; \
 	done
 	@for i in $(CDOBJS) ; do \
-	    nobj=$$(echo $(CDOBJS) | tr ' ' '\n' | grep -n -w -F $${i} | sed 's/:.*//') ; \
-	    src=$$(echo $(CSRCS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
-	    obj=$$(echo $(COBJS) | tr ' ' '\n' | sed -n $${nobj}p) ; \
+	    nobj=$$(grep -n -w -F $${i} $(CDOBJSFILE) | sed 's/:.*//') ; \
+	    src=$$(sed -n $${nobj}p $(CSRCSFILE)) ; \
+	    obj=$$(sed -n $${nobj}p $(COBJSFILE)) ; \
 	    if [ $${src} -nt $${obj} ] ; then rm $${i} ; fi ; \
 	done
 	@rm -f $(addsuffix /$(MAKEDSCRIPT:.py=.dict), $(OBJPATH))
@@ -742,8 +777,10 @@ latex: pdf
 pdf: doxygen
 	@cd latex ; env PATH=${PATH}:$(TEXPATH) make pdf
 
+help: info
+
 info:
-	@echo "CHS Makefile"
+	@echo "JAMS Makefile"
 	@echo ""
 	@echo "Config"
 	@echo "system   = $(system)"
