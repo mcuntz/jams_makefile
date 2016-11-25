@@ -93,7 +93,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_netcdf # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_ncwrite # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -113,7 +113,7 @@ compiler := gnu
 # Releases: debug, release, true (last two are equal)
 release  := debug
 # Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   := netcdf4
+netcdf   := netcdf3
 # LAPACK (Linear Algebra Pack): true, [anything else]
 lapack   := true
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]

@@ -69,7 +69,7 @@ RPATH += -Wl,-rpath,$(GNULIB)
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /usr/local/netcdf/3.6.3_gcc46
     NCFLAG := -lnetcdf -lnetcdff
-    NCDEF  := -DNETCDF
+    NCDEF  := -DNETCDF -DNETCDF3
 else
     NCDIR    := /usr
     NCFLAG   := -lnetcdf

@@ -67,8 +67,6 @@ RPATH += -Wl,-rpath,$(GNULIB)
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  :=
-    NCFLAG := #-lnetcdf -lnetcdff
-    NCDEF  := #-DNETCDF
 else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf

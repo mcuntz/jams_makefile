@@ -77,10 +77,7 @@ RPATH += -Wl,-rpath,$(PGILIB)
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    # NCDIR  := /usr/local/netcdf/3.6.3_pgi-15.9
     NCDIR  :=
-    NCFLAG := #-lnetcdf -lnetcdff
-    NCDEF  := #-DNETCDF
 else
     NCDIR    := /usr/local/netcdf/4.3.3-1
     NCFLAG   := -lnetcdf
