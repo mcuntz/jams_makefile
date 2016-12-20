@@ -486,11 +486,11 @@ ifeq ($(mpi),true)
     MPIINC ?= $(MPIDIR)/include
     MPILIB ?= $(MPIDIR)/lib
     MPIBIN ?= $(MPIDIR)/bin
-    MPI_F90FLAGS += $(shell $(MPIBIN)/mpifort --showme:compile)
+    MPI_F90FLAGS += $(shell $(MPIBIN)/mpif90 --showme:compile)
     MPI_FCFLAGS  += $(shell $(MPIBIN)/mpif77 --showme:compile)
     MPI_CFLAGS   += $(shell $(MPIBIN)/mpicc --showme:compile)
     ifeq ($(LD),$(F90))
-        MPI_LDFLAGS += $(shell $(MPIBIN)/mpifort --showme:link)
+        MPI_LDFLAGS += $(shell $(MPIBIN)/mpif90 --showme:link)
     else
         MPI_LDFLAGS += $(shell $(MPIBIN)/mpicc --showme:link)
     endif
