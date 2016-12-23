@@ -93,7 +93,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_netcdf # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_julian # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -376,6 +376,18 @@ COBJSFILE := $(OBJPATH1)/make.d.cobjs
 CDOBJSFILE := $(OBJPATH1)/make.d.cdobjs
 LSRCSFILE := $(OBJPATH1)/make.d.lsrcs
 LOBJSFILE := $(OBJPATH1)/make.d.lobjs
+$(shell if [[ ! -d $(OBJPATH1) ]] ; then mkdir -p $(OBJPATH1) ; fi)
+$(shell if [[ -f $(SRCSFILE) ]]   ; then rm $(SRCSFILE)   ; fi ; echo $(SRCS)   | tr ' ' '\n' >> $(SRCSFILE))
+$(shell if [[ -f $(OBJSFILE) ]]   ; then rm $(OBJSFILE)   ; fi ; echo $(OBJS)   | tr ' ' '\n' >> $(OBJSFILE))
+$(shell if [[ -f $(DOBJSFILE) ]]  ; then rm $(DOBJSFILE)  ; fi ; echo $(DOBJS)  | tr ' ' '\n' >> $(DOBJSFILE))
+$(shell if [[ -f $(FSRCSFILE) ]]  ; then rm $(FSRCSFILE)  ; fi ; echo $(FSRCS)  | tr ' ' '\n' >> $(FSRCSFILE))
+$(shell if [[ -f $(FOBJSFILE) ]]  ; then rm $(FOBJSFILE)  ; fi ; echo $(FOBJS)  | tr ' ' '\n' >> $(FOBJSFILE))
+$(shell if [[ -f $(FDOBJSFILE) ]] ; then rm $(FDOBJSFILE) ; fi ; echo $(FDOBJS) | tr ' ' '\n' >> $(FDOBJSFILE))
+$(shell if [[ -f $(CSRCSFILE) ]]  ; then rm $(CSRCSFILE)  ; fi ; echo $(CSRCS)  | tr ' ' '\n' >> $(CSRCSFILE))
+$(shell if [[ -f $(COBJSFILE) ]]  ; then rm $(COBJSFILE)  ; fi ; echo $(COBJS)  | tr ' ' '\n' >> $(COBJSFILE))
+$(shell if [[ -f $(CDOBJSFILE) ]] ; then rm $(CDOBJSFILE) ; fi ; echo $(CDOBJS) | tr ' ' '\n' >> $(CDOBJSFILE))
+$(shell if [[ -f $(LSRCSFILE) ]]  ; then rm $(LSRCSFILE)  ; fi ; echo $(LSRCS)  | tr ' ' '\n' >> $(LSRCSFILE))
+$(shell if [[ -f $(LOBJSFILE) ]]  ; then rm $(LOBJSFILE)  ; fi ; echo $(LOBJS)  | tr ' ' '\n' >> $(LOBJSFILE))
 
 # Mac OS X is special, there is (almost) no static linking.
 # Mac OS X does not work with -rpath. Set DYLD_LIBRARY_PATH if needed.
@@ -586,10 +598,6 @@ $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
 # Get dependencies
 $(DOBJS):
 	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
-	@if [[ ! -f $(SRCSFILE) ]] ; then echo $(SRCS) | tr ' ' '\n' >> $(SRCSFILE) ; fi
-	@if [[ ! -f $(OBJSFILE) ]] ; then echo $(OBJS) | tr ' ' '\n' >> $(OBJSFILE) ; fi
-	@if [[ ! -f $(DOBJSFILE) ]] ; then echo $(DOBJS) | tr ' ' '\n' >> $(DOBJSFILE) ; fi
-	@if [[ ! -f $(FSRCSFILE) ]] ; then echo $(FSRCS) | tr ' ' '\n' >> $(FSRCSFILE) ; fi
 	@nobj=$$(grep -n -w -F $@  $(DOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(SRCSFILE)) ; \
 	$(CPP) -C -P $(DEFINES) $(INCLUDES) $$src > $$src.pre 2>/dev/null ; \
@@ -598,9 +606,6 @@ $(DOBJS):
 
 $(FDOBJS):
 	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
-	@if [[ ! -f $(FSRCSFILE) ]] ; then echo $(FSRCS) | tr ' ' '\n' >> $(FSRCSFILE) ; fi
-	@if [[ ! -f $(FOBJSFILE) ]] ; then echo $(FOBJS) | tr ' ' '\n' >> $(FOBJSFILE) ; fi
-	@if [[ ! -f $(FDOBJSFILE) ]] ; then echo $(FDOBJS) | tr ' ' '\n' >> $(FDOBJSFILE) ; fi
 	@nobj=$$(grep -n -w -F $@ $(FDOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(FSRCSFILE)) ; \
 	obj=$$(sed -n $${nobj}p $(FOBJSFILE)) ; \
@@ -609,9 +614,6 @@ $(FDOBJS):
 
 $(CDOBJS):
 	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
-	@if [[ ! -f $(CSRCSFILE) ]] ; then echo $(CSRCS) | tr ' ' '\n' >> $(CSRCSFILE) ; fi
-	@if [[ ! -f $(COBJSFILE) ]] ; then echo $(COBJS) | tr ' ' '\n' >> $(COBJSFILE) ; fi
-	@if [[ ! -f $(CDOBJSFILE) ]] ; then echo $(CDOBJS) | tr ' ' '\n' >> $(CDOBJSFILE) ; fi
 	@nobj=$$(grep -n -w -F $@ $(CDOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(CSRCSFILE)) ; \
 	pobj=$(dir $@) ; psrc=$(dir $$src) ; \
@@ -666,32 +668,46 @@ $(COBJS):
 
 # Helper Targets
 clean:
-	rm -f $(DOBJS)
-	rm -f $(FDOBJS)
-	rm -f $(CDOBJS)
+ifneq ($(strip $(OBJS)),)
 	rm -f $(OBJS)
+endif
+ifneq ($(strip $(DOBJS)),)
+	rm -f $(DOBJS)
+endif
+ifneq ($(strip $(FOBJS)),)
 	rm -f $(FOBJS)
+endif
+ifneq ($(strip $(FDOBJS)),)
+	rm -f $(FDOBJS)
+endif
+ifneq ($(strip $(COBJS)),)
 	rm -f $(COBJS)
+endif
+ifneq ($(strip $(CDOBJS)),)
+	rm -f $(CDOBJS)
+endif
+ifneq ($(strip $(GOBJS)),)
+	rm -f $(GOBJS)
+endif
+ifneq ($(strip $(FGOBJS)),)
+	rm -f $(FGOBJS)
+endif
 	rm -f $(addsuffix /*.mod, $(OBJPATH))
 	rm -f $(addsuffix /*.pre, $(SRCPATH))
 ifneq ($(PROGNAME),)
 	rm -f "$(PROGNAME)"
 endif
-ifneq ($(strip $(GOBJS) $(FGOBJS)),)
-	rm -f $(GOBJS)
-	rm -f $(FGOBJS)
+ifneq ($(LIBNAME),)
+	rm -f "$(LIBNAME)"
 endif
 	rm -f *make_check_test_file
-
-cleanclean: clean
 	rm -rf $(addsuffix /.*.r*, $(SRCPATH))
 	rm -rf $(addsuffix /.*.d*, $(SRCPATH))
 	rm -rf "$(PROGNAME)".dSYM $(addsuffix /html, $(SRCPATH))
 	@if [ -f "$(DOXCONFIG)" ] ; then rm -rf $(PROGPATH)/latex ; fi
 	@if [ -f "$(DOXCONFIG)" ] ; then rm -rf $(PROGPATH)/html ; fi
-ifneq ($(LIBNAME),)
-	rm -f "$(LIBNAME)"
-endif
+
+cleanclean: clean
 
 cleancheck:
 	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
