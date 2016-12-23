@@ -114,7 +114,8 @@ BLASLIB    := /cm/shared/apps/blas/gcc/1/lib64
 BLASFLAG   := -lblas
 
 # MPI
-MPIDIR := /cm/shared/apps/mpich2_smpd/ge/gcc/64/1.3.2p1
+MPIDIR := /cm/shared/apps/openmpi/gcc/64/1.4.4
+MPILIB := /cm/shared/apps/openmpi/gcc/64/1.4.4/lib64
 MPIDEF := -DMPI
 
 # Documentation
