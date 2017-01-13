@@ -19,7 +19,7 @@
 #     Default C is:          .c,   .C
 #
 # TARGETS
-#     all (default), check (=test), clean, cleanclean, cleancheck (=cleantest=checkclean=testclean),
+#     all (default), check (=test), clean, cleanclean (=distclean), cleancheck (=cleantest=checkclean=testclean),
 #     dependencies (=depend), html, pdf, latex, doxygen, info
 #
 # OPTIONS
@@ -93,7 +93,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_julian # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_utils # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -246,7 +246,7 @@ ifneq ($(strip $(MAKECMDGOALS)),)
     ifneq ($(findstring /$(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/),)
         iphony := True
     endif
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/ /cleancheck/ /cleantest/ /checkclean/ /testclean/ /info/ /clean/ /cleanclean/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/ /info/ /clean/ /cleanclean/ /distclean/ /cleancheck/ /checkclean/ /cleantest/ /testclean/))
         iphonyall := True
     endif
 endif
@@ -580,7 +580,7 @@ INCLUDES += $(addprefix -I,$(OBJPATH))
 #.SUFFIXES: .f90 .F90 .f95 .F95 .f03 .F03 .f08 .F08 .f .F .for .FOR .ftn .FTN .c .C .d .o .a .so .dylib
 .SUFFIXES:
 
-.PHONY: clean cleanclean cleantest checkclean testclean cleancheck html latex pdf doxygen check test info
+.PHONY: clean cleanclean distclean cleantest testclean checkclean cleancheck html latex pdf doxygen check test info
 
 all: $(PROGNAME) $(LIBNAME)
 
@@ -696,18 +696,30 @@ endif
 	rm -f $(addsuffix /*.pre, $(SRCPATH))
 ifneq ($(PROGNAME),)
 	rm -f "$(PROGNAME)"
+	rm -f "$(PROGNAME)".dSYM
 endif
 ifneq ($(LIBNAME),)
 	rm -f "$(LIBNAME)"
 endif
+ifneq ($(SRCPATH),)
+	rm -rf $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)),$(SRCPATH))
+endif
 	rm -f *make_check_test_file
-	rm -rf $(addsuffix /.*.r*, $(SRCPATH))
-	rm -rf $(addsuffix /.*.d*, $(SRCPATH))
-	rm -rf "$(PROGNAME)".dSYM $(addsuffix /html, $(SRCPATH))
+
+cleanclean: clean
+	for irr in release debug ; do \
+	    for icc in $(compilers) ; do \
+	        $(MAKE) system=$(system) release=$$irr compiler=$$icc \
+	        MAKEDPATH=$(MAKEDPATH) SRCPATH="$(SRCPATH)" PROGPATH=$(PROGPATH) \
+	        CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) \
+	        clean ; \
+	    done ; \
+	done
+	rm -rf $(addsuffix /html, $(SRCPATH))
 	@if [ -f "$(DOXCONFIG)" ] ; then rm -rf $(PROGPATH)/latex ; fi
 	@if [ -f "$(DOXCONFIG)" ] ; then rm -rf $(PROGPATH)/html ; fi
 
-cleanclean: clean
+distclean: cleanclean
 
 cleancheck:
 	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
@@ -740,7 +752,7 @@ endif
 	         CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
 	         release=$(irelease) netcdf=$(netcdf) static=$(static) proj=$(proj) \
 	         imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
-	         openmp=$(openmp) NOMACWARN=true EXTRA_LIBS="$$libextra" > /dev/null \
+	         openmp=$(openmp) EXTRA_LIBS="$$libextra" > /dev/null \
 	    && { $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ;} ; status=$$? ; \
 	    if [ $$status != 0 ] ; then echo "$$i failed!" ; fi ; \
 	    $(MAKE) -s system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
@@ -852,10 +864,11 @@ endif
 	@echo "checkclean     alias for cleancheck"
 	@echo "clean          Clean compilation of current compiler and release"
 	@echo "cleancheck     Cleanclean all test directories $(CHECKPATH)/test* and $(CHECKPATH)/check*"
-	@echo "cleanclean     Clean compilations of all compilers and releases"
+	@echo "cleanclean     Clean compilations of all releases and all available compilers for current system"
 	@echo "cleantest      alias for cleancheck"
 	@echo "depend         alias for dependencies"
 	@echo "dependencies   Redo dependencies"
+	@echo "distclean      alias for cleanclean"
 	@echo "doxygen        Run doxygen html with $(DOXPATH)/doxygen.config"
 	@echo "html           Run either doxygen html with $(DOXPATH)/doxygen.config or f2html of Jean-Marc Beroud"
 	@echo "info           Prints info about current settings and possibilities"

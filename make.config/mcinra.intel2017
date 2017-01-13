@@ -41,7 +41,7 @@ FC  := $(F90)
 CC  := /usr/bin/cc  # clang, same as /usr/bin/gcc
 CPP := /usr/bin/cpp # could be 'gcc -E -cpp' on Linux but does not work on Mac
 ifeq ($(release),debug)
-    F90FLAGS += -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug
+    F90FLAGS += -check all -warn all -g -debug -traceback -fp-stack-check -O0 -debug # -check all,noarg_temp_created
     FCFLAGS  += -g -debug -traceback -fp-stack-check -O0 -debug
     CFLAGS   += -pedantic -Wall -W -O -g
 else
