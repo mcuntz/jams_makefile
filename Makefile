@@ -93,7 +93,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_utils # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_file_utils # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -232,6 +232,9 @@ endif
 
 # allow release=true and debug=true; debug comes from command line only and supercedes release
 irelease := $(if $(debug),debug,$(release:true=release))
+
+# this makefile
+THISMAKEFILE := $(lastword $(MAKEFILE_LIST))
 
 # dependency files creation script 
 MAKEDSCRIPT  := make.d.py
@@ -709,7 +712,7 @@ endif
 cleanclean: clean
 	for irr in release debug ; do \
 	    for icc in $(compilers) ; do \
-	        $(MAKE) system=$(system) release=$$irr compiler=$$icc \
+	        $(MAKE) -f $(THISMAKEFILE) system=$(system) release=$$irr compiler=$$icc \
 	        MAKEDPATH=$(MAKEDPATH) SRCPATH="$(SRCPATH)" PROGPATH=$(PROGPATH) \
 	        CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) \
 	        clean ; \
@@ -723,7 +726,7 @@ distclean: cleanclean
 
 cleancheck:
 	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
-	    $(MAKE) system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
+	    $(MAKE) -f $(THISMAKEFILE) system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
 	done
 
 cleantest: cleancheck
@@ -741,23 +744,25 @@ endif
 	    j=$${i/minpack/maxpack} ; \
 	    libextra= ; \
 	    if [ $$i != $$j ] ; then \
-	    	 $(MAKE) -s MAKEDPATH=$(MAKEDPATH) SRCPATH="$$i"/../../minpack PROGPATH=$(PROGPATH) \
-	    	      CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=libminpack.a system=$(system) \
-	    	      release=$(irelease) netcdf=$(netcdf) static=$(static) proj=$(proj) \
-	    	      imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
-	    	      openmp=$(openmp) > /dev/null ; \
-                 libextra="-L. -lminpack" ; \
+	        $(MAKE) -f $(THISMAKEFILE) -s \
+	            MAKEDPATH=$(MAKEDPATH) SRCPATH="$$i"/../../minpack PROGPATH=$(PROGPATH) \
+	    	    CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=libminpack.a system=$(system) \
+	    	    release=$(irelease) netcdf=$(netcdf) static=$(static) proj=$(proj) \
+	    	    imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
+	    	    openmp=$(openmp) > /dev/null ; \
+                libextra="-L. -lminpack" ; \
 	    fi ; \
-	    $(MAKE) -s MAKEDPATH=$(MAKEDPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
-	         CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
-	         release=$(irelease) netcdf=$(netcdf) static=$(static) proj=$(proj) \
-	         imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
-	         openmp=$(openmp) EXTRA_LIBS="$$libextra" > /dev/null \
+	    $(MAKE) -f $(THISMAKEFILE) -s \
+		MAKEDPATH=$(MAKEDPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
+		CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
+		release=$(irelease) netcdf=$(netcdf) static=$(static) proj=$(proj) \
+		imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
+		openmp=$(openmp) EXTRA_LIBS="$$libextra" > /dev/null \
 	    && { $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ;} ; status=$$? ; \
 	    if [ $$status != 0 ] ; then echo "$$i failed!" ; fi ; \
-	    $(MAKE) -s system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
+	    $(MAKE) -f $(THISMAKEFILE) -s system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
 	    if [ $$i != $$j ] ; then \
-	    	 $(MAKE) -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a cleanclean ; \
+	        $(MAKE) -f $(THISMAKEFILE) -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a cleanclean ; \
 	    fi ; \
 	done
 
