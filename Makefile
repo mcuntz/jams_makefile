@@ -93,7 +93,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_file_utils # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_string_utils # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -209,12 +209,12 @@ LIBSUFFIXES := .a .so .dylib
 # Make absolute paths from relative paths - there should be no space nor comment at the end of the next lines
 SRCPATH1   := $(word 1, $(SRCPATH))
 SRCPATH1   := $(abspath $(SRCPATH1:~%=${HOME}%))
-SRCPATH    := $(abspath $(SRCPATH:~%=${HOME}%))
-PROGPATH   := $(abspath $(PROGPATH:~%=${HOME}%))
-CONFIGPATH := $(abspath $(CONFIGPATH:~%=${HOME}%))
-MAKEDPATH  := $(abspath $(MAKEDPATH:~%=${HOME}%))
-CHECKPATH  := $(abspath $(CHECKPATH:~%=${HOME}%))
-DOXCONFIG  := $(abspath $(DOXCONFIG:~%=${HOME}%))
+override SRCPATH    := $(abspath $(SRCPATH:~%=${HOME}%))
+override PROGPATH   := $(abspath $(PROGPATH:~%=${HOME}%))
+override CONFIGPATH := $(abspath $(CONFIGPATH:~%=${HOME}%))
+override MAKEDPATH  := $(abspath $(MAKEDPATH:~%=${HOME}%))
+override CHECKPATH  := $(abspath $(CHECKPATH:~%=${HOME}%))
+override DOXCONFIG  := $(abspath $(DOXCONFIG:~%=${HOME}%))
 # $(info "DOXCONFIG: "$(DOXCONFIG))
 
 # Only Prog or Lib
@@ -223,10 +223,10 @@ ifneq ($(and $(strip $(PROGNAME)),$(strip $(LIBNAME))),)
 else ifeq ($(or $(strip $(PROGNAME)),$(strip $(LIBNAME))),)
     $(error Error: PROGNAME or LIBNAME must be given.)
 else ifneq ($(strip $(PROGNAME)),)
-    PROGNAME := $(PROGPATH)/$(strip $(PROGNAME))
+    override PROGNAME := $(PROGPATH)/$(strip $(PROGNAME))
     LIBNAME  :=
 else
-    LIBNAME  := $(PROGPATH)/$(strip $(LIBNAME))
+    override LIBNAME  := $(PROGPATH)/$(strip $(LIBNAME))
     PROGNAME :=
 endif
 
@@ -237,8 +237,8 @@ irelease := $(if $(debug),debug,$(release:true=release))
 THISMAKEFILE := $(lastword $(MAKEFILE_LIST))
 
 # dependency files creation script 
-MAKEDSCRIPT  := make.d.py
-MAKEDPROG    := $(MAKEDPATH)/$(MAKEDSCRIPT)
+MAKEDSCRIPT := make.d.py
+MAKEDPROG   := $(MAKEDPATH)/$(MAKEDSCRIPT)
 
 # .PHONY targets
 # some targets should not compile the code, e.g. documentation
@@ -533,9 +533,9 @@ PERLPATH := $(if $(PERLDIR),$(strip $(PERLDIR)),$(dir $(shell which perl)))
 
 # --- INTEL F2003 REALLOC-LHS ---------------------------------------
 ifneq (,$(findstring $(icompiler),$(intelcompilers)))
-    F90FLAGS1 = $(subst -assume realloc-lhs,,"$(F90FLAGS)")
+    F90FLAGS1 := $(subst -assume realloc-lhs,,"$(F90FLAGS)")
 else
-    F90FLAGS1 = $(F90FLAGS)
+    F90FLAGS1 := $(F90FLAGS)
 endif
 
 #
