@@ -93,7 +93,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_string_utils # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_cfortran # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -223,11 +223,15 @@ ifneq ($(and $(strip $(PROGNAME)),$(strip $(LIBNAME))),)
 else ifeq ($(or $(strip $(PROGNAME)),$(strip $(LIBNAME))),)
     $(error Error: PROGNAME or LIBNAME must be given.)
 else ifneq ($(strip $(PROGNAME)),)
-    override PROGNAME := $(PROGPATH)/$(strip $(PROGNAME))
-    LIBNAME  :=
+    ifeq ($(findstring //, /$(PROGNAME)),)
+        override PROGNAME := $(PROGPATH)/$(strip $(PROGNAME))
+        LIBNAME  :=
+    endif
 else
-    override LIBNAME  := $(PROGPATH)/$(strip $(LIBNAME))
-    PROGNAME :=
+    ifeq ($(findstring //, /$(LIBNAME)),)
+        override LIBNAME  := $(PROGPATH)/$(strip $(LIBNAME))
+        PROGNAME :=
+    endif
 endif
 
 # allow release=true and debug=true; debug comes from command line only and supercedes release
@@ -760,9 +764,9 @@ endif
 		openmp=$(openmp) EXTRA_LIBS="$$libextra" > /dev/null \
 	    && { $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ;} ; status=$$? ; \
 	    if [ $$status != 0 ] ; then echo "$$i failed!" ; fi ; \
-	    $(MAKE) -f $(THISMAKEFILE) -s system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
+	    $(MAKE) -f $(THISMAKEFILE) -s system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i clean ; \
 	    if [ $$i != $$j ] ; then \
-	        $(MAKE) -f $(THISMAKEFILE) -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a cleanclean ; \
+	        $(MAKE) -f $(THISMAKEFILE) -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a clean ; \
 	    fi ; \
 	done
 
