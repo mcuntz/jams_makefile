@@ -20,7 +20,8 @@
 #
 # TARGETS
 #     all (default), check (=test), clean, cleanclean (=distclean), cleancheck (=cleantest=checkclean=testclean),
-#     dependencies (=depend), html, pdf, latex, doxygen, info
+#     cleancleancheck (=cleancleantest=checkcleanclean=testcleanclean), dependencies (=depend),
+#     html, pdf, latex, doxygen, info
 #
 # OPTIONS
 #     All make options such as -f makefile. See 'man make'.
@@ -82,7 +83,7 @@
 #    along with the JAMS makefile project (cf. gpl.txt and lgpl.txt).
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2011-2016 Matthias Cuntz
+#    Copyright 2011-2017 Matthias Cuntz
 #
 # Written and maintained Matthias Cuntz, Nov. 2011 - mc (at) macu.de
 
@@ -253,7 +254,7 @@ ifneq ($(strip $(MAKECMDGOALS)),)
     ifneq ($(findstring /$(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/),)
         iphony := True
     endif
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/ /info/ /clean/ /cleanclean/ /distclean/ /cleancheck/ /checkclean/ /cleantest/ /testclean/))
+    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/ /info/ /clean/ /cleanclean/ /distclean/ /cleancheck/ /checkclean/ /cleantest/ /testclean/ /cleancleancheck/ /checkcleanclean/ /cleancleantest/ /testcleanclean/))
         iphonyall := True
     endif
 endif
@@ -587,7 +588,7 @@ INCLUDES += $(addprefix -I,$(OBJPATH))
 #.SUFFIXES: .f90 .F90 .f95 .F95 .f03 .F03 .f08 .F08 .f .F .for .FOR .ftn .FTN .c .C .d .o .a .so .dylib
 .SUFFIXES:
 
-.PHONY: clean cleanclean distclean cleantest testclean checkclean cleancheck html latex pdf doxygen check test info
+.PHONY: clean cleanclean distclean cleantest testclean checkclean cleancheck cleancleantest testcleanclean checkcleanclean cleancleancheck html latex pdf doxygen check test info
 
 all: $(PROGNAME) $(LIBNAME)
 
@@ -732,7 +733,7 @@ distclean: cleanclean
 
 cleancheck:
 	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
-	    $(MAKE) -f $(THISMAKEFILE) system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
+	    $(MAKE) -f $(THISMAKEFILE) system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i clean ; \
 	done
 
 cleantest: cleancheck
@@ -740,6 +741,17 @@ cleantest: cleancheck
 checkclean: cleancheck
 
 testclean: cleancheck
+
+cleancleancheck:
+	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
+	    $(MAKE) -f $(THISMAKEFILE) system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i cleanclean ; \
+	done
+
+cleancleantest: cleancleancheck
+
+checkcleanclean: cleancleancheck
+
+testcleanclean: cleancleancheck
 
 check:
 ifeq ($(PROGNAME),)
