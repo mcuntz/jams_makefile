@@ -1,0 +1,127 @@
+# -*- Makefile -*-
+
+#
+# Setup file for Gnu compiler 6.1 at Matthias' Macbook Pro at INRA
+#
+
+# The Makefile assumes the standard bin, include and lib directories for instaled libraries,
+# i.e. if SOMEDIR = /path/to/library, the make file will define the two dirs if not given:
+#   SOMEINC ?= SOMEDIR/include
+#   SOMELIB ?= SOMEDIR/lib
+# It also looks for SOMEFLAG and SOMEDEF for library linker and CPP flags, resp.
+
+# LICENSE
+#    This file is part of the JAMS makefile project.
+#
+#    The JAMS makefile project is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    The JAMS makefile project is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with the JAMS makefile project. If not, see <http://www.gnu.org/licenses/>.
+#
+#    Copyright 2012-2016 Matthias Cuntz
+
+# Paths
+GNUDIR := /usr/local
+GNULIB := $(GNUDIR)/lib
+GNUBIN := $(GNUDIR)/bin
+
+# Compiling
+F90 := $(GNUBIN)/gfortran
+FC  := $(F90)
+CC  := /usr/bin/cc  # clang, same as /usr/bin/gcc
+CPP := /usr/bin/cpp # could be 'gcc -E -cpp' on Linux but does not work on Mac
+ifeq ($(release),debug)
+    F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+else
+    F90FLAGS += -O3 -Wno-aggressive-loop-optimizations
+    FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
+    CFLAGS   += -O3
+endif
+F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
+FCFLAGS  += -ffixed-form -ffixed-line-length-132
+CFLAGS   +=
+MODFLAG  := -J# space significant
+DEFINES  += -DGFORTRAN -DgFortran
+# OpenMP
+F90OMPFLAG := -fopenmp
+FCOMPFLAG  := -fopenmp
+COMPFLAG   := -fopenmp
+LDOMPFLAG  := -fopenmp
+OMPDEFINE  := -DOPENMP
+
+# Linking
+LIBS  += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
+
+# IMSL
+IMSLDIR  :=
+IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
+IMSLDEF  := #-DIMSL
+
+# MKL
+INTEL  := /opt/intel/compilers_and_libraries_2017/mac
+MKLDIR := $(INTEL)/mkl
+ifeq ($(openmp),true)
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
+else
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
+endif
+MKLDEF := -DMKL
+MKL95DIR  := /opt/lib/mkl95_lapack/gfortran
+MKL95LIB  := $(MKL95DIR)/lib
+MKL95INC  := $(MKL95DIR)/include/intel64/lp64
+MKL95FLAG := -lmkl_lapack95_lp64
+MKL95DEF  := -DMKL95
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR  := /opt/local/
+    NCFLAG := -lnetcdf -lnetcdff
+    NCDEF  := -DNETCDF -DNETCDF3
+else
+    NCDIR    := /opt/local
+    NCFLAG   := -lnetcdf
+    NCDEF    := -DNETCDF
+    NCFDIR   := /usr/local
+    NCFFLAG  := -lnetcdff
+    HDF5LIB  := /opt/local/lib
+    HDF5FLAG := -lhdf5_hl -lhdf5
+    SZLIB    :=
+    SZFLAG   := #-lsz
+    CURLLIB  := /opt/local/lib
+    CURLFLAG := -lcurl
+    ZFLAG    := -lz
+endif
+
+# PROJ
+PROJ4DIR  := /usr/local/
+PROJ4FLAG := -lproj
+FPROJDIR  :=
+FPROJLIB  :=
+FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
+FPROJDEF  := #-DFPROJ
+
+# LAPACK
+LAPACKDIR  :=
+LAPACKFLAG := -framework Accelerate
+LAPACKDEF  := -DLAPACK
+
+# MPI
+MPIDIR  := /usr/local/openmpi-2.0.1-gfortran
+MPIDEF  := -DMPI
+
+# Documentation
+DOXYGENDIR := /Applications/Doxygen.app/Contents/Resources
+DOTDIR     := /usr/local/bin
+TEXDIR     := /Library/TeX/texbin
+PERLDIR    := /usr/bin
