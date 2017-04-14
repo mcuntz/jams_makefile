@@ -713,7 +713,7 @@ ifneq ($(SRCPATH),)
 endif
 	rm -f *make_check_test_file
 
-cleanclean: clean
+cleanclean:
 	for irr in release debug ; do \
 	    for icc in $(compilers) ; do \
 	        $(MAKE) -f $(THISMAKEFILE) system=$(system) release=$$irr compiler=$$icc \
@@ -722,6 +722,8 @@ cleanclean: clean
 	        clean ; \
 	    done ; \
 	done
+	rm -rf $(addsuffix /.*.r*, $(SRCPATH))
+	rm -rf $(addsuffix /.*.d*, $(SRCPATH))
 	rm -rf $(addsuffix /html, $(SRCPATH))
 	@if [ -f "$(DOXCONFIG)" ] ; then rm -rf $(PROGPATH)/latex ; fi
 	@if [ -f "$(DOXCONFIG)" ] ; then rm -rf $(PROGPATH)/html ; fi
