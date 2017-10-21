@@ -595,7 +595,7 @@ all: $(PROGNAME) $(LIBNAME)
 # Link program
 $(PROGNAME): $(OBJS) $(FOBJS) $(COBJS)
 	@echo "Linking program"
-	$(LD) $(MPI_LDFLAGS) $(LDFLAGS) -o $(PROGNAME) $(OBJS) $(FOBJS) $(COBJS) $(LIBS) $(LOBJS)
+	$(LD) $(LDFLAGS) -o $(PROGNAME) $(OBJS) $(FOBJS) $(COBJS) $(LIBS) $(LOBJS) $(MPI_LDFLAGS)
 
 # Link library
 $(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
