@@ -92,33 +92,34 @@ ifeq ($(netcdf),netcdf3)
     NCFLAG := -lnetcdf -lnetcdff
     NCDEF  := -DNETCDF -DNETCDF3
 else
-    NCDIR    := /projet/nancy/save/mcuntz/local
+    NCINC    := /usr/include
+    NCLIB    := /usr/lib64
     NCFLAG   := -lnetcdf
     NCDEF    := -DNETCDF
-    NCFDIR   := /projet/nancy/save/mcuntz/local/netcdf-fortran-4.4.4-gfortran
+    NCFDIR   := /projet/nancy/save/mcuntz/local/netcdf-fortran-4.4.3-gfortran
     NCFFLAG  := -lnetcdff
-    HDF5LIB  := /projet/nancy/save/mcuntz/local
+    HDF5LIB  := /usr/lib64
     HDF5FLAG := -lhdf5_hl -lhdf5
-    SZLIB    := /projet/nancy/save/mcuntz/local
-    SZFLAG   := -lsz
+    SZLIB    :=
+    SZFLAG   := #-lsz
     ZLIB     := /lib64
     ZFLAG    := -lz
 endif
 
 # PROJ
-PROJ4DIR  := /projet/nancy/save/mcuntz/local
+PROJ4LIB  := /usr/lib64
 PROJ4FLAG := -lproj
 FPROJDIR  :=
 FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
 FPROJDEF  := #-DFPROJ
 
 # LAPACK
-LAPACKDIR  := /usr
+LAPACKLIB  := /usr/lib64
 LAPACKFLAG := -lblas -llapack
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR := /projet/nancy/save/mcuntz/local/openmpi-2.0.3-gfortran
+MPIDIR := /usr/lib64/openmpi
 MPIDEF := -DMPI
 
 # Documentation
