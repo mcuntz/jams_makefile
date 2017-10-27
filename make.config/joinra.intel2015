@@ -51,7 +51,7 @@ else
 endif
 # -xHost displays on this Mac - ifort: command line remark #10382: option '-xHOST' setting '-xCORE-AVX2'
 # disable with -diag-disable=10382  ;   another remark (e.g. #9823) can be disabled with -diag-disable=10382,9823
-F90FLAGS += -fpp -nofixed -assume byterecl -fp-model precise -m64 -ip -xHost -diag-disable=10382
+F90FLAGS += -fpp -nofixed -assume byterecl -fp-model precise -m64 -ip -xHost -diag-disable=10382 -no-save-temps
 FCFLAGS  += -assume byterecl -cpp -fp-model precise -m64 -fixed -ip -xHost -diag-disable=10382
 CFLAGS   += -m64 -std=c99
 MODFLAG  := -module # space significant
@@ -94,20 +94,20 @@ MKL95DEF  := # -DMKL95
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR  := /opt/local/
+    NCDIR  := /opt/local2/netcdf-3.6.3-ifort/
     NCFLAG := -lnetcdf -lnetcdff
     NCDEF  := -DNETCDF -DNETCDF3
 else
-    NCDIR    := /opt/local
+    NCDIR    := /opt/local2/
     NCFLAG   := -lnetcdf
     NCDEF    := -DNETCDF
-    NCFDIR   := /opt/local/
+    NCFDIR   := /opt/local2/netcdf-fortran-4.4.4-ifort/
     NCFFLAG  := -lnetcdff
-    HDF5LIB  := /opt/local/lib
+    HDF5LIB  := /opt/local2/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
-    SZLIB    :=
-    SZFLAG   := #-lsz
-    CURLLIB  := /opt/local/lib
+    SZLIB    := /opt/local2/lib
+    SZFLAG   := -lsz
+    CURLLIB  := /usr/lib
     CURLFLAG := -lcurl
     ZFLAG    := -lz
 endif

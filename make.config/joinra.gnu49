@@ -85,26 +85,26 @@ MKL95DEF  := -DMKL95
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR  := /opt/local/
+    NCDIR  := /opt/local2/netcdf-3.6.3-gfortran/
     NCFLAG := -lnetcdf -lnetcdff
     NCDEF  := -DNETCDF -DNETCDF3
 else
-    NCDIR    := /opt/local
+    NCDIR    := /opt/local2/
     NCFLAG   := -lnetcdf
     NCDEF    := -DNETCDF
-    NCFDIR   := /usr/local
+    NCFDIR   := /usr/local2/netcdf-fortran-4.4.4-gfortran/
     NCFFLAG  := -lnetcdff
-    HDF5LIB  := /opt/local/lib
+    HDF5LIB  := /opt/local2/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
-    SZLIB    :=
-    SZFLAG   := #-lsz
-    CURLLIB  := /opt/local/lib
+    SZLIB    := /opt/local2/lib
+    SZFLAG   := -lsz
+    CURLLIB  := /usr/lib
     CURLFLAG := -lcurl
     ZFLAG    := -lz
 endif
 
 # PROJ
-PROJ4DIR  := /usr/local/
+PROJ4DIR  := /usr/local2/
 PROJ4FLAG := -lproj
 FPROJDIR  :=
 FPROJLIB  :=
@@ -117,7 +117,7 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR  := /usr/local/openmpi-2.0.1-gfortran
+MPIDIR  := /usr/local2/openmpi-2.0.1-gfortran
 MPIDEF  := -DMPI
 
 # Documentation
