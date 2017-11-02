@@ -80,7 +80,7 @@ MKL95DIR  :=
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /opt/local/netcdf-3.6.3-gfortran
-    NCFLAG := -lnetcdf -lnetcdff
+    NCFLAG := -lnetcdff -lnetcdf
     NCDEF  := -DNETCDF -DNETCDF3
 else
     NCDIR    := /opt/local

@@ -89,7 +89,7 @@ MKL95DEF  := #-DMKL95
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /home/cuntz/local/netcdf-3.6.3-gcc_4.8.1_CentOS6
-    NCFLAG := -lnetcdf -lnetcdff
+    NCFLAG := -lnetcdff -lnetcdf
     NCDEF  := -DNETCDF -DNETCDF3
 else
     NCDIR    := /usr/local/netcdf/4.3.2_gcc_4.8.1_CentOS6

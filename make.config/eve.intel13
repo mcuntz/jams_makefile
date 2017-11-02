@@ -105,7 +105,7 @@ MKL95DEF  := -DMKL95
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /usr/local/netcdf/3.6.3_intel_12.0.4
-    NCFLAG := -lnetcdf -lnetcdff
+    NCFLAG := -lnetcdff -lnetcdf
     NCDEF  := -DNETCDF -DNETCDF3
 else
     NCDIR    := /usr/local/netcdf/4.3.2-2_intel_13.1.0_CentOS6

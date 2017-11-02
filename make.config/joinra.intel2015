@@ -95,7 +95,7 @@ MKL95DEF  := # -DMKL95
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /opt/local2/netcdf-3.6.3-ifort/
-    NCFLAG := -lnetcdf -lnetcdff
+    NCFLAG := -lnetcdff -lnetcdf
     NCDEF  := -DNETCDF -DNETCDF3
 else
     NCDIR    := /opt/local2/

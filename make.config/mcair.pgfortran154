@@ -109,7 +109,7 @@ MKL95DEF  := #-DMKL95
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /usr/local/netcdf-3.6.3-pgfortran
-    NCFLAG := -lnetcdf -lnetcdff
+    NCFLAG := -lnetcdff -lnetcdf
     NCDEF  := -DNETCDF -DNETCDF3
 else
     NCDIR    := /usr/local

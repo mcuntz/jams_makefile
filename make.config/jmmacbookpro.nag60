@@ -88,7 +88,7 @@ MKL95DIR :=
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /usr/local/netcdf-3.6.3-nagfor
-    NCFLAG := -lnetcdf -lnetcdff
+    NCFLAG := -lnetcdff -lnetcdf
     NCDEF  := -DNETCDF -DNETCDF3
 else
     NCDIR    := /usr/local
