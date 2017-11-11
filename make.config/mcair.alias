@@ -2,8 +2,8 @@
 ifneq (,$(findstring $(compiler),pgi pgi15 pgi154 pgfortran pgfortran15))
     icompiler := pgfortran154
 endif
-ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran53 gcc53))
-    icompiler := gnu53
+ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran72 gcc72))
+    icompiler := gnu72
 endif
 ifneq (,$(findstring $(compiler),nag nagfor nagfor61))
     icompiler := nag61
