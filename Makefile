@@ -88,7 +88,6 @@
 # Written and maintained Matthias Cuntz, Nov. 2011 - mc (at) macu.de
 
 SHELL = /bin/bash
-
 #
 # --- SWITCHES -------------------------------------------------------
 #
@@ -500,7 +499,7 @@ DEFINES  += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=DEF)),$($(dir:DIR=DEF))))
 #         endif
 #     endif
 #     ifeq ($(openmp),true)
-# 	ifeq (,$(findstring $(icompiler),$(intelcompilers)))
+#         ifeq (,$(findstring $(icompiler),$(intelcompilers)))
 #             iLIBS += -L$(INTELLIB) -liomp5
 #             RPATH += -Wl,-rpath,$(INTELLIB)
 #         endif
@@ -772,28 +771,47 @@ ifeq ($(PROGNAME),)
 endif
 	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
 	    rm -f "$(PROGNAME)" ; \
-	    j=$${i/minpack/maxpack} ; \
+	    j=$$(echo $${i} | grep -E '(minpack|netcdf3|qhull)$$') ; \
+	    inetcdf=$(netcdf) ; \
 	    libextra= ; \
-	    if [ $$i != $$j ] ; then \
+	    incextra= ; \
+	    defextra= ; \
+	    if [ "$${j}z" != "z" ] ; then \
+	        ldir=$${i##*_} ; \
+	        lname="lib$${ldir}.a" ; \
+	        libextra="-L. -l$${ldir}" ; \
+	        case $${i} in \
+	            *minpack) true ;; \
+	            *netcdf3) inetcdf= ; \
+	                      incextra="-I$${i}/../../netcdf3/.$(strip $(icompiler)).$(strip $(irelease))" ; \
+	                      defextra='-DNETCDF3' ;; \
+	            *qhull)   true ;; \
+	        esac ; \
 	        $(MAKE) -f $(THISMAKEFILE) -s \
-	            MAKEDPATH=$(MAKEDPATH) SRCPATH="$$i"/../../minpack PROGPATH=$(PROGPATH) \
-	    	    CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=libminpack.a system=$(system) \
-	    	    release=$(irelease) netcdf=$(netcdf) static=$(static) proj=$(proj) \
-	    	    imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
-	    	    openmp=$(openmp) > /dev/null ; \
-                libextra="-L. -lminpack" ; \
+	            MAKEDPATH=$(MAKEDPATH) SRCPATH="$${i}"/../../$${ldir} PROGPATH=$(PROGPATH) \
+	            CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=$${lname} \
+	            system=$(system) release=$(irelease) compiler=$(compiler) \
+	            netcdf=$${inetcdf} static=$(static) proj=$(proj) imsl=$(imsl) mkl=$(mkl) \
+	            lapack=$(lapack) openmp=$(openmp) > /dev/null ; \
 	    fi ; \
 	    $(MAKE) -f $(THISMAKEFILE) -s \
-		MAKEDPATH=$(MAKEDPATH) SRCPATH=$$i PROGPATH=$(PROGPATH) \
-		CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) system=$(system) \
-		release=$(irelease) netcdf=$(netcdf) static=$(static) proj=$(proj) \
-		imsl=$(imsl) mkl=$(mkl) lapack=$(lapack) compiler=$(compiler) \
-		openmp=$(openmp) EXTRA_LIBS="$$libextra" > /dev/null \
+	        MAKEDPATH=$(MAKEDPATH) SRCPATH="$${i}" PROGPATH=$(PROGPATH) \
+	        CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) \
+	        system=$(system) release=$(irelease) compiler=$(compiler) \
+	        netcdf=$${inetcdf} static=$(static) proj=$(proj) imsl=$(imsl) mkl=$(mkl) \
+	        lapack=$(lapack) openmp=$(openmp) \
+	        EXTRA_LIBS="$${libextra}" EXTRA_DEFINES="$${defextra}" EXTRA_INCLUDES="$${incextra}" > /dev/null \
 	    && { $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ;} ; status=$$? ; \
-	    if [ $$status != 0 ] ; then echo "$$i failed!" ; fi ; \
-	    $(MAKE) -f $(THISMAKEFILE) -s system=$(system) release=$(irelease) compiler=$(compiler) SRCPATH=$$i clean ; \
-	    if [ $$i != $$j ] ; then \
-	        $(MAKE) -f $(THISMAKEFILE) -s SRCPATH="$$i"/../../minpack PROGNAME= LIBNAME=libminpack.a clean ; \
+	    if [ $${status} != 0 ] ; then echo "$${i} failed!" ; fi ; \
+	    $(MAKE) -f $(THISMAKEFILE) -s \
+	        MAKEDPATH=$(MAKEDPATH) SRCPATH="$${i}" PROGPATH=$(PROGPATH) \
+	        CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) \
+	        system=$(system) release=$(irelease) compiler=$(compiler) clean ; \
+	    if [ "$${j}z" != "z" ] ; then \
+	        $(MAKE) -f $(THISMAKEFILE) -s \
+	            MAKEDPATH=$(MAKEDPATH) SRCPATH="$${i}"/../../$${ldir} PROGPATH=$(PROGPATH) \
+	            CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=$${lname} \
+	            system=$(system) release=$(irelease) compiler=$(compiler) clean ; \
 	    fi ; \
 	done
 
