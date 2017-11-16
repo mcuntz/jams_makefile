@@ -16,7 +16,7 @@
 #     File suffixes can be given in $(F90SUFFIXES), $(F77SUFFIXES), and $(CSUFFIXES)
 #     Default Fortran 90 is: .f90, .F90, .f95, .F95, .f03, .F03, .f08, .F08
 #     Default Fortran 77 is: .f,   .F,   .for, .FOR, .f77, .F77, .ftn, .FTN
-#     Default C is:          .c,   .C
+#     Default C is:          .c,   .C,   .cc,  .CC
 #
 # TARGETS
 #     all (default), check (=test), clean, cleanclean (=distclean), cleancheck (=cleantest=checkclean=testclean),
@@ -198,8 +198,8 @@ EXCLUDE_FILES  :=
 F90SUFFIXES := .f90 .F90 .f95 .F95 .f03 .F03 .f08 .F08
 # Fortran 77 suffixes: .f .F .for .FOR .f77 .F77 .ftn .FTN
 F77SUFFIXES := .f .F .for .FOR .f77 .F77 .ftn .FTN
-# C suffixes: .c .C
-CSUFFIXES   := .c .C
+# C suffixes: .c .C .cc .CC
+CSUFFIXES   := .c .C .cc .CC
 # Library suffixes: .a .so .dylib
 LIBSUFFIXES := .a .so .dylib
 
@@ -294,6 +294,12 @@ endif
 #
 # --- SOURCE FILES ---------------------------------------------------
 #
+
+# System specific files
+ifeq (False,$(iphony))
+    SSRCS := $(foreach suff,$(system),$(wildcard $(addsuffix /*$(suff), $(SRCPATH))))
+endif
+SOBJS := $(foreach suff, $(system), $(patsubst %.$(suff), %, $(filter %$(suff), $(SSRCS))))
 
 # Available Fortran90 source files
 ifeq (False,$(iphony))
@@ -425,6 +431,10 @@ else
     else
         iLIBS += -Bdynamic
     endif
+endif
+
+ifneq (,$(SOBJS))
+    $(foreach ff,$(SOBJS),$(shell if [[ -f $(ff) ]] ; then isdiff=`diff $(ff) $(ff).$(system)` ; if [[ "$${isdiff}z" != "z" ]] ; then cp $(ff).$(system) $(ff) ; fi ; else cp $(ff).$(system) $(ff) ; fi))
 endif
 
 # --- LINKER ---------------------------------------------------
@@ -585,7 +595,7 @@ INCLUDES += $(addprefix -I,$(OBJPATH))
 # --- TARGETS ---------------------------------------------------
 #
 
-#.SUFFIXES: .f90 .F90 .f95 .F95 .f03 .F03 .f08 .F08 .f .F .for .FOR .ftn .FTN .c .C .d .o .a .so .dylib
+#.SUFFIXES: .f90 .F90 .f95 .F95 .f03 .F03 .f08 .F08 .f .F .for .FOR .ftn .FTN .c .C .cc .CC .d .o .a .so .dylib
 .SUFFIXES:
 
 .PHONY: clean cleanclean distclean cleantest testclean checkclean cleancheck cleancleantest testcleanclean checkcleanclean cleancleancheck html latex pdf doxygen check test info
@@ -676,6 +686,9 @@ $(COBJS):
 
 # Helper Targets
 clean:
+ifneq (,$(SOBJS))
+	for ff in $(SOBJS) ; do if [[ -f $${ff}.default ]] ; then cp $${ff}.default $${ff} ; fi ; done
+endif
 ifneq ($(strip $(OBJS)),)
 	rm -f $(OBJS)
 endif
