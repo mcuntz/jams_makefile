@@ -20,7 +20,7 @@ program standard
 
   implicit none
 
-  integer(i4) :: i,j 
+  integer(i4) :: i,j
   logical     :: isgood, allgood
   ! netCDF
   integer(i4), dimension(5)               :: dimlen
@@ -63,7 +63,7 @@ program standard
   allocate(t(dimlen(3)))
 
   call Get_NcVar(filename, varname, data)
-  
+
   Varname = 'lat'
   call Get_NcVar(filename, varname, lat)
   Varname = 'lon'
@@ -206,5 +206,14 @@ program standard
   else
      write(*,*) '-> standard failed!'
   endif
+
+  ! ! --------------------------------------------------------------------
+  ! ! Test
+
+  ! allocate(data7(nn))
+  ! forall(i=1:nn) data7(i) = real(i,sp)
+  ! data7(pack((/ (i, i=1, size(data7)) /), data7 > 5.0_sp)) = 0.0_sp
+  ! print*, data7
+  ! deallocate(data7)
 
 end program standard
