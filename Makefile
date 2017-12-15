@@ -88,6 +88,7 @@
 # Written and maintained Matthias Cuntz, Nov. 2011 - mc (at) macu.de
 
 SHELL = /bin/bash
+
 #
 # --- SWITCHES -------------------------------------------------------
 #
