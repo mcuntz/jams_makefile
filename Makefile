@@ -251,10 +251,10 @@ MAKEDPROG   := $(MAKEDPATH)/$(MAKEDSCRIPT)
 iphony    := False
 iphonyall := False
 ifneq ($(strip $(MAKECMDGOALS)),)
-    ifneq ($(findstring /$(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/),)
+    ifneq ($(filter $(strip $(MAKECMDGOALS)),check test html latex pdf doxygen),)
         iphony := True
     endif
-    ifneq (,$(findstring $(strip $(MAKECMDGOALS))/,/check/ /test/ /html/ /latex/ /pdf/ /doxygen/ /info/ /clean/ /cleanclean/ /distclean/ /cleancheck/ /checkclean/ /cleantest/ /testclean/ /cleancleancheck/ /checkcleanclean/ /cleancleantest/ /testcleanclean/))
+    ifneq (,$(filter $(strip $(MAKECMDGOALS)),check test html latex pdf doxygen info clean cleanclean distclean cleancheck checkclean cleantest testclean cleancleancheck checkcleanclean cleancleantest testcleanclean))
         iphonyall := True
     endif
 endif
@@ -264,7 +264,7 @@ endif
 #
 
 systems := $(shell ls -1 $(CONFIGPATH) | sed -e "/$(MAKEDSCRIPT)/d" -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)
-ifeq (,$(findstring $(system),$(systems)))
+ifeq (,$(filter $(system),$(systems)))
     $(error Error: system '$(system)' not found: known systems are $(systems))
 endif
 
@@ -287,7 +287,7 @@ compilers := $(shell ls -1 $(CONFIGPATH) | sed -e "/$(MAKEDSCRIPT)/d" -e '/f2htm
 gnucompilers := $(filter gnu%, $(compilers))
 nagcompilers := $(filter nag%, $(compilers))
 intelcompilers := $(filter intel%, $(compilers))
-ifeq (,$(findstring $(icompiler),$(compilers)))
+ifeq (,$(filter $(icompiler),$(compilers)))
     $(error Error: compiler '$(icompiler)' not found: configured compilers for system $(system) are $(compilers))
 endif
 
@@ -407,7 +407,7 @@ $(shell if [[ -f $(LOBJSFILE) ]]  ; then rm $(LOBJSFILE)  ; fi ; echo $(LOBJS)  
 # Mac OS X does not work with -rpath. Set DYLD_LIBRARY_PATH if needed.
 iOS := $(shell uname -s)
 istatic := $(static)
-ifneq (,$(findstring $(iOS),Darwin))
+ifneq (,$(filter $(iOS),Darwin))
     istatic := dynamic
 endif
 
@@ -426,7 +426,7 @@ iLIBS :=
 ifeq ($(istatic),static)
     iLIBS += -Bstatic -Wl,--start-group
 else
-    ifneq (,$(findstring $(iOS),Darwin))
+    ifneq (,$(filter $(iOS),Darwin))
         iLIBS += -Wl,-dynamic
     else
         iLIBS += -Bdynamic
@@ -447,14 +447,14 @@ endif
 
 # --- INCLUDES/LIBS/FLAGS/DEFINES/RPATH --------------------------
 SDIRS :=
-ifneq (,$(findstring $(mkl),mkl mkl95))
+ifneq (,$(filter $(mkl),mkl mkl95))
     # First mkl95 then mkl for .mod files other then intel
     ifeq ($(mkl),mkl95)
         SDIRS += MKL95DIR
     endif
     SDIRS += MKLDIR
 endif
-ifneq (,$(findstring $(netcdf),netcdf3 netcdf4))
+ifneq (,$(filter $(netcdf),netcdf3 netcdf4))
     SDIRS += NCDIR NCFDIR
     ifeq ($(netcdf),netcdf4)
         SDIRS += HDF5DIR SZDIR CURLDIR ZDIR
@@ -470,7 +470,7 @@ endif
 ifeq ($(mpi),true)
     SDIRS += MPIDIR
 endif
-ifneq (,$(findstring $(imsl),vendor imsl))
+ifneq (,$(filter $(imsl),vendor imsl))
     SDIRS += IMSLDIR
 endif
 # function (=) used below to set flag if given
@@ -489,8 +489,8 @@ DEFINES  += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=DEF)),$($(dir:DIR=DEF))))
 
 
 # # --- MKL ---------------------------------------------------
-# ifneq (,$(findstring $(mkl),mkl mkl95))
-#     ifneq (,$(findstring $(imsl),vendor imsl))
+# ifneq (,$(filter $(mkl),mkl mkl95))
+#     ifneq (,$(filter $(imsl),vendor imsl))
 #        iLIBS += -lmkl_intel_thread #-lpthread
 #     else
 #         ifeq ($(openmp),true)
@@ -500,7 +500,7 @@ DEFINES  += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=DEF)),$($(dir:DIR=DEF))))
 #         endif
 #     endif
 #     ifeq ($(openmp),true)
-#         ifeq (,$(findstring $(icompiler),$(intelcompilers)))
+#         ifeq (,$(filter $(icompiler),$(intelcompilers)))
 #             iLIBS += -L$(INTELLIB) -liomp5
 #             RPATH += -Wl,-rpath,$(INTELLIB)
 #         endif
@@ -535,7 +535,7 @@ ifeq ($(openmp),true)
     CFLAGS   += $(COMPFLAG)
     LDFLAGS  += $(LDOMPFLAG)
     DEFINES  += $(OMPDEFINE)
-else ifneq (,$(findstring $(imsl),vendor imsl))
+else ifneq (,$(filter $(imsl),vendor imsl))
     # IMSL needs openmp during linking in any case
     LDFLAGS  += $(LDOMPFLAG)
 endif
@@ -547,7 +547,7 @@ TEXPATH  := $(if $(TEXDIR),$(strip $(TEXDIR)),$(dir $(shell which latex)))
 PERLPATH := $(if $(PERLDIR),$(strip $(PERLDIR)),$(dir $(shell which perl)))
 
 # --- INTEL F2003 REALLOC-LHS ---------------------------------------
-ifneq (,$(findstring $(icompiler),$(intelcompilers)))
+ifneq (,$(filter $(icompiler),$(intelcompilers)))
     F90FLAGS1 := $(subst -assume realloc-lhs,,"$(F90FLAGS)")
 else
     F90FLAGS1 := $(F90FLAGS)
@@ -568,7 +568,7 @@ endif
 
 # The NAG compiler links via gcc so that one has to give -Wl twice and double commas for the option
 # i.e. instead of  -Wl,rpath,/path   you need   -Wl,-Wl,,rpath,,/path
-ifneq (,$(findstring $(icompiler),$(nagcompilers)))
+ifneq (,$(filter $(icompiler),$(nagcompilers)))
     comma  := ,
     iiLIBS := $(subst -Wl,-Wl$(comma)-Wl,$(subst $(comma),$(comma)$(comma),$(iLIBS)))
     iRPATH := $(subst -Wl,-Wl$(comma)-Wl,$(subst $(comma),$(comma)$(comma),$(RPATH)))
@@ -578,7 +578,7 @@ else
 endif
 LIBS += $(iiLIBS)
 # Only Linux and Solaris can use -rpath in executable
-ifeq (,$(findstring $(iOS),Darwin))
+ifeq (,$(filter $(iOS),Darwin))
     LIBS += $(iRPATH)
 endif
 
@@ -639,7 +639,7 @@ $(CDOBJS):
 
 # Compile
 $(OBJS):
-ifneq (,$(findstring $(icompiler),gnu41 gnu42))
+ifneq (,$(filter $(icompiler),gnu41 gnu42))
 	@nobj=$$(grep -n -w -F $@ $(OBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(SRCSFILE)) ; \
 	ssrc=$$(basename $$(sed -n $${nobj}p $(SRCSFILE))) ; \
@@ -662,7 +662,7 @@ else
 endif
 
 $(FOBJS):
-ifneq (,$(findstring $(icompiler),gnu41 gnu42))
+ifneq (,$(filter $(icompiler),gnu41 gnu42))
 	@nobj=$$(grep -n -w -F $@ $(FOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(FSRCSFILE)) ; \
 	tmp=$@.$$(echo $${src} | sed 's/.*\.//') ; \
@@ -907,9 +907,9 @@ info:
 ifneq ($(strip $(ALIASINC)),)
 	@echo ""
 	@echo "Compiler aliases for $(system)"
-	@sed -n '/ifneq (,$$(findstring $$(compiler)/,/endif/p' $(ALIASINC) | \
+	@sed -n '/ifneq (,$$(filter $$(compiler)/,/endif/p' $(ALIASINC) | \
 	 sed -e '/endif/d' -e 's/icompiler ://' | \
-	 sed -e 's/ifneq (,$$(findstring $$(compiler),//' -e 's/))//' | \
+	 sed -e 's/ifneq (,$$(filter $$(compiler),//' -e 's/))//' | \
 	 paste - - | tr -d '\t' | tr -s ' '
 endif
 	@echo ""
