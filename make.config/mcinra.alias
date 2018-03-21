@@ -5,8 +5,8 @@ endif
 ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran61 gcc61))
     icompiler := gnu61
 endif
-ifneq (,$(findstring $(compiler),nag nagfor nagfor61))
-    icompiler := nag61
+ifneq (,$(findstring $(compiler),nag nagfor nagfor62))
+    icompiler := nag62
 endif
 ifneq (,$(findstring $(compiler),intel ifort intel17 ifort17 ifort2017))
     icompiler := intel2017
