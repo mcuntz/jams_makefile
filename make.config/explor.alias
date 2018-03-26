@@ -1,0 +1,7 @@
+# Set aliases so that one can, for example, say ifort to invoke standard intel2018 on explor
+ifneq (,$(findstring $(compiler),gnu gfortran gcc))
+    icompiler := gnu63
+endif
+ifneq (,$(findstring $(compiler),intel intel2018 ifort ifort18 ifort2018))
+    icompiler := intel2018.0
+endif
