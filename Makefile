@@ -542,9 +542,9 @@ endif
 
 # --- DOXYGEN ---------------------------------------------------
 DOXYGEN  := $(if $(DOXYGENDIR),$(strip $(DOXYGENDIR))/doxygen,$(shell which doxygen 2>/dev/null))
-DOTPATH  := $(if $(DOTDIR),$(strip $(DOTDIR)),$(dir $(shell which dot)))
-TEXPATH  := $(if $(TEXDIR),$(strip $(TEXDIR)),$(dir $(shell which latex)))
-PERLPATH := $(if $(PERLDIR),$(strip $(PERLDIR)),$(dir $(shell which perl)))
+DOTPATH  := $(if $(DOTDIR),$(strip $(DOTDIR)),$(dir $(shell which dot 2>/dev/null)))
+TEXPATH  := $(if $(TEXDIR),$(strip $(TEXDIR)),$(dir $(shell which latex 2>/dev/null)))
+PERLPATH := $(if $(PERLDIR),$(strip $(PERLDIR)),$(dir $(shell which perl 2>/dev/null)))
 
 # --- INTEL F2003 REALLOC-LHS ---------------------------------------
 ifneq (,$(filter $(icompiler),$(intelcompilers)))
