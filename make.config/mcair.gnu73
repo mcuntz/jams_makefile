@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for GNU gfortran 7.2 on Matthias' MacBook Air
+# Setup file for GNU gfortran 7.3 on Matthias' MacBook Air
 #
 
 # The Makefile assumes the standard bin, include and lib directories for instaled libraries,
@@ -26,7 +26,7 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with the JAMS makefile project. If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2012-2016 Matthias Cuntz
+#    Copyright 2012-2018 Matthias Cuntz
 
 # Paths
 GNUDIR := /usr/local
@@ -91,7 +91,7 @@ else
     NCDEF    := -DNETCDF
     NCFDIR   := /usr/local/netcdf-fortran-4.4.4-gfortran
     NCFFLAG  := -lnetcdff
-    HDF5LIB  := /usr/local/opt/hdf5@1.8/lib
+    HDF5LIB  := /usr/local/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
     SZLIB    := /usr/local/lib
     SZFLAG   := -lsz
