@@ -455,7 +455,7 @@ ifneq (,$(filter $(mkl),mkl mkl95))
     SDIRS += MKLDIR
 endif
 ifneq (,$(filter $(netcdf),netcdf3 netcdf4))
-    SDIRS += NCDIR NCFDIR
+    SDIRS += NCFDIR NCDIR
     ifeq ($(netcdf),netcdf4)
         SDIRS += HDF5DIR SZDIR CURLDIR ZDIR
     endif
