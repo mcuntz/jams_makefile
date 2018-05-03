@@ -60,7 +60,7 @@ LDOMPFLAG  := -fopenmp
 OMPDEFINE  := -DOPENMP
 
 # Linking
-LIBS  += -L$(GNULIB)
+# LIBS  += -L$(GNULIB)
 RPATH += -Wl,-rpath,$(GNULIB)
 
 # IMSL
