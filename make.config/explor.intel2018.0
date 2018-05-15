@@ -29,11 +29,8 @@
 #    Copyright 2012-2016 Matthias Cuntz
 
 # Paths
-# INTEL    := /opt/intel/composer_xe_2013.1.117
-# INTELDIR := /usr/local/intel/13.0.1
-INTEL    := /opt/intel/composer_xe_2013.2.146
-INTELDIR := /usr/local/intel/13.1.0
-INTELLIB := $(INTELDIR)
+INTEL    := /opt/soft/all/intel/compilers_and_libraries_2018.0.128/linux/
+INTELLIB := $(INTEL)/compiler/lib/intel64
 INTELBIN := $(INTEL)/bin/intel64
 
 # Compiling
@@ -50,13 +47,13 @@ ifeq ($(release),debug)
 else
     # -fast (=-ipo -O3 -static) Multifile interprocedure optimization
     # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
-    F90FLAGS += -O3 -vec-report0 -override-limits
-    FCFLAGS  += -O3 -vec-report0 -override-limits
+    F90FLAGS += -O3 -qopt-report=0 -qopt-report-phase=vec -qoverride-limits
+    FCFLAGS  += -O3 -qopt-report=0 -qopt-report-phase=vec -qoverride-limits
     CFLAGS   += -O3
 endif
-F90FLAGS += -nofixed -assume byterecl -cpp -fp-model source -m64 -assume realloc-lhs # precise -> source: suppress warning, computation identical
+F90FLAGS += -nofixed -assume byterecl -fpp -fp-model source -m64 -assume realloc-lhs # precise -> source: suppress warning, computation identical
 MODFLAG  := -module # space significant
-FCFLAGS  += -assume byterecl -cpp -fp-model source -m64 -fixed
+FCFLAGS  += -assume byterecl -fpp -fp-model source -m64 -fixed
 CFLAGS   += -m64 -std=c99
 DEFINES  += -DINTEL -DINTEL_COMPILER
 # OpenMP
@@ -76,7 +73,7 @@ ifneq ($(istatic),static)
      LIBS += -lintlc
 endif
 RPATH += -Wl,-rpath,$(INTELLIB)
-iLDPATH = $(GNUDIR)/lib/gcc/x86_64-unknown-linux-gnu/4.8.1:/usr/local/cloog/0.18.0-2/lib:/usr/local/isl/0.11.1-2/lib:/usr/local/mpc/1.0.1-3/lib:/usr/local/mpfr/3.1.2-2/lib:/usr/local/gmp/5.1.2-1/lib
+iLDPATH = $(INTEL)/compiler/lib/intel64:$(INTEL)/compiler/lib/intel64_lin:$(INTEL)/ipp/lib/intel64:$(INTEL)/compiler/lib/intel64_lin:$(INTEL)/tbb/lib/intel64/gcc4.7:/opt/soft/all/intel/debugger_2017/iga/lib:/opt/soft/all/intel/debugger_2017/libipt/intel64/lib:$(INTEL)/daal/lib/intel64_lin:$(INTEL)/daal/../tbb/lib/intel64_lin/gcc4.4
 ifneq ($(LDPATH),)
     LDPATH += :$(iLDPATH)
 else
@@ -84,12 +81,12 @@ else
 endif
 
 # IMSL
-IMSLDIR := /usr/local/imsl/imsl/fnl700/rdhin111e64
+IMSLDIR :=
 
 # MKL
 MKLDIR := $(INTEL)/mkl
-MKLINC := $(MKLDIR)/include/intel64/lp64
-MKLLIB := $(INTELDIR)/mkl/lib/intel64
+MKLINC := $(MKLDIR)/include
+MKLLIB := $(INTELDIR)/mkl/lib/intel64_lin
 ifeq ($(openmp),true)
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
 else
@@ -98,65 +95,53 @@ endif
 MKLDEF := -DMKL
 MKL95DIR  := $(MKLDIR)
 MKL95INC  := $(MKL95DIR)/include/intel64/lp64
-MKL95LIB  := $(MKL95DIR)/lib/intel64
+MKL95LIB  := $(MKL95DIR)/lib/intel64_lin
 MKL95FLAG := -lmkl_blas95_lp64 -lmkl_lapack95_lp64
 MKL95DEF  := -DMKL95
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR  := /usr/local/netcdf/3.6.3_intel_12.0.4
+    NCDIR  := /home/oqx29/zzy20/local/netcdf-3.6.3-ifort2018.0
     NCFLAG := -lnetcdff -lnetcdf
     NCDEF  := -DNETCDF -DNETCDF3
 else
-    NCDIR    := /usr/local/netcdf/4.3.2-2_intel_13.1.0_CentOS6
+    NCDIR    := /home/oqx29/zzy20/local
     NCFLAG   := -lnetcdf
     NCDEF    := -DNETCDF
-    NCFDIR   := /usr/local/netcdf-fortran/4.2_intel_13.1.0_CentOS6
+    NCFDIR   := /home/oqx29/zzy20/local/netcdf-fortran-4.4.4-ifort2018.0
     NCFFLAG  := -lnetcdff
-    HDF5LIB  := /usr/local/hdf5/1.8.12-1_intel_13.1.0_CentOS6/lib
+    HDF5LIB  := /home/oqx29/zzy20/local
     HDF5FLAG := -lhdf5_hl -lhdf5
-    SZLIB    := /usr/local/szip/2.1_intel_13.1.0_CentOS6/lib
+    SZLIB    := /home/oqx29/zzy20/local
     SZFLAG   := -lsz
-    ZLIB     := /usr/local/zlib/1.2.8-3_icc_13.1.0_CentOS6/lib
+    ZLIB     := /usr/lib64
     ZFLAG    := -lz
 endif
 
 # PROJ
-PROJ4DIR  := /usr/local/proj/4.7.0
-PROJ4FLAG := -lproj
-FPROJDIR  := /usr/local/fproj/4.7.0_intel11.1.075
-FPROJFLAG := -lfproj4 $(FPROJLIB)/proj4.o
-FPROJDEF  := -DFPROJ
+PROJ4DIR  := #/usr/local/proj/4.7.0
+PROJ4FLAG := #-lproj
+FPROJDIR  :=
+FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
+FPROJDEF  := #-DFPROJ
 
 # LAPACK
-LAPACKDIR  := /usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
-LAPACKFLAG := -lblas -llapack
-LAPACKDEF  := -DLAPACK
+LAPACKDIR  := #/usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
+LAPACKFLAG := #-lblas -llapack
+LAPACKDEF  := #-DLAPACK
 
 # MPI
-MPIDIR := /usr/local/openmpi/intel/1.8.4-2
+MPIDIR := /opt/soft/hf/openmpi-3.0.0-intel18
 MPIDEF := -DMPI
 
 # Documentation
-DOXYGENDIR := /usr/local/doxygen/1.8.7-1_gcc_4.8.1_CentOS6/bin
-DOTDIR     := /usr/bin
-TEXDIR     := /usr/local/texlive/2011/bin/x86_64-linux
+DOXYGENDIR :=
+DOTDIR     :=
+TEXDIR     :=
 PERLDIR    := /usr/bin
-iiLDPATH := /usr/local/flex/2.5.39-1_gcc_4.8.1_CentOS6/lib:/usr/local/bison/3.0.2-1_gcc_4.8.1_CentOS6/lib
+iiLDPATH :=
 ifneq ($(LDPATH),)
     LDPATH += :$(iiLDPATH)
 else
     LDPATH := $(iiLDPATH)
-endif
-
-# Lapack on Eve needs libgfortran
-GFORTRANDIR := /usr/local/gcc/4.8.1-3_CentOS6/
-GFORTRANLIB := $(GFORTRANDIR)/lib64
-ifeq ($(lapack),true)
-    ifneq (exists, $(shell if [ -d "$(GFORTRANDIR)" ] ; then echo 'exists' ; fi))
-        $(error Error: GFORTRAN path '$(GFORTRANDIR)' not found.)
-    endif
-    GFORTRANLIB ?= $(GFORTRANDIR)/lib
-    iLIBS       += -L$(GFORTRANLIB) -lgfortran
-    RPATH       += -Wl,-rpath,$(GFORTRANLIB)
 endif
