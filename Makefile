@@ -94,7 +94,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_spline # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_netcdf # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -716,8 +716,8 @@ endif
 	rm -f $(addsuffix /*.mod, $(OBJPATH))
 	rm -f $(addsuffix /*.pre, $(SRCPATH))
 ifneq ($(PROGNAME),)
-	rm -f "$(PROGNAME)"
-	rm -f "$(PROGNAME)".dSYM
+	rm -f  "$(PROGNAME)"
+	rm -rf "$(PROGNAME)".dSYM
 endif
 ifneq ($(LIBNAME),)
 	rm -f "$(LIBNAME)"
