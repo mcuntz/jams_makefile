@@ -390,18 +390,20 @@ COBJSFILE := $(OBJPATH1)/make.d.cobjs
 CDOBJSFILE := $(OBJPATH1)/make.d.cdobjs
 LSRCSFILE := $(OBJPATH1)/make.d.lsrcs
 LOBJSFILE := $(OBJPATH1)/make.d.lobjs
-$(shell if [[ ! -d $(OBJPATH1) ]] ; then mkdir -p $(OBJPATH1) ; fi)
-$(shell if [[ -f $(SRCSFILE) ]]   ; then rm $(SRCSFILE)   ; fi ; echo $(SRCS)   | tr ' ' '\n' >> $(SRCSFILE))
-$(shell if [[ -f $(OBJSFILE) ]]   ; then rm $(OBJSFILE)   ; fi ; echo $(OBJS)   | tr ' ' '\n' >> $(OBJSFILE))
-$(shell if [[ -f $(DOBJSFILE) ]]  ; then rm $(DOBJSFILE)  ; fi ; echo $(DOBJS)  | tr ' ' '\n' >> $(DOBJSFILE))
-$(shell if [[ -f $(FSRCSFILE) ]]  ; then rm $(FSRCSFILE)  ; fi ; echo $(FSRCS)  | tr ' ' '\n' >> $(FSRCSFILE))
-$(shell if [[ -f $(FOBJSFILE) ]]  ; then rm $(FOBJSFILE)  ; fi ; echo $(FOBJS)  | tr ' ' '\n' >> $(FOBJSFILE))
-$(shell if [[ -f $(FDOBJSFILE) ]] ; then rm $(FDOBJSFILE) ; fi ; echo $(FDOBJS) | tr ' ' '\n' >> $(FDOBJSFILE))
-$(shell if [[ -f $(CSRCSFILE) ]]  ; then rm $(CSRCSFILE)  ; fi ; echo $(CSRCS)  | tr ' ' '\n' >> $(CSRCSFILE))
-$(shell if [[ -f $(COBJSFILE) ]]  ; then rm $(COBJSFILE)  ; fi ; echo $(COBJS)  | tr ' ' '\n' >> $(COBJSFILE))
-$(shell if [[ -f $(CDOBJSFILE) ]] ; then rm $(CDOBJSFILE) ; fi ; echo $(CDOBJS) | tr ' ' '\n' >> $(CDOBJSFILE))
-$(shell if [[ -f $(LSRCSFILE) ]]  ; then rm $(LSRCSFILE)  ; fi ; echo $(LSRCS)  | tr ' ' '\n' >> $(LSRCSFILE))
-$(shell if [[ -f $(LOBJSFILE) ]]  ; then rm $(LOBJSFILE)  ; fi ; echo $(LOBJS)  | tr ' ' '\n' >> $(LOBJSFILE))
+ifeq (False,$(iphonyall))
+    $(shell if [[ ! -d $(OBJPATH1) ]] ; then mkdir -p $(OBJPATH1) ; fi)
+    $(shell if [[ -f $(SRCSFILE) ]]   ; then rm $(SRCSFILE)   ; fi ; echo $(SRCS)   | tr ' ' '\n' >> $(SRCSFILE))
+    $(shell if [[ -f $(OBJSFILE) ]]   ; then rm $(OBJSFILE)   ; fi ; echo $(OBJS)   | tr ' ' '\n' >> $(OBJSFILE))
+    $(shell if [[ -f $(DOBJSFILE) ]]  ; then rm $(DOBJSFILE)  ; fi ; echo $(DOBJS)  | tr ' ' '\n' >> $(DOBJSFILE))
+    $(shell if [[ -f $(FSRCSFILE) ]]  ; then rm $(FSRCSFILE)  ; fi ; echo $(FSRCS)  | tr ' ' '\n' >> $(FSRCSFILE))
+    $(shell if [[ -f $(FOBJSFILE) ]]  ; then rm $(FOBJSFILE)  ; fi ; echo $(FOBJS)  | tr ' ' '\n' >> $(FOBJSFILE))
+    $(shell if [[ -f $(FDOBJSFILE) ]] ; then rm $(FDOBJSFILE) ; fi ; echo $(FDOBJS) | tr ' ' '\n' >> $(FDOBJSFILE))
+    $(shell if [[ -f $(CSRCSFILE) ]]  ; then rm $(CSRCSFILE)  ; fi ; echo $(CSRCS)  | tr ' ' '\n' >> $(CSRCSFILE))
+    $(shell if [[ -f $(COBJSFILE) ]]  ; then rm $(COBJSFILE)  ; fi ; echo $(COBJS)  | tr ' ' '\n' >> $(COBJSFILE))
+    $(shell if [[ -f $(CDOBJSFILE) ]] ; then rm $(CDOBJSFILE) ; fi ; echo $(CDOBJS) | tr ' ' '\n' >> $(CDOBJSFILE))
+    $(shell if [[ -f $(LSRCSFILE) ]]  ; then rm $(LSRCSFILE)  ; fi ; echo $(LSRCS)  | tr ' ' '\n' >> $(LSRCSFILE))
+    $(shell if [[ -f $(LOBJSFILE) ]]  ; then rm $(LOBJSFILE)  ; fi ; echo $(LOBJS)  | tr ' ' '\n' >> $(LOBJSFILE))
+endif
 
 # Mac OS X is special, there is (almost) no static linking.
 # Mac OS X does not work with -rpath. Set DYLD_LIBRARY_PATH if needed.
