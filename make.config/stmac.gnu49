@@ -36,7 +36,7 @@ GNUBIN := $(GNUDIR)/bin
 # Compiling
 F90 := $(GNUBIN)/gfortran
 FC  := $(F90)
-CC  := /usr/bin/gcc
+CC  := $(GNUBIN)/gcc
 CPP := /usr/bin/cpp
 # GNU Fortran version >= 4.4
 ifeq ($(release),debug)
@@ -71,7 +71,7 @@ else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
     NCDEF    := -DNETCDF
-    NCFDIR   := /usr/local/netcdf-fortran-4.4.1-gfortran
+    NCFDIR   := /usr/local/netcdf-fortran-4.4.4-gfortran
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
