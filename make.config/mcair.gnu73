@@ -37,25 +37,30 @@ GNUBIN := $(GNUDIR)/bin
 F90 := $(GNUBIN)/gfortran
 FC  := $(F90)
 CC  := /usr/bin/gcc
+CXX := /usr/bin/g++
 CPP := /usr/bin/cpp # could be   gcc -E -cpp   on Linux but does not work on Mac
 ifeq ($(release),debug)
     F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
     FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
     CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
+    CXXFLAGS += -pedantic -Wall -W -O -g -Wno-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal
 else
     F90FLAGS += -O3 -Wno-aggressive-loop-optimizations
     FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
     CFLAGS   += -O3
+    CXXFLAGS += -O3
 endif
 F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
 FCFLAGS  += -ffixed-form -ffixed-line-length-132 -x f77-cpp-input
 CFLAGS   +=
+CXXFLAGS +=
 MODFLAG  := -J# space significant
 DEFINES  += -DGFORTRAN -DgFortran
 # OpenMP
 F90OMPFLAG := -fopenmp
 FCOMPFLAG  := -fopenmp
 COMPFLAG   := -fopenmp
+CXXOMPFLAG := -fopenmp
 LDOMPFLAG  := -fopenmp
 OMPDEFINE  := -DOPENMP
 

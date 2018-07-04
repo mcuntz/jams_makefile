@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 #
 # PURPOSE
-#     JAMS Makefile for Fortran, C and mixed projects
+#     JAMS Makefile for Fortran, C, C++, and mixed projects
 #
 # CALLING SEQUENCE
 #     make [options] [VARIABLE=VARIABLE ...] [targets]
@@ -17,6 +17,7 @@
 #     Default Fortran 90 is: .f90, .F90, .f95, .F95, .f03, .F03, .f08, .F08
 #     Default Fortran 77 is: .f,   .F,   .for, .FOR, .f77, .F77, .ftn, .FTN
 #     Default C is:          .c,   .C,   .cc,  .CC
+#     Default C++ is:        .cpp, .CPP, .cxx, .CXX, .cp,  .CP,  .c++, .C++
 #
 # TARGETS
 #     all (default), check (=test), clean, cleanclean (=distclean), cleancheck (=cleantest=checkclean=testclean),
@@ -53,7 +54,7 @@
 #    The static switch is maintained like a red-headed stepchild. Libraries might be not ordered correctly
 #    if static linking and --begin-group/--end-group is not supported.
 #
-#    C-file dependencies are generated with
+#    C- and C++-file dependencies are generated with
 #        $(CC) -E $(DEFINES) -MM
 #
 # EXAMPLE
@@ -83,7 +84,7 @@
 #    along with the JAMS makefile project (cf. gpl.txt and lgpl.txt).
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2011-2017 Matthias Cuntz
+#    Copyright 2011-2018 Matthias Cuntz
 #
 # Written and maintained Matthias Cuntz, Nov. 2011 - mc (at) macu.de
 
@@ -104,6 +105,8 @@ DOXCONFIG  := ./doxygen.config   # the doxygen config file
 #
 PROGNAME := Prog # Name of executable
 LIBNAME  := # Name of library, e.g. libminpack.a
+# program should be linked with the compiler for the main file (fortran program, C main): fortran/for, c, c++/cxx
+LINKER   :=
 #
 # Options
 # Systems: eve and personal computers such as mcair for Matthias' MacBook Air; look in $(MAKEDPATH) or type 'make info'
@@ -187,6 +190,7 @@ EXTRA_INCLUDES :=
 EXTRA_LDFLAGS  :=
 EXTRA_LIBS     :=
 EXTRA_CFLAGS   :=
+EXTRA_CXXFLAGS :=
 
 # Intel F2003 -assume realloc-lhs
 INTEL_EXCLUDE  :=
@@ -200,6 +204,9 @@ F90SUFFIXES := .f90 .F90 .f95 .F95 .f03 .F03 .f08 .F08
 F77SUFFIXES := .f .F .for .FOR .f77 .F77 .ftn .FTN
 # C suffixes: .c .C .cc .CC
 CSUFFIXES   := .c .C .cc .CC
+# C++ suffixes: .cpp .CPP .cxx .CXX .cp .CP .c++ .C++
+# often .C and .cc are also taken as C++, e.g. in gcc compiler suite
+CXXSUFFIXES   := .cpp .CPP .cxx .CXX .cp .CP .c++ .C++
 # Library suffixes: .a .so .dylib
 LIBSUFFIXES := .a .so .dylib
 
@@ -335,6 +342,15 @@ COSRCS := $(foreach suff, $(CSUFFIXES), $(patsubst %$(suff), %.o, $(filter %$(su
 COBJS  := $(join $(dir $(COSRCS)), $(addprefix .$(strip $(icompiler)).$(strip $(irelease))/,$(notdir $(COSRCS))))
 CDOBJS := $(COBJS:.o=.d)
 
+# C++
+ifeq (False,$(iphony))
+    CXXSRCS1 := $(foreach suff,$(CXXSUFFIXES),$(wildcard $(addsuffix /*$(suff), $(SRCPATH))))
+endif
+CXXSRCS  := $(foreach f,$(CXXSRCS1),$(if $(findstring $(f),$(abspath $(EXCLUDE_FILES))),,$(f)))
+CXXOSRCS := $(foreach suff, $(CXXSUFFIXES), $(patsubst %$(suff), %.o, $(filter %$(suff), $(CXXSRCS))))
+CXXOBJS  := $(join $(dir $(CXXOSRCS)), $(addprefix .$(strip $(icompiler)).$(strip $(irelease))/,$(notdir $(CXXOSRCS))))
+CXXDOBJS := $(CXXOBJS:.o=.d)
+
 # Libraries
 ifeq (False,$(iphony))
     LSRCS1 := $(foreach suff,$(LIBSUFFIXES),$(wildcard $(addsuffix /*$(suff), $(SRCPATH))))
@@ -357,6 +373,9 @@ F90FLAGS := $(EXTRA_F90FLAGS)
 # C
 CC       :=
 CFLAGS   := $(EXTRA_CFLAGS)
+# C++
+CXX      :=
+CXXFLAGS := $(EXTRA_CXXFLAGS)
 # all
 CPP      :=
 DEFINES  := $(EXTRA_DEFINES)
@@ -379,15 +398,18 @@ OBJPATH := $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)), $(SRCPATH))
 
 # Files with lists of file names
 OBJPATH1 := $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)), $(SRCPATH1))
-SRCSFILE := $(OBJPATH1)/make.d.srcs
-OBJSFILE := $(OBJPATH1)/make.d.objs
+SRCSFILE  := $(OBJPATH1)/make.d.srcs
+OBJSFILE  := $(OBJPATH1)/make.d.objs
 DOBJSFILE := $(OBJPATH1)/make.d.dobjs
-FSRCSFILE := $(OBJPATH1)/make.d.fsrcs
-FOBJSFILE := $(OBJPATH1)/make.d.fobjs
+FSRCSFILE  := $(OBJPATH1)/make.d.fsrcs
+FOBJSFILE  := $(OBJPATH1)/make.d.fobjs
 FDOBJSFILE := $(OBJPATH1)/make.d.fdobjs
-CSRCSFILE := $(OBJPATH1)/make.d.csrcs
-COBJSFILE := $(OBJPATH1)/make.d.cobjs
+CSRCSFILE  := $(OBJPATH1)/make.d.csrcs
+COBJSFILE  := $(OBJPATH1)/make.d.cobjs
 CDOBJSFILE := $(OBJPATH1)/make.d.cdobjs
+CXXSRCSFILE  := $(OBJPATH1)/make.d.cxxsrcs
+CXXOBJSFILE  := $(OBJPATH1)/make.d.cxxobjs
+CXXDOBJSFILE := $(OBJPATH1)/make.d.cxxdobjs
 LSRCSFILE := $(OBJPATH1)/make.d.lsrcs
 LOBJSFILE := $(OBJPATH1)/make.d.lobjs
 ifeq (False,$(iphonyall))
@@ -401,6 +423,9 @@ ifeq (False,$(iphonyall))
     $(shell if [[ -f $(CSRCSFILE) ]]  ; then rm $(CSRCSFILE)  ; fi ; echo $(CSRCS)  | tr ' ' '\n' >> $(CSRCSFILE))
     $(shell if [[ -f $(COBJSFILE) ]]  ; then rm $(COBJSFILE)  ; fi ; echo $(COBJS)  | tr ' ' '\n' >> $(COBJSFILE))
     $(shell if [[ -f $(CDOBJSFILE) ]] ; then rm $(CDOBJSFILE) ; fi ; echo $(CDOBJS) | tr ' ' '\n' >> $(CDOBJSFILE))
+    $(shell if [[ -f $(CXXSRCSFILE) ]]  ; then rm $(CXXSRCSFILE)  ; fi ; echo $(CXXSRCS)  | tr ' ' '\n' >> $(CXXSRCSFILE))
+    $(shell if [[ -f $(CXXOBJSFILE) ]]  ; then rm $(CXXOBJSFILE)  ; fi ; echo $(CXXOBJS)  | tr ' ' '\n' >> $(CXXOBJSFILE))
+    $(shell if [[ -f $(CXXDOBJSFILE) ]] ; then rm $(CXXDOBJSFILE) ; fi ; echo $(CXXDOBJS) | tr ' ' '\n' >> $(CXXDOBJSFILE))
     $(shell if [[ -f $(LSRCSFILE) ]]  ; then rm $(LSRCSFILE)  ; fi ; echo $(LSRCS)  | tr ' ' '\n' >> $(LSRCSFILE))
     $(shell if [[ -f $(LOBJSFILE) ]]  ; then rm $(LOBJSFILE)  ; fi ; echo $(LOBJS)  | tr ' ' '\n' >> $(LOBJSFILE))
 endif
@@ -440,12 +465,31 @@ ifneq (,$(SOBJS))
 endif
 
 # --- LINKER ---------------------------------------------------
-# Link with the fortran compiler if fortran code
-ifneq ($(SRCS)$(FSRCS),)
-    LD := $(F90)
+# # Link with the fortran compiler if fortran code
+# ifneq ($(SRCS)$(FSRCS),)
+#     LD := $(F90)
+# else
+#     LD := $(CC)
+# endif
+# Link with compiler for main file
+ifneq ($(LINKER),)
+    ifneq ($(filter $(strip $(LINKER)),fortran Fortran FORTRAN for For FOR),)
+        LD := $(F90)
+    endif
+    ifneq ($(filter $(strip $(LINKER)),c C),)
+        LD := $(CC)
+    endif
+    ifneq ($(filter $(strip $(LINKER)),c++ C++ cxx CXX),)
+        LD := $(CXX)
+    endif
 else
-    LD := $(CC)
+    ifneq ($(SRCS)$(FSRCS),)
+        LD := $(F90)
+    else
+        LD := $(CC)
+    endif
 endif
+
 
 # --- INCLUDES/LIBS/FLAGS/DEFINES/RPATH --------------------------
 SDIRS :=
@@ -513,6 +557,7 @@ DEFINES  += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=DEF)),$($(dir:DIR=DEF))))
 MPI_F90FLAGS :=
 MPI_FCFLAGS  :=
 MPI_CFLAGS   :=
+MPI_CXXFLAGS :=
 MPI_LDFLAGS  :=
 ifeq ($(mpi),true)
     MPIINC ?= $(MPIDIR)/include
@@ -521,6 +566,7 @@ ifeq ($(mpi),true)
     MPI_F90FLAGS += $(shell $(MPIBIN)/mpif90 --showme:compile)
     MPI_FCFLAGS  += $(shell $(MPIBIN)/mpif77 --showme:compile)
     MPI_CFLAGS   += $(shell $(MPIBIN)/mpicc --showme:compile)
+    MPI_CXXFLAGS += $(shell $(MPIBIN)/mpic++ --showme:compile)
     ifeq ($(LD),$(F90))
         MPI_LDFLAGS += $(shell $(MPIBIN)/mpif90 --showme:link)
     else
@@ -535,6 +581,7 @@ ifeq ($(openmp),true)
     F90FLAGS += $(F90OMPFLAG)
     FCFLAGS  += $(FCOMPFLAG)
     CFLAGS   += $(COMPFLAG)
+    CXXFLAGS += $(CXXOMPFLAG)
     LDFLAGS  += $(LDOMPFLAG)
     DEFINES  += $(OMPDEFINE)
 else ifneq (,$(filter $(imsl),vendor imsl))
@@ -605,14 +652,14 @@ INCLUDES += $(addprefix -I,$(OBJPATH))
 all: $(PROGNAME) $(LIBNAME)
 
 # Link program
-$(PROGNAME): $(OBJS) $(FOBJS) $(COBJS)
+$(PROGNAME): $(OBJS) $(FOBJS) $(COBJS) $(CXXOBJS)
 	@echo "Linking program"
-	$(LD) $(LDFLAGS) -o $(PROGNAME) $(OBJS) $(FOBJS) $(COBJS) $(LIBS) $(LOBJS) $(MPI_LDFLAGS)
+	$(LD) $(LDFLAGS) -o $(PROGNAME) $(OBJS) $(FOBJS) $(COBJS) $(CXXOBJS) $(LIBS) $(LOBJS) $(MPI_LDFLAGS)
 
 # Link library
-$(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(OBJS) $(FOBJS) $(COBJS)
+$(LIBNAME): $(DOBJS) $(FDOBJS) $(CDOBJS) $(CXXDOBJS) $(OBJS) $(FOBJS) $(COBJS) $(CXXOBJS)
 	@echo "Linking library"
-	$(AR) $(ARFLAGS) $(LIBNAME) $(OBJS) $(FOBJS) $(COBJS)
+	$(AR) $(ARFLAGS) $(LIBNAME) $(OBJS) $(FOBJS) $(COBJS) $(CXXOBJS)
 	$(RANLIB) $(LIBNAME)
 
 # Get dependencies
@@ -638,6 +685,13 @@ $(CDOBJS):
 	src=$$(sed -n $${nobj}p $(CSRCSFILE)) ; \
 	pobj=$(dir $@) ; psrc=$(dir $$src) ; \
 	$(CC) -E $(DEFINES) $(INCLUDES) -MM $$src | sed "s|.*:|$(patsubst %.d,%.o,$@) $@ :|" > $@
+
+$(CXXDOBJS):
+	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
+	@nobj=$$(grep -n -w -F $@ $(CXXDOBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(CXXSRCSFILE)) ; \
+	pobj=$(dir $@) ; psrc=$(dir $$src) ; \
+	$(CXX) -E $(DEFINES) $(INCLUDES) -MM $$src | sed "s|.*:|$(patsubst %.d,%.o,$@) $@ :|" > $@
 
 # Compile
 $(OBJS):
@@ -686,6 +740,12 @@ $(COBJS):
 	echo $(CC) $(DEFINES) $(INCLUDES) $(MPI_CFLAGS) $(CFLAGS) -c $${src} -o $@ ; \
 	$(CC) $(DEFINES) $(INCLUDES) $(MPI_CFLAGS) $(CFLAGS) -c $${src} -o $@
 
+$(CXXOBJS):
+	@nobj=$$(grep -n -w -F $@ $(CXXOBJSFILE) | sed 's/:.*//') ; \
+	src=$$(sed -n $${nobj}p $(CXXSRCSFILE)) ; \
+	echo $(CXX) $(DEFINES) $(INCLUDES) $(MPI_CXXFLAGS) $(CXXFLAGS) -c $${src} -o $@ ; \
+	$(CXX) $(DEFINES) $(INCLUDES) $(MPI_CXXFLAGS) $(CXXFLAGS) -c $${src} -o $@
+
 # Helper Targets
 clean:
 ifneq (,$(SOBJS))
@@ -708,6 +768,12 @@ ifneq ($(strip $(COBJS)),)
 endif
 ifneq ($(strip $(CDOBJS)),)
 	rm -f $(CDOBJS)
+endif
+ifneq ($(strip $(CXXOBJS)),)
+	rm -f $(CXXOBJS)
+endif
+ifneq ($(strip $(CXXDOBJS)),)
+	rm -f $(CXXDOBJS)
 endif
 ifneq ($(strip $(GOBJS)),)
 	rm -f $(GOBJS)
@@ -841,6 +907,12 @@ dependencies:
 	    obj=$$(sed -n $${nobj}p $(COBJSFILE)) ; \
 	    if [ $${src} -nt $${obj} ] ; then rm $${i} ; fi ; \
 	done
+	@for i in $(CXXDOBJS) ; do \
+	    nobj=$$(grep -n -w -F $${i} $(CXXDOBJSFILE) | sed 's/:.*//') ; \
+	    src=$$(sed -n $${nobj}p $(CXXSRCSFILE)) ; \
+	    obj=$$(sed -n $${nobj}p $(CXXOBJSFILE)) ; \
+	    if [ $${src} -nt $${obj} ] ; then rm $${i} ; fi ; \
+	done
 	@rm -f $(addsuffix /$(MAKEDSCRIPT:.py=.dict), $(OBJPATH))
 
 doxygen:
@@ -896,6 +968,8 @@ info:
 	@echo "F90FLAGS  = $(F90FLAGS)"
 	@echo "CC        = $(CC)"
 	@echo "CFLAGS    = $(CFLAGS)"
+	@echo "CXX       = $(CXX)"
+	@echo "CXXFLAGS  = $(CXXFLAGS)"
 	@echo "DEFINES   = $(DEFINES)"
 	@echo "INCLUDES  = $(INCLUDES)"
 	@echo "LD        = $(LD)"
@@ -949,5 +1023,5 @@ endif
 # All dependencies created by python script make.d.py
 ifeq (False,$(iphonyall))
     $(info Checking dependencies ...)
-    -include $(DOBJS) $(FDOBJS) $(CDOBJS)
+    -include $(DOBJS) $(FDOBJS) $(CDOBJS) $(CXXDOBJS)
 endif
