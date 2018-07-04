@@ -49,7 +49,7 @@ else
     CFLAGS   += -O3
 endif
 F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
-FCFLAGS  += -ffixed-form -ffixed-line-length-132
+FCFLAGS  += -ffixed-form -ffixed-line-length-132 -x f77-cpp-input
 CFLAGS   +=
 MODFLAG  := -J# space significant
 DEFINES  += -DGFORTRAN -DgFortran
