@@ -1,0 +1,4 @@
+# Set aliases so that one can, for example, say gnu to invoke standard gfortran
+ifneq (,$(findstring $(compiler),gnu gfortran gcc))
+    icompiler := gnu
+endif
