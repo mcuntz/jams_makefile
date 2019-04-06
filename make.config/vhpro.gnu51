@@ -93,8 +93,8 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR := /usr/local/openmpi-1.8.6-gfortran
-MPIDEF := -DMPI
+OPENMPIDIR := /usr/local/openmpi-1.8.6-gfortran
+OPENMPIDEF := -DMPI
 
 # Documentation
 DOXYGENDIR :=

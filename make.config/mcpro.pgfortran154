@@ -140,8 +140,8 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR := /usr/local/openmpi-1.10.2-pgfortran
-MPIDEF := -DMPI
+OPENMPIDIR := /usr/local/openmpi-1.10.2-pgfortran
+OPENMPIDEF := -DMPI
 
 # Documentation
 DOXYGENDIR := /Applications/Program/Doxygen.app/Contents/Resources

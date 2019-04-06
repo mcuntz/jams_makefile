@@ -99,7 +99,7 @@ LAPACKDIR   :=
 GFORTRANDIR :=
 
 # MPI
-MPIDIR :=
+OPENMPIDIR :=
 
 # Documentation
 DOXYGENDIR := /usr/local/bin

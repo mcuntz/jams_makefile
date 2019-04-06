@@ -95,8 +95,8 @@ LAPACKFLAG := #-lblas -llapack
 LAPACKDEF  := #-DLAPACK
 
 # MPI
-MPIDIR := /usr/local/openmpi/gcc/1.8.4-2
-MPIDEF := -DMPI
+OPENMPIDIR := /usr/local/openmpi/gcc/1.8.4-2
+OPENMPIDEF := -DMPI
 
 iiLDPATH   := 
 ifneq ($(LDPATH),)

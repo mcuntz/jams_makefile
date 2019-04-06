@@ -117,8 +117,8 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR  :=
-MPIDEF  := -DMPI
+OPENMPIDIR  :=
+OPENMPIDEF  := -DMPI
 
 # Documentation
 DOXYGENDIR :=

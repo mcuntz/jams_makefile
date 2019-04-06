@@ -109,8 +109,8 @@ LAPACKFLAG := -lblas -llapack
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR := /opt/local/openmpi-2.0.1-gfortran
-MPIDEF := -DMPI
+OPENMPIDIR := /opt/local/openmpi-2.0.1-gfortran
+OPENMPIDEF := -DMPI
 
 # Documentation
 DOXYGENDIR := /usr/bin

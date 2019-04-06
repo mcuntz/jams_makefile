@@ -119,8 +119,8 @@ LAPACKFLAG := -lblas -llapack
 LAPACKDEF  := -DLAPACK
 
 # MPI
-MPIDIR := /usr/lib64/openmpi
-MPIDEF := -DMPI
+OPENMPIDIR := /usr/lib64/openmpi
+OPENMPIDEF := -DMPI
 
 # Documentation
 DOXYGENDIR := /bin

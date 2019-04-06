@@ -121,9 +121,13 @@ LAPACKDIR  :=
 LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -DLAPACK
 
-# MPI
-MPIDIR  := /usr/local/openmpi-2.0.1-gfortran
-MPIDEF  := -DMPI
+# OPENMPI
+OPENMPIDIR := /usr/local/openmpi-2.0.1-gfortran
+OPENMPIDEF := -DMPI
+
+# MPICH
+MPICHDIR := /usr/local/mpich-3.3-gfortran
+MPICHDEF := -DMPI
 
 # Documentation
 DOXYGENDIR := /Applications/Doxygen.app/Contents/Resources

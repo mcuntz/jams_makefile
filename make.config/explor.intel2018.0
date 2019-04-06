@@ -131,8 +131,8 @@ LAPACKFLAG := #-lblas -llapack
 LAPACKDEF  := #-DLAPACK
 
 # MPI
-MPIDIR := /opt/soft/hf/openmpi-3.0.0-intel18
-MPIDEF := -DMPI
+OPENMPIDIR := /opt/soft/hf/openmpi-3.0.0-intel18
+OPENMPIDEF := -DMPI
 
 # Documentation
 DOXYGENDIR :=

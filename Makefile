@@ -95,7 +95,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_julian # where are the source files; use test_??? to
+SRCPATH    := ../fortran/test/test_mo_mpi_stubs # where are the source files; use test_??? to
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
@@ -128,7 +128,7 @@ proj     :=
 imsl     :=
 # OpenMP parallelization: true, [anything else]
 openmp   := 
-# MPI parallelization - experimental: true, [anything else]
+# MPI parallelization - experimental: openmpi mpich [anything else]
 mpi      :=
 # Linking: static, shared, dynamic (last two are equal)
 static   := shared
@@ -513,8 +513,13 @@ ifeq ($(lapack),true)
     SDIRS += LAPACKDIR
     SDIRS += BLASDIR
 endif
-ifeq ($(mpi),true)
-    SDIRS += MPIDIR
+ifneq (,$(filter $(mpi),openmpi mpich))
+    ifeq ($(netcdf),openmpi)
+        SDIRS += OPENMPIDIR
+    endif
+    ifeq ($(netcdf),mpich)
+        SDIRS += MPICHDIR
+    endif
 endif
 ifneq (,$(filter $(imsl),vendor imsl))
     SDIRS += IMSLDIR
@@ -559,20 +564,34 @@ MPI_FCFLAGS  :=
 MPI_CFLAGS   :=
 MPI_CXXFLAGS :=
 MPI_LDFLAGS  :=
-ifeq ($(mpi),true)
-    MPIINC ?= $(MPIDIR)/include
-    MPILIB ?= $(MPIDIR)/lib
-    MPIBIN ?= $(MPIDIR)/bin
+ifeq ($(mpi),openmpi)
+    MPIINC ?= $(OPENMPIDIR)/include
+    MPILIB ?= $(OPENMPIDIR)/lib
+    MPIBIN ?= $(OPENMPIDIR)/bin
     MPI_F90FLAGS += $(shell $(MPIBIN)/mpif90 --showme:compile)
     MPI_FCFLAGS  += $(shell $(MPIBIN)/mpif77 --showme:compile)
     MPI_CFLAGS   += $(shell $(MPIBIN)/mpicc --showme:compile)
-    MPI_CXXFLAGS += $(shell $(MPIBIN)/mpic++ --showme:compile)
+    MPI_CXXFLAGS += $(shell $(MPIBIN)/mpicxx --showme:compile)
     ifeq ($(LD),$(F90))
         MPI_LDFLAGS += $(shell $(MPIBIN)/mpif90 --showme:link)
     else
         MPI_LDFLAGS += $(shell $(MPIBIN)/mpicc --showme:link)
     endif
     INCLUDES += -I$(MPILIB) # mpi.h in lib and not include <- strange
+endif
+ifeq ($(mpi),mpich)
+    MPIINC ?= $(MPICHDIR)/include
+    MPILIB ?= $(MPICHDIR)/lib
+    MPIBIN ?= $(MPICHDIR)/bin
+    MPI_F90FLAGS += $(shell $(MPIBIN)/mpifort -compile_info | cut -d ' ' -f 2-)
+    MPI_FCFLAGS  += $(shell $(MPIBIN)/mpifort -compile_info | cut -d ' ' -f 2-)
+    MPI_CFLAGS   += $(shell $(MPIBIN)/mpicc -compile_info | cut -d ' ' -f 2-)
+    MPI_CXXFLAGS += $(shell $(MPIBIN)/mpicxx -compile_info | cut -d ' ' -f 2-)
+    ifeq ($(LD),$(F90))
+        MPI_LDFLAGS += $(shell $(MPIBIN)/mpif90 -link_info | cut -d ' ' -f 2-)
+    else
+        MPI_LDFLAGS += $(shell $(MPIBIN)/mpicc -link_info | cut -d ' ' -f 2-)
+    endif
 endif
 
 # --- OPENMP ---------------------------------------------------
@@ -1018,6 +1037,7 @@ endif
 	@echo "proj        true [anything else]"
 	@echo "imsl        vendor imsl [anything else]"
 	@echo "openmp      true [anything else]"
+	@echo "mpi         openmpi mpich [anything else]"
 	@echo "static      static shared (=dynamic)"
 
 # All dependencies created by python script make.d.py

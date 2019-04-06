@@ -133,9 +133,9 @@ BLASLIB    := /cm/shared/apps/blas/intel/1/lib64
 BLASFLAG   := -lblas
 
 # MPI
-MPIDIR := /cm/shared/apps/openmpi/intel/64/1.4.4
+OPENMPIDIR := /cm/shared/apps/openmpi/intel/64/1.4.4
 MPILIB := /cm/shared/apps/openmpi/intel/64/1.4.4/lib64
-MPIDEF := -DMPI
+OPENMPIDEF := -DMPI
 
 # Documentation
 DOXYGENDIR :=

@@ -83,5 +83,5 @@ else
 endif
 
 # MPI
-MPIDIR := /usr/lib/openmpi
-MPIDEF := -DMPI
+OPENMPIDIR := /usr/lib/openmpi
+OPENMPIDEF := -DMPI
