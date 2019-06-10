@@ -12,7 +12,8 @@ program standard
 
   use mo_kind,           only: i4, sp, dp
   use mo_ncread,         only: Get_NcVar, Get_NcDim
-  use mo_ncwrite,        only: dump_netcdf, var2nc
+  use mo_ncdump,         only: dump_netcdf
+  use mo_var2nc,         only: var2nc
   use mo_mainvar,        only: lat, lon, data, t
   use mo_utils,          only: notequal, ne
   use mo_linear_algebra, only: diag, inverse

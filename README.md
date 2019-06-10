@@ -138,13 +138,19 @@ computer systems. The Fortran code is in the subdirectory _src/fortran_ and the 
 
         make system=mcinra compiler=gnu release=debug   &&   ./myproject
 
+- Added new _use module, only: func_ in one of the Fortran source files: one has to re-generate
+  dependencies first:
+
+        make system=mcinra compiler=gnu release=debug   depend
+        make system=mcinra compiler=gnu release=debug   &&   ./myproject
+
 - Debug further with other compilers:
 
         make system=mcinra compiler=intel release=debug   &&   ./myproject
 
         make system=mcinra compiler=nag release=debug   &&   ./myproject
 
-- Then produce fast release version:
+- Produce fast release version:
 
         make system=mcinra compiler=intel release=release   &&   ./myproject
 
