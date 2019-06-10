@@ -1,9 +1,53 @@
 # -*- Makefile -*-
 #
 # PURPOSE
+# -------
 #     JAMS Makefile for Fortran, C, C++, and mixed projects
 #
+#
+# DESCRIPTION
+# -----------
+#     Compiling a program from source code is an elaborate process. The compiler has to find all
+#     source files, of course. It has to know all dependencies between the source files. For C programs,
+#     it has to find all the header (.h) files. For Fortran programs, it has to find the module (.mod)
+#     files, which are produced by the compiler itself, which means that the files have to be compiled
+#     in a certain order. Last but not least, the compiler and linker have to find external libraries
+#     and use appropriate compiler options.
+#
+#     Different solutions exist for this problem, the two most prominent being GNU's configure and
+#     Kitware's CMake. One amost always gives non-standard directories on the command line, e.g.
+#         configure --with-netcdf=/path/to/netcdf
+#         cmake -DCMAKE_NETCDF_DIR:STRING=/path/to/netcdf
+#     Therefore, one has to know all installation directories etc. for the current computer (system) or
+#     load the appropriate, matching modules, which is tedious if you work on several computers such as
+#     your local computer for development and one or two clusters or supercomputers for production.
+#     This can be externalised in CMake by giving a script with -C or -P once all information was gathered.
+#
+#     This Makefile follows a similar idea that the information about the current computer (system)
+#     must only be gathered once and stored in a config file. The user can then easily compile the same code
+#     on different computer (systems) with different compilers in debug or release mode, by simply
+#     telling on the command line
+#         make system=mcinra compiler=gnu release=debug
+#     This uses the system specific files mcinra.alias to look for the default gnu compiler, which is
+#     version 6.1 in this case and then uses all variables set in the file mcinra.gnu61. The user has
+#     to provide these mcinra.alias and mcinra.gnu61 populated with the directories and specific compiler
+#     options for the GNU compiler suite 6.1 on the macOS system mcinra. The files can then be reused for
+#     every other project on the computer (system) mcinra.
+#
+#     The project includes examples for different operating systems, i.e. Unix (e.g. pearcey),
+#     Linux (e.g. explor), macOS (e.g. mcinra), and Windows (e.g. uwin).
+#     The computer system mcinra provides examples for different compilers, i.e. the GNU compiler suite,
+#     the Intel compiler suite, the NAG Fortran compiler, and the PGI Fortran compiler.
+#
+#     The project provides some standard configurations for the GNU compiler suite such as
+#     homebrew on macOS, ubuntu on Linux, and cygwin and ubuntu (uwin) on Windows.
+#
+#     The README.md includes a section how to add a new compiler and how to setup the Makefile project
+#     on a new computer (system).
+#     
+#
 # CALLING SEQUENCE
+# ----------------
 #     make [options] [VARIABLE=VARIABLE ...] [targets]
 #
 #     Variables can be set on the command line [VAR=VAR] or in the section SWITCHES below.
@@ -13,80 +57,107 @@
 #
 #     Sources are in $(SRCPATH), which can be several directories separated by whitespace.
 #
-#     File suffixes can be given in $(F90SUFFIXES), $(F77SUFFIXES), and $(CSUFFIXES)
-#     Default Fortran 90 is: .f90, .F90, .f95, .F95, .f03, .F03, .f08, .F08
-#     Default Fortran 77 is: .f,   .F,   .for, .FOR, .f77, .F77, .ftn, .FTN
-#     Default C is:          .c,   .C,   .cc,  .CC
-#     Default C++ is:        .cpp, .CPP, .cxx, .CXX, .cp,  .CP,  .c++, .C++
+#     File suffixes can be given in $(F90SUFFIXES), $(F77SUFFIXES), $(CSUFFIXES), $(CXXSUFFIXES), and $(LIBSUFFIXES)
+#     Defaults are:
+#         Fortran 90: .f90, .F90, .f95, .F95, .f03, .F03, .f08, .F08
+#         Fortran 77: .f,   .F,   .for, .FOR, .f77, .F77, .ftn, .FTN
+#         C:          .c,   .C,   .cc,  .CC
+#         C++:        .cpp, .CPP, .cxx, .CXX, .cp,  .CP,  .c++, .C++
+#         Library:    .a .so .dylib
+#     Note that .F and .FOR are Fortran 77 by default.
+#
 #
 # TARGETS
-#     all (default), check (=test), clean, cleanclean (=distclean), cleancheck (=cleantest=checkclean=testclean),
-#     cleancleancheck (=cleancleantest=checkcleanclean=testcleanclean), dependencies (=depend),
-#     html, pdf, latex, doxygen, info
+# -------
+#     all (default), check (=test), dependencies (=depend), html, pdf, latex, doxygen, info
+#     clean, cleanclean (=distclean), cleancheck (=cleantest=checkclean=testclean),
+#     cleancleancheck (=cleancleantest=checkcleanclean=testcleanclean),
+#
 #
 # OPTIONS
+# -------
 #     All make options such as -f makefile. See 'man make'.
 #
+#
 # VARIABLES
+# ---------
 #     All variables defined in this makefile.
 #     This makefile has lots of conditional statements depending on variables.
 #     If the variable works as a switch then the condition checks for variable = true,
-#     i.e. ifeq ($(variable),true)
-#     otherwise the variable can have any other value.
+#     i.e. ifeq ($(variable),true), otherwise the variable can have any other value.
 #     See individual variables in section SWITCHES below or type 'make info'.
 #
 #     Variables can be empty for disabling a certain behaviour,
-#     e.g. if you do not want to use IMSL, set:  imsl=no  or  imsl=
+#     e.g. if you do not want to use LAPACK, set:  lapack=no  or  lapack=
 #
 #     For main variables see 'make info'.
 #
+#
 # DEPENDENCIES
+# ------------
 #    This makefile uses the following files:
 #        $(MAKEDPATH)/make.d.py, $(CONFIGPATH)/$(system).$(compiler), $(CONFIGPATH)/$(system).alias
-#    The default $(MAKEDPATH) and $(CONFIGPATH) is make.config
-#    The makefile can use doxygen for html and pdf automatic documentation.
-#        It is then using $(DOXCONFIG).
+#    The default $(MAKEDPATH) and $(CONFIGPATH) is make.config.
+#    The makefile can use doxygen for html and pdf automatic documentation. It is then using $(DOXCONFIG).
 #    If this is not available, it uses the perl script f2html for html documentation:
 #        $(TOOLPATH)/f2html, $(TOOLPATH)/f2html.fgenrc
 #
+#
 # RESTRICTIONS
-#    Not all packages work with or are compiled for all compilers.
-#    The static switch is maintained like a red-headed stepchild. Libraries might be not ordered correctly
-#    if static linking and --begin-group/--end-group is not supported.
+# ------------
+#    1. The makefile provides dependency generation. This process must be done in serial. Parallel make (-j)
+#       does hence not work from scratch.
+#       One can split dependency generation and compilation by
+#       first calling make with a dummy target, which creates all dependencies, and then
+#       second calling parallel make with the -j switch, i.e.
+#           make      system=mcinra compiler=intel release=release  dum
+#           make -j 8 system=mcinra compiler=intel release=release
 #
-#    C- and C++-file dependencies are generated with
-#        $(CC) -E $(DEFINES) -MM
+#    2. The static switch is maintained like a red-headed stepchild. Libraries might be not ordered correctly
+#       if static linking and --begin-group/--end-group is not supported by the linker.
 #
-# EXAMPLE
-#    make system=eve compiler=intel release=debug mkl=mkl95 PROGNAME=prog
+#    3. C- and C++-file dependencies are generated with:
+#           $(CC) -E $(DEFINES) -MM
+#
+#
+# EXAMPLES
+# --------
+#    make system=eve release=true
+#    make system=mcinra compiler=gcc release=debug lapack=true mpi=openmpi
+#
 #
 # NOTES
-#    Further information is given in the README, for example on
+# -----
+#    Further information is given in the README.md, for example on
 #    the repository of the makefile,
 #    further reading,
 #    how to add a new compiler on a given system, or
 #    how to add a new system.
 #
+#
 # LICENSE
-#    This file is part of the JAMS makefile project.
+# -------
+#    This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-#    The JAMS makefile project is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#    Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
 #
-#    The JAMS makefile project is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU Lesser General Public License for more details.
+#    Permission is hereby granted, free of charge, to any person obtaining a copy
+#    of this software and associated documentation files (the "Software"), to deal
+#    in the Software without restriction, including without limitation the rights
+#    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#    copies of the Software, and to permit persons to whom the Software is
+#    furnished to do so, subject to the following conditions:
 #
-#    You should have received a copy of the GNU Lesser General Public License
-#    along with the JAMS makefile project (cf. gpl.txt and lgpl.txt).
-#    If not, see <http://www.gnu.org/licenses/>.
+#    The above copyright notice and this permission notice shall be included in all
+#    copies or substantial portions of the Software.
 #
-#    Copyright 2011-2018 Matthias Cuntz
-#
-# Written and maintained Matthias Cuntz, Nov. 2011 - mc (at) macu.de
+#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#    SOFTWARE.
 
 SHELL = /bin/bash
 
@@ -95,31 +166,34 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../fortran/test/test_mo_mpi_stubs # where are the source files; use test_??? to
+SRCPATH    := test/test_standard # where are the source files; whitespace separated list
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
-MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.sh script
-CHECKPATH  := ../fortran/test    # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.py script
+CHECKPATH  := test               # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 TOOLPATH   := tools              # tools such as f2html
 DOXCONFIG  := ./doxygen.config   # the doxygen config file
 #
-PROGNAME := Prog # Name of executable
+PROGNAME := prog # Name of executable
 LIBNAME  := # Name of library, e.g. libminpack.a
-# program should be linked with the compiler for the main file (fortran program, C main): fortran/for, c, c++/cxx
+# Program should be linked using the compiler of the main file (-> fortran: program prog, C: void main()).
+# Default: $(F90) if source files include fortran files, otherwise $(CC).
+# Possible values: fortran Fortran FORTRAN for For FOR, c C, c++ C++ cxx CXX
 LINKER   :=
 #
 # Options
-# Systems: eve and personal computers such as mcair for Matthias' MacBook Air; look in $(MAKEDPATH) or type 'make info'
-system   := mcair
+# Systems: computer (system) name given during installation such as mcair for Matthias' MacBook Air, for example.
+# Look in $(MAKEDPATH) or type 'make info' for available computer systems.
+system   := mcinra
 # Compiler: e.g. gnuX where X stands for version number, e.g. intel13;
 #   look at $(MAKEDPATH)/$(system).alias for shortcuts such as gnu for gnuX or type 'make info'
 compiler := gnu
 # Releases: debug, release, true (last two are equal)
 release  := debug
-# Netcdf versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   := netcdf4
+# netCDF versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
+netcdf   :=
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   := true
+lapack   :=
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # Proj4 (Cartographic Projections Library): true, [anything else]
@@ -135,7 +209,7 @@ static   := shared
 
 # The Makefile sets the following variables depending on the above options:
 # FC, FCFLAGS, F90, F90FLAGS, CC, CFLAGS, CPP, DEFINES, INCLUDES, LD, LDFLAGS, LIBS
-# flags, defines, etc. will be set incremental. They will be initialised with
+# Flags, defines, etc. will be set incremental. They will be initialised with
 # the following EXTRA_* variables. This allows for example to set an extra compiler
 # option or define a preprocessor variable such as: EXTRA_DEFINES := -DNOGUI -DDPREC
 
@@ -157,8 +231,8 @@ static   := shared
 #      0_10708
 #     : catastrophic error: **Internal compiler error: internal abort** Please report this error along with the
 #     circumstances in which it occurred in a Software Problem Report.
-#      Note: File and line given may not be explicit cause of this error.
-# then you probably assume the F2003 feature that arrays can be allocated as a result of a function.
+#     Note: File and line given may not be explicit cause of this error.
+# then you probably assume the F2003 feature that arrays can be (re-)allocated as a result of a function.
 # Add the affected file to the list
 #     INTEL_EXCLUDE
 # below. This will not set the compiler flag -assume realloc-lhs.
@@ -211,12 +285,18 @@ CXXSUFFIXES   := .cpp .CPP .cxx .CXX .cp .CP .c++ .C++
 LIBSUFFIXES := .a .so .dylib
 
 #
+# ----------------------------------------------------------
+# END OF USER SECTION
+# ----------------------------------------------------------
+#
+
+#
 # --- PATHS ------------------------------------------------
 #
 
 # Make absolute paths from relative paths - there should be no space nor comment at the end of the next lines
-SRCPATH1   := $(word 1, $(SRCPATH))
-SRCPATH1   := $(abspath $(SRCPATH1:~%=${HOME}%))
+SRCPATH1 := $(word 1, $(SRCPATH))
+SRCPATH1 := $(abspath $(SRCPATH1:~%=${HOME}%))
 override SRCPATH    := $(abspath $(SRCPATH:~%=${HOME}%))
 override PROGPATH   := $(abspath $(PROGPATH:~%=${HOME}%))
 override CONFIGPATH := $(abspath $(CONFIGPATH:~%=${HOME}%))
@@ -270,7 +350,7 @@ endif
 # --- CHECK SYSTEM ----------------------------------------------
 #
 
-systems := $(shell ls -1 $(CONFIGPATH) | sed -e "/$(MAKEDSCRIPT)/d" -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)
+systems := $(shell ls -1 $(CONFIGPATH) | sed -e "/$(MAKEDSCRIPT)/d" -e '/f2html/d' -e '/^old/d' | cut -d '.' -f 1 | sort | uniq)
 ifeq (,$(filter $(system),$(systems)))
     $(error Error: system '$(system)' not found: known systems are $(systems))
 endif
@@ -430,8 +510,8 @@ ifeq (False,$(iphonyall))
     $(shell if [[ -f $(LOBJSFILE) ]]  ; then rm $(LOBJSFILE)  ; fi ; echo $(LOBJS)  | tr ' ' '\n' >> $(LOBJSFILE))
 endif
 
-# Mac OS X is special, there is (almost) no static linking.
-# Mac OS X does not work with -rpath. Set DYLD_LIBRARY_PATH if needed.
+# macOS is special, there is (almost) no static linking.
+# macOS does not work with -rpath. Set DYLD_LIBRARY_PATH if needed.
 iOS := $(shell uname -s)
 istatic := $(static)
 ifneq (,$(filter $(iOS),Darwin))
@@ -465,12 +545,6 @@ ifneq (,$(SOBJS))
 endif
 
 # --- LINKER ---------------------------------------------------
-# # Link with the fortran compiler if fortran code
-# ifneq ($(SRCS)$(FSRCS),)
-#     LD := $(F90)
-# else
-#     LD := $(CC)
-# endif
 # Link with compiler for main file
 ifneq ($(LINKER),)
     ifneq ($(filter $(strip $(LINKER)),fortran Fortran FORTRAN for For FOR),)
@@ -483,13 +557,13 @@ ifneq ($(LINKER),)
         LD := $(CXX)
     endif
 else
+    # Link with the fortran compiler if fortran code
     ifneq ($(SRCS)$(FSRCS),)
         LD := $(F90)
     else
         LD := $(CC)
     endif
 endif
-
 
 # --- INCLUDES/LIBS/FLAGS/DEFINES/RPATH --------------------------
 SDIRS :=
@@ -538,26 +612,6 @@ RPATH    += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=LIB)),$(WL)$($(dir:DIR=LIB))
 # defines
 DEFINES  += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=DEF)),$($(dir:DIR=DEF))))
 
-
-# # --- MKL ---------------------------------------------------
-# ifneq (,$(filter $(mkl),mkl mkl95))
-#     ifneq (,$(filter $(imsl),vendor imsl))
-#        iLIBS += -lmkl_intel_thread #-lpthread
-#     else
-#         ifeq ($(openmp),true)
-#             iLIBS += -lmkl_intel_thread #-lpthread
-#         else
-#             iLIBS += -lmkl_sequential #-lpthread
-#         endif
-#     endif
-#     ifeq ($(openmp),true)
-#         ifeq (,$(filter $(icompiler),$(intelcompilers)))
-#             iLIBS += -L$(INTELLIB) -liomp5
-#             RPATH += -Wl,-rpath,$(INTELLIB)
-#         endif
-#     endif
-# endif
-
 # --- MPI ---------------------------------------------------
 MPI_F90FLAGS :=
 MPI_FCFLAGS  :=
@@ -577,7 +631,7 @@ ifeq ($(mpi),openmpi)
     else
         MPI_LDFLAGS += $(shell $(MPIBIN)/mpicc --showme:link)
     endif
-    INCLUDES += -I$(MPILIB) # mpi.h in lib and not include <- strange
+    INCLUDES += -I$(MPILIB) # mpi.h in lib and not include
 endif
 ifeq ($(mpi),mpich)
     MPIINC ?= $(MPICHDIR)/include
@@ -968,6 +1022,7 @@ info:
 	@echo "proj     = $(proj)"
 	@echo "imsl     = $(imsl)"
 	@echo "openmp   = $(openmp)"
+	@echo "mpi      = $(mpi)"
 	@echo "static   = $(static)"
 	@echo ""
 	@echo "Files/Paths"
@@ -976,6 +1031,8 @@ info:
 	@echo "CONFIGPATH = $(CONFIGPATH)"
 	@echo "MAKEDPATH  = $(MAKEDPATH)"
 	@echo "CHECKPATH  = $(CHECKPATH)"
+	@echo "TOOLPATH   = $(TOOLPATH)"
+	@echo "DOXCONFIG  = $(DOXCONFIG)"
 	@echo "PROGNAME   = $(basename $(PROGNAME))"
 	@echo "LIBNAME    = $(basename $(LIBNAME))"
 	@echo "FILES      = $(SRCS) $(FORSRCS) $(CSRCS) $(LASRCS)"
@@ -1019,17 +1076,17 @@ endif
 	@echo "depend         alias for dependencies"
 	@echo "dependencies   Redo dependencies"
 	@echo "distclean      alias for cleanclean"
-	@echo "doxygen        Run doxygen html with $(DOXPATH)/doxygen.config"
-	@echo "html           Run either doxygen html with $(DOXPATH)/doxygen.config or f2html of Jean-Marc Beroud"
+	@echo "doxygen        Run doxygen html with $(DOXCONFIG)"
+	@echo "html           Run either doxygen html with $(DOXCONFIG) or f2html of Jean-Marc Beroud"
 	@echo "info           Prints info about current settings and possibilities"
 	@echo "latex          alias for pdf"
-	@echo "pdf            Run doxygen PDF with $(DOXPATH)/doxygen.config"
+	@echo "pdf            Run doxygen PDF with $(DOXCONFIG)"
 	@echo "test           alias for check"
 	@echo "testclean      alias for cleancheck"
 	@echo ""
 	@echo "All possibilities"
-	@echo "system      $(shell ls -1 $(CONFIGPATH) | sed -e '/"$(MAKEDSCRIPT)"/d' -e '/f2html/d' | cut -d '.' -f 1 | sort | uniq)"
-	@echo "compiler    $(shell ls -1 $(CONFIGPATH) | sed -e '/"$(MAKEDSCRIPT)"/d' -e '/f2html/d' -e '/alias/d' | cut -d '.' -f 2- | sort | uniq)"
+	@echo "system      $(shell ls -1 $(CONFIGPATH) | sed -e '/^$(MAKEDSCRIPT)/d' -e '/f2html/d' -e '/^old/d' | cut -d '.' -f 1 | sort | uniq)"
+	@echo "compiler    $(shell ls -1 $(CONFIGPATH) | sed -e '/^$(MAKEDSCRIPT)/d' -e '/f2html/d' -e '/^old/d' -e '/alias/d' | cut -d '.' -f 2- | sort | uniq)"
 	@echo "release     debug release (=true)"
 	@echo "netcdf      netcdf3 netcdf4 [anything else]"
 	@echo "lapack      true [anything else]"

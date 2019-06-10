@@ -1,4 +1,11 @@
-# Set aliases so that one can, for example, say ifort to invoke standard intel11 on eve
+# -*- Makefile -*-
+#
+# Set aliases so that one can, for example, use compiler=ifort to invoke intel2017 on mcinra
+#
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
+#
+# Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
+#
 ifneq (,$(findstring $(compiler),gnu gfortran gcc))
     icompiler := gnu48
 endif

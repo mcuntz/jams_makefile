@@ -1,12 +1,12 @@
 #!/usr/bin/env python2
 from __future__ import print_function
 """
-usage: make.d.py [-h] [-f FortranFile] InputFile OutputPath SourceFileList
+usage: make.d.py [-h] [-f FortranFile] InputFile OutputPath FilesWithSourceFileList
 
 Make dependency files for Fortran90 projects.
 
 positional arguments:
-  InputFile OutputPath SourceFileList
+  InputFile OutputPath FilesWithSourceFileList
                         Preprocessed input file, relative output directory
                         (script assumes compilation into
                         dirname(InputFile)/opath), file(s) with list(s) of all source files.
@@ -15,14 +15,14 @@ optional arguments:
   -h, --help            show this help message and exit
   -f FortranFile, --ffile FortranFile
                         Not preprocessed Fortran source filename. If missing
-                        prefile[:-4] is assumed.
+                        InputFile[:-4] is assumed.
 
 
 History
 -------
 Written,  MC, Mar 2016
 Modified, MC, Nov 2016 - read/write 'r'/'w' instead of 'rb'/'wb' for Python3
-Modified, MC, Nov 2016 - read list ofsource file names from file instead of command line
+Modified, MC, Nov 2016 - read list of source file names from file instead of command line
 """
 
 __all__ = ['make_d']
@@ -346,11 +346,11 @@ if __name__ == '__main__':
         import optparse # deprecated with Python rev 2.7
 
         ffile = None
-        usage = "Make dependency files for Fortran90 projects.\nUsage: %prog [options] InputFile OutputPath SourceFileList"
+        usage = "Make dependency files for Fortran90 projects.\nUsage: %prog [options] InputFile OutputPath FilesWithSourceFileList"
         parser = optparse.OptionParser(usage=usage)
         parser.add_option('-f', '--ffile', action='store',
                           default=ffile, dest='ffile', metavar='FortranFile',
-                          help='Not preprocessed Fortran source filename. If missing prefile[:-4] is assumed.')
+                          help='Not preprocessed Fortran source filename. If missing InputFile[:-4] is assumed.')
 
         (options, args) = parser.parse_args()
         ffile = options.ffile
@@ -363,8 +363,8 @@ if __name__ == '__main__':
                                          description='Make dependency files for Fortran90 projects.')
         parser.add_argument('-f', '--ffile', action='store',
                             default=ffile, dest='ffile', metavar='FortranFile',
-                            help='Not preprocessed Fortran source filename. If missing prefile[:-4] is assumed.')
-        parser.add_argument('files', nargs='*', default=None, metavar='InputFile OutputPath SourceFileList',
+                            help='Not preprocessed Fortran source filename. If missing InputFile[:-4] is assumed.')
+        parser.add_argument('files', nargs='*', default=None, metavar='InputFile OutputPath FilesWithSourceFileList',
                            help='Preprocessed input file, relative output directory (script assumes compilation into dirname(InputFile)/opath), file(s) with list(s) of all source files.')
 
         args  = parser.parse_args()
@@ -373,7 +373,7 @@ if __name__ == '__main__':
 
     if len(allin) < 3:
         print('Arguments: ', allin)
-        raise IOError('Script needs: InputFile OutputPath SourceFileList.')
+        raise IOError('Script needs: InputFile OutputPath FilesWithSourceFileList.')
 
     prefile  = allin[0]
     opath    = allin[1]

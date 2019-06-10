@@ -1,2 +1,1 @@
-- Pass file with all source files to make.d.py instead of passing all file names on command line
 - add/rm flags for specific files, e.g. from list of file:include_flag:remove_flag

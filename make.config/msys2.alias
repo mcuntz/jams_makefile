@@ -1,4 +1,11 @@
-# Set aliases so that one can, for example, say gnu to invoke standard gnu52 on msys2
+# -*- Makefile -*-
+#
+# Set aliases so that one can, for example, use compiler=ifort to invoke intel2017 on mcinra
+#
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
+#
+# Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
+#
 ifneq (,$(findstring $(compiler),gnu gfortran gcc))
     icompiler := gnu52
 endif

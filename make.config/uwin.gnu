@@ -1,32 +1,12 @@
 # -*- Makefile -*-
 
 #
-# Setup file for GNU gfortran 5.4 on Ubuntu on Windows
+# Setup file for GNU gfortran on Ubuntu on Windows
 #
-
-# The Makefile assumes the standard bin, include and lib directories for instaled libraries,
-# i.e. if SOMEDIR = /path/to/library, the make file will define the two dirs if not given:
-#   SOMEINC ?= SOMEDIR/include
-#   SOMELIB ?= SOMEDIR/lib
-# It also looks for SOMEFLAG and SOMEDEF for library linker and CPP flags, resp.
-
-# LICENSE
-#    This file is part of the JAMS makefile project.
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-#    The JAMS makefile project is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+# Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
 #
-#    The JAMS makefile project is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU Lesser General Public License for more details.
-#
-#    You should have received a copy of the GNU Lesser General Public License
-#    along with the JAMS makefile project. If not, see <http://www.gnu.org/licenses/>.
-#
-#    Copyright 2012-2016 Matthias Cuntz
 
 # Paths
 GNUDIR := /usr/
@@ -126,9 +106,3 @@ DOXYGENDIR := /usr/bin
 DOTDIR     := /usr/bin
 TEXDIR     := /usr/bin
 PERLDIR    := /usr/bin
-# iiLDPATH := /usr/local/flex/2.5.39-1_gcc_4.8.1_CentOS6/lib:/usr/local/bison/3.0.2-1_gcc_4.8.1_CentOS6/lib
-# ifneq ($(LDPATH),)
-#     LDPATH += :$(iiLDPATH)
-# else
-#     LDPATH := $(iiLDPATH)
-# endif

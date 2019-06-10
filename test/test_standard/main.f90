@@ -32,6 +32,11 @@ program standard
   real(sp), dimension(:),         allocatable :: data7
   character(256), dimension(:,:), allocatable :: attributes
 
+  ! ! test reshape, transpose
+  ! integer(i4) :: i1, i2, i3
+  ! real(sp), dimension(:,:,:),     allocatable :: data8, data9
+  ! real(sp), dimension(:,:),       allocatable :: data10, data11
+
   ! LAPACK
   integer(i4), parameter :: nn = 100
   real(dp),    dimension(nn,nn) :: dat
@@ -210,10 +215,19 @@ program standard
   ! ! --------------------------------------------------------------------
   ! ! Test
 
-  ! allocate(data7(nn))
-  ! forall(i=1:nn) data7(i) = real(i,sp)
-  ! data7(pack((/ (i, i=1, size(data7)) /), data7 > 5.0_sp)) = 0.0_sp
-  ! print*, data7
-  ! deallocate(data7)
+  ! allocate(data8(2, 3, 4))
+  ! forall (i1=1:2, i2=1:3, i3=1:4) data8(i1,i2,i3) = i1*1.+i2*10.+i3*100.
+  ! allocate(data9(4, 2, 3))
+  ! forall (i1=1:2, i2=1:3, i3=1:4) data9(i3,i1,i2) = i1*1.+i2*10.+i3*100.
+  ! print*, data9 - reshape(data8, shape(data9), order=(/2,3,1/))
+  ! deallocate(data8, data9)
+
+  ! allocate(data10(2, 3))
+  ! forall (i1=1:2, i2=1:3) data10(i1,i2) = i1*1.+i2*10.
+  ! allocate(data11(3, 2))
+  ! forall (i1=1:2, i2=1:3) data11(i2,i1) = i1*1.+i2*10.
+  ! print*, data11 - reshape(data10, shape(data11), order=(/2,1/))
+  ! print*, data11 - transpose(data10)
+  ! deallocate(data10, data11)
 
 end program standard
