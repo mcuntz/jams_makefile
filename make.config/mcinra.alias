@@ -6,18 +6,15 @@
 #
 # Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
 #
-ifneq (,$(findstring $(compiler),pgi16 pgi164 pgfortran16))
-    icompiler := pgfortran164
+ifneq (,$(findstring $(compiler),pgi pgi19 pgi194 pgfortran pgfortran19))
+    icompiler := pgfortran194
 endif
-ifneq (,$(findstring $(compiler),pgi pgi18 pgi184 pgfortran pgfortran18))
-    icompiler := pgfortran184
-endif
-ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran61 gcc61))
-    icompiler := gnu61
+ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran92 gcc92))
+    icompiler := gnu92
 endif
 ifneq (,$(findstring $(compiler),nag nagfor nagfor62))
     icompiler := nag62
 endif
-ifneq (,$(findstring $(compiler),intel ifort intel17 ifort17 ifort2017))
-    icompiler := intel2017
-endif
+# ifneq (,$(findstring $(compiler),intel ifort intel17 ifort17 ifort2017))
+#     icompiler := intel2017
+# endif

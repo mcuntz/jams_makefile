@@ -170,7 +170,7 @@ SRCPATH    := test/test_standard # where are the source files; whitespace separa
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.py script
-CHECKPATH  := test               # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+CHECKPATH  := ../../jams/fortran/test # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 TOOLPATH   := tools              # tools such as f2html
 DOXCONFIG  := ./doxygen.config   # the doxygen config file
 #
@@ -191,9 +191,9 @@ compiler := gnu
 # Releases: debug, release, true (last two are equal)
 release  := debug
 # netCDF versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
-netcdf   :=
+netcdf   := netcdf4
 # LAPACK (Linear Algebra Pack): true, [anything else]
-lapack   :=
+lapack   := true
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
 # Proj4 (Cartographic Projections Library): true, [anything else]

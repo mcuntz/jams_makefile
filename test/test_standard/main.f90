@@ -55,7 +55,7 @@ program standard
 
   isgood      = .true.
   allgood     = .true.
-  filename    = '../makefile/test/test_standard/pr_1961-2000.nc'
+  filename    = 'test/test_standard/pr_1961-2000.nc'
 
   ! --------------------------------------------------------------------
   ! Read netCDF file

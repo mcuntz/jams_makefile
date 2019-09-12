@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for Gnu compiler 6.1 at Matthias' Macbook Pro at INRA
+# Setup file for Gnu compiler 9.2 at Matthias' Macbook Pro at INRA
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
@@ -20,8 +20,8 @@ CC  := /usr/bin/cc  # clang, same as /usr/bin/gcc
 CXX := /usr/bin/c++ # clang, same as /usr/bin/gcc
 CPP := /usr/bin/cpp # could be 'gcc -E -cpp' on Linux but does not work on Mac
 ifeq ($(release),debug)
-    F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal -finit-real=<zero|inf|-inf|nan|snan>
-    FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized
+    F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized -Wno-aggressive-loop-optimizations # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal -finit-real=<zero|inf|-inf|nan|snan>
+    FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized -Wno-aggressive-loop-optimizations
     CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized
     CXXFLAGS += -pedantic -Wall -W -O -g -Wno-uninitialized
 else
@@ -54,30 +54,30 @@ IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpist
 IMSLDEF  := #-DIMSL
 
 # MKL
-INTEL  := /opt/intel/compilers_and_libraries_2017/mac
-MKLDIR := $(INTEL)/mkl
+INTEL  := #/opt/intel/compilers_and_libraries_2017/mac
+MKLDIR := #$(INTEL)/mkl
 ifeq ($(openmp),true)
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
 else
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
 endif
 MKLDEF := -DMKL
-MKL95DIR  := /opt/lib/mkl95_lapack/gfortran
-MKL95LIB  := $(MKL95DIR)/lib
-MKL95INC  := $(MKL95DIR)/include/intel64/lp64
+MKL95DIR  := #/opt/lib/mkl95_lapack/gfortran
+MKL95LIB  := #$(MKL95DIR)/lib
+MKL95INC  := #$(MKL95DIR)/include/intel64/lp64
 MKL95FLAG := -lmkl_lapack95_lp64
 MKL95DEF  := -DMKL95
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR  := /usr/local/netcdf-3.6.3-gfortran
+    NCDIR  :=
     NCFLAG := -lnetcdff -lnetcdf
     NCDEF  := -DNETCDF -DNETCDF3
 else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
     NCDEF    := -DNETCDF
-    NCFDIR   := /usr/local/netcdf-fortran-4.4.4-gfortran
+    NCFDIR   := /usr/local/netcdf-fortran-4.4.5-gfortran
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
@@ -102,15 +102,15 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -DLAPACK
 
 # OPENMPI
-OPENMPIDIR := /usr/local/openmpi-2.0.1-gfortran
+OPENMPIDIR := /usr/local/openmpi-3.1.4-gfortran
 OPENMPIDEF := -DMPI
 
 # MPICH
-MPICHDIR := /usr/local/mpich-3.3-gfortran
+MPICHDIR := /usr/local/mpich-3.3.1-gfortran
 MPICHDEF := -DMPI
 
 # Documentation
-DOXYGENDIR := /Applications/Doxygen.app/Contents/Resources
+DOXYGENDIR := /usr/local/bin
 DOTDIR     := /usr/local/bin
 TEXDIR     := /Library/TeX/texbin
 PERLDIR    := /usr/bin
