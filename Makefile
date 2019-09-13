@@ -867,7 +867,6 @@ ifneq ($(SRCPATH),)
 	rm -rf $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)),$(SRCPATH))
 	rm -f $(SRCPATH)/*make_check_test_file
 endif
-	rm -f *make_check_test_file
 
 cleanclean:
 	for irr in release debug ; do \
