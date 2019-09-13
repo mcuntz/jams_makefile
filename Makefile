@@ -166,7 +166,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := test/test_standard # where are the source files; whitespace separated list
+SRCPATH    := ../../jams/fortran/test/test_mo_elemeffects # where are the source files; whitespace separated list
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.py script
@@ -911,7 +911,8 @@ check:
 ifeq ($(PROGNAME),)
 	$(error Error: check and test must be done with given PROGNAME.)
 endif
-	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
+	isdir=${PWD} ; \
+	for i in $(shell ls -d $(CHECKPATH)/test_mo_minpack* $(CHECKPATH)/check* 2> /dev/null) ; do \
 	    rm -f "$(PROGNAME)" ; \
 	    j=$$(echo $${i} | grep -E '(minpack|netcdf3|qhull)$$') ; \
 	    inetcdf=$(netcdf) ; \
@@ -943,7 +944,7 @@ endif
 	        netcdf=$${inetcdf} static=$(static) proj=$(proj) imsl=$(imsl) mkl=$(mkl) \
 	        lapack=$(lapack) openmp=$(openmp) \
 	        EXTRA_LIBS="$${libextra}" EXTRA_DEFINES="$${defextra}" EXTRA_INCLUDES="$${incextra}" > /dev/null \
-	    && { $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ;} ; status=$$? ; \
+	    && { cd $${i} ; $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ; cd - > /dev/null 2>&1 ;} ; status=$$? ; \
 	    if [ $${status} != 0 ] ; then echo "$${i} failed!" ; fi ; \
 	    $(MAKE) -f $(THISMAKEFILE) -s \
 	        MAKEDPATH=$(MAKEDPATH) SRCPATH="$${i}" PROGPATH=$(PROGPATH) \

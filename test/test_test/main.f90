@@ -232,9 +232,9 @@ PROGRAM main
   ! test count line numbers
   ! write(*,*) ''
   ! call cpu_time(ctime1)
-  ! open(unit=20, file="fortran_test/test1e6.txt", status="old", form="formatted", action="read")
-  ! !open(unit=20, file="fortran_test/test1e7.txt", status="old", form="formatted", action="read")
-  ! !open(unit=20, file="fortran_test/test1e8.txt", status="old", form="formatted", action="read")
+  ! open(unit=20, file="test1e6.txt", status="old", form="formatted", action="read")
+  ! !open(unit=20, file="test1e7.txt", status="old", form="formatted", action="read")
+  ! !open(unit=20, file="test1e8.txt", status="old", form="formatted", action="read")
   ! ierr = 0
   ! cc   = 0
   ! do while (ierr==0)
