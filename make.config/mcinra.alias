@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 #
-# Set aliases so that one can, for example, use compiler=ifort to invoke intel2017 on mcinra
+# Set aliases so that one can, for example, use compiler=ifort to invoke intel2019 on mcinra
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
@@ -15,6 +15,6 @@ endif
 ifneq (,$(findstring $(compiler),nag nagfor nagfor62))
     icompiler := nag62
 endif
-# ifneq (,$(findstring $(compiler),intel ifort intel17 ifort17 ifort2017))
-#     icompiler := intel2017
-# endif
+ifneq (,$(findstring $(compiler),intel ifort intel19 ifort19 ifort2019))
+    icompiler := intel2019
+endif
