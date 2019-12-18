@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 from __future__ import print_function
 """
 usage: make.d.py [-h] [-f FortranFile] InputFile OutputPath FilesWithSourceFileList
@@ -20,9 +20,11 @@ optional arguments:
 
 History
 -------
-Written,  MC, Mar 2016
-Modified, MC, Nov 2016 - read/write 'r'/'w' instead of 'rb'/'wb' for Python3
-Modified, MC, Nov 2016 - read list of source file names from file instead of command line
+Written,  Matthias Cuntz, Mar 2016
+Modified, Matthias Cuntz, Nov 2016 - read/write 'r'/'w' instead of 'rb'/'wb' for Python3
+          Matthias Cuntz, Nov 2016 - read list of source file names from file instead of command line
+          Matthias Cuntz, Dec 2019 - use codecs module to ignore non-ascii characters in input files
+                                   - and allow UTF-8 path and file names
 """
 
 __all__ = ['make_d']
@@ -60,21 +62,23 @@ def make_dict(modfile, srcfiles):
 
     History
     -------
-    Written,  MC, Mar 2016
-    Modified, MC, Nov 2016 - write 'w' instead of 'wb' for Python3
+    Written,  Matthias Cuntz, Mar 2016
+    Modified, Matthias Cuntz, Nov 2016 - write 'w' instead of 'wb' for Python3
+              Matthias Cuntz, Dec 2019 - use codecs module to ignore non-ascii text in files
     """
     import os
     import re
+    import codecs
 
     if not os.path.exists(os.path.dirname(modfile)): os.mkdir(os.path.dirname(modfile))
-    of = open(modfile, 'w')
+    of = codecs.open(modfile, 'w', encoding='utf-8')
     for ff in srcfiles:
         # Go through line by line, remove comments and strings because the latter can include ';'.
         # Then split at at ';', if given.
         # The stripped line should start with 'module ' and there should be nothing after the module name,
         # as for example in lines such as 'module procedure ...'
         olist = list()
-        fi = open(ff, 'r')
+        fi = codecs.open(ff, 'r', encoding='ascii', errors='ignore')
         for line in fi:
             ll = line.rstrip().lower()   # everything lower case
             ll = re.sub('!.*$', '', ll)  # remove F90 comment
@@ -130,11 +134,13 @@ def get_dict(modfile):
 
     History
     -------
-    Written,  MC, Mar 2016
-    Modified, MC, Nov 2016 - read 'r' instead of 'rb' for Python3
+    Written,  Matthias Cuntz, Mar 2016
+    Modified, Matthias Cuntz, Nov 2016 - read 'r' instead of 'rb' for Python3
     """
+    import codecs
+
     odict = dict()
-    of = open(modfile, 'r')
+    of = codecs.open(modfile, 'r', encoding='utf-8')
     for line in of:
         # Dictionary lines should be like: /path/filename.suffix: mo_mod1 mo_mod2
         ll = line.rstrip().split(':')
@@ -169,16 +175,18 @@ def used_mods(ffile):
 
     History
     -------
-    Written,  MC, Mar 2016
-    Modified, MC, Nov 2016 - read 'r' instead of 'rb' for Python3
+    Written,  Matthias Cuntz, Mar 2016
+    Modified, Matthias Cuntz, Nov 2016 - read 'r' instead of 'rb' for Python3
+              Matthias Cuntz, Dec 2019 - use codecs module to ignore non-ascii text in files
     """
     import re
+    import codecs
 
     # Go through line by line, remove comments and strings because the latter can include ';'.
     # Then split at at ';', if given.
     # The stripped line should start with 'use ' and after module name should only be ', only: ...'
     olist = list()
-    of = open(ffile, 'r')
+    of = codecs.open(ffile, 'r', encoding='ascii', errors='ignore')
     for line in of:
         ll = line.rstrip().lower()   # everything lower case
         ll = re.sub('!.*$', '', ll)  # remove F90 comment
@@ -227,7 +235,7 @@ def f2suff(forfile, opath, suff):
 
     History
     -------
-    Written,  MC, Mar 2016
+    Written,  Matthias Cuntz, Mar 2016
     """
     import os
 
@@ -286,23 +294,27 @@ def make_d(prefile, opath, srcfilelist, ffile=None):
 
     History
     -------
-    Written,  MC, Mar 2016
-    Modified, MC, Nov 2016 - write 'w' instead of 'wb' for Python3
-    Modified, MC, Nov 2016 - read list of source file names from file instead of command line
+    Written,  Matthias Cuntz, Mar 2016
+    Modified, Matthias Cuntz, Nov 2016 - write 'w' instead of 'wb' for Python3
+              Matthias Cuntz, Nov 2016 - read list of source file names from file instead of command line
+              Matthias Cuntz, Dec 2019 - use codecs module to allow UTF-8 path and file names
     """
     import os
+    import codecs
 
     # If Fortran file ffile not given, assume that preprocessed file is ffile.pre,
     # or any other three letter suffix.
     if ffile:
-        forfile = ffile
+        forfile = ffile.decode('utf-8')
     else:
-        forfile = prefile[:-4]
+        forfile = prefile[:-4].decode('utf-8')
 
     # Get source file names from file list
     srcfiles = []
     for ff in srcfilelist:
-        srcfiles.extend(open(ff).read().split('\n'))
+        fs = codecs.open(ff,'r',encoding='utf-8')
+        srcfiles.extend(fs.read().split('\n'))
+        fs.close()
     srcfiles = [ ss for ss in srcfiles if ss.strip() != '' ]
 
     # Only one dictionary file for all files in first object directory
@@ -329,7 +341,7 @@ def make_d(prefile, opath, srcfilelist, ffile=None):
     # Write output .d file
     dfile = f2d(forfile,opath)
     ofile = f2o(forfile,opath)
-    df = open(dfile, 'w')
+    df = codecs.open(dfile, 'w', encoding='utf-8')
     print(dfile, ':', forfile, file=df)
     print(ofile, ':', dfile, end='', file=df)
     for im in imodfiles:

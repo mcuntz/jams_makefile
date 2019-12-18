@@ -216,6 +216,8 @@ PROGRAM main
   write(*,*) 'L0: ', ztmp(1:2)
   write(*,*) 'L1: ', log(ztmp(1:2))
 
+  write(*,*) '-> test o.k.'
+  
   ! test sum
   ! nx = 20_i8*60_i8*60_i8
   ! if (.not. allocated(eddy)) allocate(eddy(nx))
