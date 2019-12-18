@@ -323,7 +323,11 @@ else
 endif
 
 # allow release=true and debug=true; debug comes from command line only and supercedes release
+releases := release debug
 irelease := $(if $(debug),debug,$(release:true=release))
+ifeq (,$(filter $(irelease),$(releases)))
+    $(error Error: release '$(irelease)' not in known releases: $(releases))
+endif
 
 # this makefile
 THISMAKEFILE := $(lastword $(MAKEFILE_LIST))
