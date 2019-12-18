@@ -166,11 +166,11 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../../jams/fortran/test/test_mo_c13o2_photosynthesis # where are the source files; whitespace separated list
+SRCPATH    := test/test_test # where are the source files; whitespace separated list
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.py script
-CHECKPATH  := ../../jams/fortran/test # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
+CHECKPATH  := test               # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
 TOOLPATH   := tools              # tools such as f2html
 DOXCONFIG  := ./doxygen.config   # the doxygen config file
 #
@@ -870,6 +870,7 @@ endif
 ifneq ($(SRCPATH),)
 	rm -rf $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)),$(SRCPATH))
 	rm -f $(addsuffix /*make_check_test_file, $(SRCPATH))
+	rm -f $(addsuffix /*make_check_test_file, .)
 endif
 
 cleanclean:
@@ -916,7 +917,7 @@ ifeq ($(PROGNAME),)
 	$(error Error: check and test must be done with given PROGNAME.)
 endif
 	isdir=${PWD} ; \
-	for i in $(shell ls -d $(CHECKPATH)/test_mo_minpack* $(CHECKPATH)/check* 2> /dev/null) ; do \
+	for i in $(shell ls -d $(CHECKPATH)/test* $(CHECKPATH)/check* 2> /dev/null) ; do \
 	    rm -f "$(PROGNAME)" ; \
 	    j=$$(echo $${i} | grep -E '(minpack|netcdf3|qhull)$$') ; \
 	    inetcdf=$(netcdf) ; \
