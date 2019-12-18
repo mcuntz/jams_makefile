@@ -166,7 +166,7 @@ SHELL = /bin/bash
 #
 
 # . is current directory, .. is parent directory
-SRCPATH    := ../../jams/fortran/test/test_mo_elemeffects # where are the source files; whitespace separated list
+SRCPATH    := ../../jams/fortran/test/test_mo_c13o2_photosynthesis # where are the source files; whitespace separated list
 PROGPATH   := .                  # where shall be the executable
 CONFIGPATH := make.config        # where are the $(system).$(compiler) files
 MAKEDPATH  := $(CONFIGPATH)      # where is the make.d.py script
@@ -865,7 +865,7 @@ ifneq ($(LIBNAME),)
 endif
 ifneq ($(SRCPATH),)
 	rm -rf $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)),$(SRCPATH))
-	rm -f $(SRCPATH)/*make_check_test_file
+	rm -f $(addsuffix /*make_check_test_file, $(SRCPATH))
 endif
 
 cleanclean:
