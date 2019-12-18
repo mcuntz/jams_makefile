@@ -68,26 +68,26 @@ MKL95DEF  := #-DMKL95
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
-    NCDIR  := /usr/local/netcdf-3.6.3-gfortran
-    NCFLAG := -lnetcdff -lnetcdf
-    NCDEF  := -DNETCDF -DNETCDF3
+    NCDIR  :=
+    NCFLAG := #-lnetcdff -lnetcdf
+    NCDEF  := #-DNETCDF -DNETCDF3
 else
-    NCDIR    := #/usr/local
-    NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
-    NCFDIR   := #/usr/local/netcdf-fortran-4.4.4-gfortran
-    NCFFLAG  := -lnetcdff
-    HDF5LIB  := #/usr/local/lib
-    HDF5FLAG := -lhdf5_hl -lhdf5
-    SZLIB    := #/usr/local/lib
-    SZFLAG   := -lsz
-    ZLIB     := #/usr/lib/x86_64-linux-gnu
-    ZFLAG    := -lz
+    NCDIR    :=
+    NCFLAG   := #-lnetcdf
+    NCDEF    := #-DNETCDF
+    NCFDIR   :=
+    NCFFLAG  := #-lnetcdff
+    HDF5LIB  :=
+    HDF5FLAG := #-lhdf5_hl -lhdf5
+    SZLIB    :=
+    SZFLAG   := #-lsz
+    ZLIB     :=
+    ZFLAG    := #-lz
 endif
 
 # PROJ
-PROJ4DIR  := #/usr/local
-PROJ4FLAG := -lproj
+PROJ4DIR  :=
+PROJ4FLAG := #-lproj
 FPROJDIR  :=
 FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
 FPROJDEF  := #-DFPROJ
@@ -102,13 +102,8 @@ OPENMPIDIR := #/usr/local/openmpi-2.0.3-gfortran
 OPENMPIDEF := -DMPI
 
 # Documentation
-DOXYGENDIR := #/usr/bin
-DOTDIR     := #/usr/bin
+DOXYGENDIR :=
+DOTDIR     :=
 TEXDIR     := /usr/bin
 PERLDIR    := /usr/bin
-# iiLDPATH := /usr/local/flex/2.5.39-1_gcc_4.8.1_CentOS6/lib:/usr/local/bison/3.0.2-1_gcc_4.8.1_CentOS6/lib
-# ifneq ($(LDPATH),)
-#     LDPATH += :$(iiLDPATH)
-# else
-#     LDPATH := $(iiLDPATH)
-# endif
+

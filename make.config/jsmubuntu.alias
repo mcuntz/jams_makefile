@@ -6,6 +6,9 @@
 #
 # Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
 #
+ifneq (,$(findstring $(compiler),pgi pgi18 pgi1810 pgfortran pgfortran18))
+    icompiler := pgfortran1810
+endif
 ifneq (,$(findstring $(compiler),gnu gfortran gcc))
     icompiler := gnu54
 endif
