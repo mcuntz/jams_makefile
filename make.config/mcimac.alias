@@ -1,0 +1,14 @@
+# -*- Makefile -*-
+#
+# Set aliases so that one can, for example, use compiler=gnu to invoke gfortran 9.2 on mcimac
+#
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
+#
+# Copyright (c) 2011-2010 Matthias Cuntz - mc (at) macu (dot) de
+#
+ifneq (,$(findstring $(compiler),pgi pgi19 pgi1910 pgfortran pgfortran19 pgfortran1910))
+    icompiler := pgi1910
+endif
+ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran92 gcc92))
+    icompiler := gnu92
+endif
