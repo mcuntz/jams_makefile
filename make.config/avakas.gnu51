@@ -32,13 +32,13 @@ F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
 FCFLAGS  += -ffixed-form -ffixed-line-length-132 -x f77-cpp-input
 CFLAGS   +=
 MODFLAG  := -J# space significant
-DEFINES  += -DGFORTRAN -DgFortran
+DEFINES  += -D__GFORTRAN__ -D__gFortran__
 # OpenMP
 F90OMPFLAG := -fopenmp
 FCOMPFLAG  := -fopenmp
 COMPFLAG   := -fopenmp
 LDOMPFLAG  := -fopenmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 LIBS  += -L$(GNULIB)
@@ -54,21 +54,21 @@ ifeq ($(openmp),true)
 else
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
 endif
-MKLDEF := -DMKL
+MKLDEF := -D__MKL__
 # INTELLIB  := $(INTEL)/compiler/lib/intel64
 MKL95DIR  :=
 MKL95FLAG := #-lmkl_blas95_lp64 -lmkl_lapack95_lp64
-MKL95DEF  := #-DMKL95
+MKL95DEF  := #-D__MKL95__
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /home/mcuntz/local/netcdf-3.6.3-gfortran
     NCFLAG := -lnetcdff -lnetcdf
-    NCDEF  := -DNETCDF -DNETCDF3
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
 else
     NCDIR    := /home/mcuntz/local
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /home/mcuntz/local/netcdf-fortran-4.4.4-gfortran
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /home/mcuntz/local
@@ -84,19 +84,19 @@ PROJ4DIR  := /home/mcuntz/local
 PROJ4FLAG := -lproj
 FPROJDIR  :=
 FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
-FPROJDEF  := #-DFPROJ
+FPROJDEF  := #-D__FPROJ__
 
 # LAPACK
 LAPACKLIB  := /cm/shared/apps/lapack/gcc/64/3.3.0
 LAPACKFLAG := -llapack
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__
 BLASLIB    := /cm/shared/apps/blas/gcc/1/lib64
 BLASFLAG   := -lblas
 
 # MPI
 OPENMPIDIR := /cm/shared/apps/openmpi/gcc/64/1.4.4
 MPILIB := /cm/shared/apps/openmpi/gcc/64/1.4.4/lib64
-OPENMPIDEF := -DMPI
+OPENMPIDEF := -D__MPI__
 
 # Documentation
 DOXYGENDIR :=

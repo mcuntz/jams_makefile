@@ -42,14 +42,14 @@ F90FLAGS += -Mpreprocess -Mfreeform -tp=p7-64
 FCFLAGS  += -Mfixed -tp=p7-64
 CFLAGS   +=
 MODFLAG  := -module # space significant
-DEFINES  += -DpgiFortran -DpgiFortran154
+DEFINES  += -D__pgiFortran__ -D__pgiFortran154__
 LDFLAGS  += -pgf90libs
 # OpenMP
 F90OMPFLAG := -openmp
 FCOMPFLAG  := -openmp
 COMPFLAG   := -openmp
 LDOMPFLAG  := -openmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 LIBS  += -L$(PGILIB)
@@ -61,7 +61,7 @@ ifeq ($(netcdf),netcdf3)
 else
     NCDIR    := /usr/local/netcdf/4.3.3-1
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /usr/local/netcdf-fortran/4.4.1-2_pgi-15.9
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/hdf5/1.8.14-1/lib
@@ -79,11 +79,11 @@ PROJ4FLAG := -lproj
 # LAPACK
 LAPACKDIR  := /usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
 LAPACKFLAG := -lblas -llapack
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__
 
 # MPI
 # OPENMPIDIR := /usr/local/openmpi/pgi/1.8.4
-# OPENMPIDEF := -DMPI
+# OPENMPIDEF := -D__MPI__
 OPENMPIDIR :=
 
 # Documentation

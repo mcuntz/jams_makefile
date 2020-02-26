@@ -35,13 +35,13 @@ F90FLAGS += -fpp -nofixed -assume byterecl -fp-model precise -m64 -ip -xHost -di
 FCFLAGS  += -assume byterecl -cpp -fp-model precise -m64 -fixed -ip -xHost -diag-disable=10382
 CFLAGS   += -m64 -std=c99
 MODFLAG  := -module # space significant
-DEFINES  += -DINTEL -DINTEL_COMPILER
+DEFINES  += -D__INTEL__ -D__INTEL_COMPILER__
 # OpenMP
 F90OMPFLAG := -fopenmp
 FCOMPFLAG  := -fopenmp
 COMPFLAG   := -fopenmp
 LDOMPFLAG  := -fopenmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 ifeq ($(istatic),static)
@@ -56,7 +56,7 @@ RPATH += -Wl,-rpath,$(INTELLIB)
 # IMSL
 IMSLDIR  :=
 IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
-IMSLDEF  := #-DIMSL
+IMSLDEF  := #-D__IMSL__
 
 # MKL
 MKLDIR := $(INTEL)/mkl
@@ -65,22 +65,22 @@ ifeq ($(openmp),true)
 else
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
 endif
-MKLDEF := -DMKL
+MKLDEF := -D__MKL__
 MKL95DIR  := /opt/lib/mkl95_lapack/ifort
 MKL95LIB  := $(MKL95DIR)/lib
 MKL95INC  := $(MKL95DIR)/include/intel64/lp64
 MKL95FLAG := -lmkl_lapack95_lp64
-MKL95DEF  := -DMKL95
+MKL95DEF  := -D__MKL95__
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /usr/local/netcdf-3.6.3-ifort
     NCFLAG := -lnetcdff -lnetcdf
-    NCDEF  := -DNETCDF -DNETCDF3
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
 else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /usr/local/netcdf-fortran-4.4.4-ifort
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
@@ -98,16 +98,16 @@ PROJ4FLAG := -lproj
 FPROJDIR  :=
 FPROJLIB  :=
 FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
-FPROJDEF  := #-DFPROJ
+FPROJDEF  := #-D__FPROJ__
 
 # LAPACK
 LAPACKDIR  :=
 LAPACKFLAG := -framework Accelerate
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__
 
 # MPI
 OPENMPIDIR := /usr/local/openmpi-2.0.1-ifort
-OPENMPIDEF := -DMPI
+OPENMPIDEF := -D__MPI__
 
 # Documentation
 DOXYGENDIR := /Applications/Doxygen.app/Contents/Resources

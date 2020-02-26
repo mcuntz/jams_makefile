@@ -35,13 +35,13 @@ F90FLAGS += -nofixed -assume byterecl -cpp -fp-model source -m64 -assume realloc
 MODFLAG  := -module # space significant
 FCFLAGS  += -assume byterecl -cpp -fp-model source -m64 -fixed
 CFLAGS   += -m64 -std=c99
-DEFINES  += -DINTEL -DINTEL_COMPILER
+DEFINES  += -D__INTEL__ -D__INTEL_COMPILER__
 # OpenMP
 F90OMPFLAG := -openmp
 FCOMPFLAG  := -openmp
 COMPFLAG   := -openmp
 LDOMPFLAG  := -openmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 ifeq ($(istatic),static)
@@ -61,22 +61,22 @@ ifeq ($(openmp),true)
 else
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
 endif
-MKLDEF := -DMKL
+MKLDEF := -D__MKL__
 MKL95DIR  := $(MKLDIR)
 MKL95INC  := $(MKL95DIR)/include/intel64/lp64
 MKL95LIB  := $(MKL95DIR)/lib/intel64
 MKL95FLAG := -lmkl_blas95_lp64 -lmkl_lapack95_lp64
-MKL95DEF  := -DMKL95
+MKL95DEF  := -D__MKL95__
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /apps/netcdf/3.6.3
     NCFLAG := -lnetcdff -lnetcdf
-    NCDEF  := -DNETCDF -DNETCDF3
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
 else
     NCDIR    := /apps/netcdf/4.3.2
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /apps/netcdf/4.3.2
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /apps/hdf5/1.8.13-mpi/lib

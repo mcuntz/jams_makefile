@@ -38,13 +38,13 @@ F90FLAGS += -nofixed -assume byterecl -cpp -fp-model source -m64 -assume realloc
 MODFLAG  := -module # space significant
 FCFLAGS  += -assume byterecl -cpp -fp-model source -m64 -fixed
 CFLAGS   += -m64 -std=c99
-DEFINES  += -DINTEL -DINTEL_COMPILER
+DEFINES  += -D__INTEL__ -D__INTEL_COMPILER__
 # OpenMP
 F90OMPFLAG := -openmp
 FCOMPFLAG  := -openmp
 COMPFLAG   := -openmp
 LDOMPFLAG  := -openmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 
 # Linking
@@ -75,22 +75,22 @@ ifeq ($(openmp),true)
 else
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
 endif
-MKLDEF := -DMKL
+MKLDEF := -D__MKL__
 MKL95DIR  := $(MKLDIR)
 MKL95INC  := $(MKL95DIR)/include/intel64/lp64
 MKL95LIB  := $(MKL95DIR)/lib/intel64
 MKL95FLAG := -lmkl_blas95_lp64 -lmkl_lapack95_lp64
-MKL95DEF  := -DMKL95
+MKL95DEF  := -D__MKL95__
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /usr/local/netcdf/3.6.3_intel_12.0.4
     NCFLAG := -lnetcdff -lnetcdf
-    NCDEF  := -DNETCDF -DNETCDF3
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
 else
     NCDIR    := /usr/local/netcdf/4.3.2-2_intel_13.1.0_CentOS6
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /usr/local/netcdf-fortran/4.2_intel_13.1.0_CentOS6
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/hdf5/1.8.12-1_intel_13.1.0_CentOS6/lib
@@ -106,16 +106,16 @@ PROJ4DIR  := /usr/local/proj/4.7.0
 PROJ4FLAG := -lproj
 FPROJDIR  := /usr/local/fproj/4.7.0_intel11.1.075
 FPROJFLAG := -lfproj4 $(FPROJLIB)/proj4.o
-FPROJDEF  := -DFPROJ
+FPROJDEF  := -D__FPROJ__
 
 # LAPACK
 LAPACKDIR  := /usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
 LAPACKFLAG := -lblas -llapack
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__
 
 # MPI
 OPENMPIDIR := /usr/local/openmpi/intel/1.8.4-2
-OPENMPIDEF := -DMPI
+OPENMPIDEF := -D__MPI__
 
 # Documentation
 DOXYGENDIR := /usr/local/doxygen/1.8.7-1_gcc_4.8.1_CentOS6/bin

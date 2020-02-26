@@ -36,14 +36,14 @@ FCFLAGS  += -ffixed-form -ffixed-line-length-132 -x f77-cpp-input
 CFLAGS   +=
 CXXFLAGS +=
 MODFLAG  := -J# space significant
-DEFINES  += -DGFORTRAN -DgFortran
+DEFINES  += -D__GFORTRAN__ -D__gFortran__
 # OpenMP
 F90OMPFLAG := -fopenmp
 FCOMPFLAG  := -fopenmp
 COMPFLAG   := -fopenmp
 CXXOMPFLAG := -fopenmp
 LDOMPFLAG  := -fopenmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 LIBS  += -L$(GNULIB)
@@ -55,7 +55,7 @@ ifeq ($(netcdf),netcdf3)
 else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /usr/local/netcdf-fortran-4.4.4-gfortran
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
@@ -70,4 +70,4 @@ endif
 # LAPACK
 LAPACKDIR  :=
 LAPACKFLAG := -framework Accelerate
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__

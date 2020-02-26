@@ -31,13 +31,13 @@ F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
 FCFLAGS  += -ffixed-form -ffixed-line-length-132
 CFLAGS   +=
 MODFLAG  := -J# space significant
-DEFINES  += -DGFORTRAN -DgFortran
+DEFINES  += -D__GFORTRAN__ -D__gFortran__
 # OpenMP
 F90OMPFLAG := -fopenmp
 FCOMPFLAG  := -fopenmp
 COMPFLAG   := -fopenmp
 LDOMPFLAG  := -fopenmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 LIBS  += -L$(GNULIB)
@@ -46,7 +46,7 @@ RPATH += -Wl,-rpath,$(GNULIB)
 # IMSL
 IMSLDIR  :=
 IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
-IMSLDEF  := #-DIMSL
+IMSLDEF  := #-D__IMSL__
 
 # MKL
 INTEL  :=
@@ -56,22 +56,22 @@ ifeq ($(openmp),true)
 else
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
 endif
-MKLDEF := -DMKL
+MKLDEF := -D__MKL__
 MKL95DIR  :=
 MKL95LIB  := # $(MKL95DIR)/lib
 MKL95INC  := # $(MKL95DIR)/include/intel64/lp64
 MKL95FLAG := -lmkl_lapack95_lp64
-MKL95DEF  := -DMKL95
+MKL95DEF  := -D__MKL95__
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  :=
     NCFLAG := -lnetcdff -lnetcdf
-    NCDEF  := -DNETCDF -DNETCDF3
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
 else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   :=
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
@@ -89,16 +89,16 @@ PROJ4FLAG := -lproj
 FPROJDIR  :=
 FPROJLIB  :=
 FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
-FPROJDEF  := #-DFPROJ
+FPROJDEF  := #-D__FPROJ__
 
 # LAPACK
 LAPACKDIR  :=
 LAPACKFLAG := -framework Accelerate
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__
 
 # MPI
 OPENMPIDIR  :=
-OPENMPIDEF  := -DMPI
+OPENMPIDEF  := -D__MPI__
 
 # Documentation
 DOXYGENDIR :=

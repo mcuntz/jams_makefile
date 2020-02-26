@@ -32,13 +32,13 @@ F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
 FCFLAGS  += -ffixed-form -ffixed-line-length-132 -x f77-cpp-input
 CFLAGS   +=
 MODFLAG  := -J# space significant
-DEFINES  += -DGFORTRAN -DgFortran
+DEFINES  += -D__GFORTRAN__ -D__gFortran__
 # OpenMP
 F90OMPFLAG := -fopenmp
 FCOMPFLAG  := -fopenmp
 COMPFLAG   := -fopenmp
 LDOMPFLAG  := -fopenmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 LIBS  += -L$(GNULIB)
@@ -56,7 +56,7 @@ ifeq ($(netcdf),netcdf3)
 else
     NCDIR    := /opt/sharcnet/netcdf/4.2/gcc
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   :=
     NCFFLAG  := #-lnetcdff
     HDF5LIB  := /opt/sharcnet/hdf/5.1.8.11/serial/lib
@@ -72,11 +72,11 @@ endif
 LAPACKDIR  := #/usr/lib
 LAPACKLIB  := #$(LAPACKDIR)/lapack
 LAPACKFLAG := #-lblas -llapack
-LAPACKDEF  := #-DLAPACK
+LAPACKDEF  := #-D__LAPACK__
 
 # MPI
 OPENMPIDIR := /usr/local/openmpi/gcc/1.8.4-2
-OPENMPIDEF := -DMPI
+OPENMPIDEF := -D__MPI__
 
 iiLDPATH   := 
 ifneq ($(LDPATH),)

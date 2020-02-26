@@ -50,7 +50,7 @@ F90FLAGS += -Mpreprocess -Mfreeform -tp=p7-64 -Mallocatable=03
 FCFLAGS  += -Mfixed -tp=p7-64
 CFLAGS   +=
 MODFLAG  := -module # space significant
-DEFINES  += -DpgiFortran
+DEFINES  += -D__pgiFortran__
 LDFLAGS  += -pgf90libs
 
 # Linking

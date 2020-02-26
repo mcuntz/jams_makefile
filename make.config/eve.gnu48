@@ -36,14 +36,14 @@ FCFLAGS  += -ffixed-form -ffixed-line-length-132 -x f77-cpp-input
 CFLAGS   +=
 CXXFLAGS +=
 MODFLAG  := -J# space significant
-DEFINES  += -DGFORTRAN -DgFortran
+DEFINES  += -D__GFORTRAN__ -D__gFortran__
 # OpenMP
 F90OMPFLAG := -fopenmp
 FCOMPFLAG  := -fopenmp
 COMPFLAG   := -fopenmp
 CXXOMPFLAG := -fopenmp
 LDOMPFLAG  := -fopenmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 LIBS  += -L$(GNULIB)
@@ -65,21 +65,21 @@ ifeq ($(openmp),true)
 else
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
 endif
-MKLDEF := -DMKL
+MKLDEF := -D__MKL__
 INTELLIB  := $(INTEL)/compiler/lib/intel64
 MKL95DIR  :=
 MKL95FLAG := #-lmkl_blas95_lp64 -lmkl_lapack95_lp64
-MKL95DEF  := #-DMKL95
+MKL95DEF  := #-D__MKL95__
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /home/cuntz/local/netcdf-3.6.3-gcc_4.8.1_CentOS6
     NCFLAG := -lnetcdff -lnetcdf
-    NCDEF  := -DNETCDF -DNETCDF3
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
 else
     NCDIR    := /usr/local/netcdf/4.3.2_gcc_4.8.1_CentOS6
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /usr/local/netcdf-fortran/4.2_gcc_4.8.1_CentOS6
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/hdf5/1.8.12-1_gcc_4.8.1_CentOS6/lib
@@ -95,16 +95,16 @@ PROJ4DIR  := /usr/local/proj/4.8.0-2_gcc_4.8.1_CentOS6
 PROJ4FLAG := -lproj
 FPROJDIR  :=
 FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
-FPROJDEF  := #-DFPROJ
+FPROJDEF  := #-D__FPROJ__
 
 # LAPACK
 LAPACKDIR  := /usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
 LAPACKFLAG := -lblas -llapack
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__
 
 # MPI
 OPENMPIDIR := /usr/local/openmpi/gcc/1.8.4-2
-OPENMPIDEF := -DMPI
+OPENMPIDEF := -D__MPI__
 
 # Documentation
 DOXYGENDIR := /usr/local/doxygen/1.8.7-1_gcc_4.8.1_CentOS6/bin

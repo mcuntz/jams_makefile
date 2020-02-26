@@ -530,7 +530,7 @@ endif
 include $(MAKEINC)
 
 # Always use -DCFORTRAN for mixed C and Fortran compilations
-DEFINES += -DCFORTRAN
+DEFINES += -D__CFORTRAN__
 
 # Start group for cyclic search in static linking
 iLIBS :=
@@ -684,7 +684,7 @@ endif
 #
 
 ifeq ($(irelease),debug)
-    DEFINES += -DDEBUG
+    DEFINES += -D__DEBUG__
 endif
 
 # Mac OS X is special, there is (almost) no static linking; otherwise close static group
@@ -932,7 +932,7 @@ endif
 	            *minpack) true ;; \
 	            *netcdf3) inetcdf= ; \
 	                      incextra="-I$${i}/../../netcdf3/.$(strip $(icompiler)).$(strip $(irelease))" ; \
-	                      defextra='-DNETCDF3' ;; \
+	                      defextra='-D__NETCDF3__' ;; \
 	            *qhull)   true ;; \
 	        esac ; \
 	        $(MAKE) -f $(THISMAKEFILE) -s \

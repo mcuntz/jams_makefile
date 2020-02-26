@@ -32,13 +32,13 @@ F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
 FCFLAGS  += -ffixed-form -ffixed-line-length-132 -x f77-cpp-input
 CFLAGS   +=
 MODFLAG  := -J# space significant
-DEFINES  += -DGFORTRAN -DgFortran
+DEFINES  += -D__GFORTRAN__ -D__gFortran__
 # OpenMP
 F90OMPFLAG := -fopenmp
 FCOMPFLAG  := -fopenmp
 COMPFLAG   := -fopenmp
 LDOMPFLAG  := -fopenmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 LIBS  += -L$(GNULIB)
@@ -50,7 +50,7 @@ ifeq ($(netcdf),netcdf3)
 else
     NCDIR    := /opt/local
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /opt/local/netcdf-fortran-4.4.1-gfortran
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /opt/local/lib
@@ -64,4 +64,4 @@ endif
 
 # MPI
 OPENMPIDIR := /usr/lib/openmpi
-OPENMPIDEF := -DMPI
+OPENMPIDEF := -D__MPI__

@@ -46,13 +46,13 @@ MODFLAG  := -mdir # space significant
 FCFLAGS  += -fixed
 CFLAGS   +=
 LDFLAGS  += -ideclient -unsharedrts
-DEFINES  += -DNAG -DNAGf90Fortran
+DEFINES  += -D__NAG__ -D__NAGf90Fortran__
 # OpenMP
 F90OMPFLAG := -openmp
 FCOMPFLAG  := -openmp
 COMPFLAG   := -openmp
 LDOMPFLAG  := -openmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 LIBS  += -L$(NAGLIB) #$(NAGLIB)/thsafe.o
@@ -64,7 +64,7 @@ ifeq ($(netcdf),netcdf3)
 else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /usr/local/netcdf_4.2_nag53
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
@@ -83,7 +83,7 @@ PROJ4FLAG := -lproj
 # LAPACK
 LAPACKDIR  :=
 LAPACKFLAG := -framework Accelerate
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__
 
 # Documentation
 DOXYGENDIR := /usr/local/bin

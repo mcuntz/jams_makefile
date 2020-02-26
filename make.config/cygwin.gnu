@@ -32,14 +32,14 @@ F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
 FCFLAGS  += -ffixed-form -ffixed-line-length-132 -x f77-cpp-input
 CFLAGS   +=
 MODFLAG  := -J# space significant
-DEFINES  += -DGFORTRAN -DgFortran -DCYGWIN
+DEFINES  += -D__GFORTRAN__ -D__gFortran__ -D__CYGWIN__
 # LDFLAGS  += -L$(GNULIB) -lgfortran -Wl,-rpath,$(GNULIB)
 # OpenMP
 F90OMPFLAG := -fopenmp
 FCOMPFLAG  := -fopenmp
 COMPFLAG   := -fopenmp
 LDOMPFLAG  := -fopenmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 LIBS  += -L$(GNULIB)
@@ -49,11 +49,11 @@ RPATH += -Wl,-rpath,$(GNULIB)
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /usr/local/netcdf/3.6.3_gcc46
     NCFLAG := -lnetcdff -lnetcdf
-    NCDEF  := -DNETCDF -DNETCDF3
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
 else
     NCDIR    := /usr
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /usr
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/lib
@@ -64,7 +64,7 @@ endif
 LAPACKDIR  := /usr/lib
 LAPACKLIB  := $(LAPACKDIR)/lapack
 LAPACKFLAG := -lblas -llapack
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__
 
 # Documentation
 DOXYGENDIR := /usr/bin

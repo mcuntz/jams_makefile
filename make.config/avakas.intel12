@@ -44,14 +44,14 @@ MODFLAG  := -module # space significant
 FCFLAGS  += -assume byterecl -cpp -fp-model source -m64 -fixed
 # CFLAGS   += -m64 -std=c99
 CFLAGS   +=
-DEFINES  += -DINTEL -DINTEL_COMPILER
+DEFINES  += -D__INTEL__ -D__INTEL_COMPILER__
 # OpenMP
 F90OMPFLAG := -openmp
 FCOMPFLAG  := -openmp
 # COMPFLAG   := -openmp
 COMPFLAG   := -fopenmp
 LDOMPFLAG  := -openmp
-OMPDEFINE  := -DOPENMP
+OMPDEFINE  := -D__OPENMP__
 
 # Linking
 ifeq ($(istatic),static)
@@ -73,21 +73,21 @@ ifeq ($(openmp),true)
 else
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
 endif
-MKLDEF := -DMKL
+MKLDEF := -D__MKL__
 # INTELLIB  := $(INTEL)/compiler/lib/intel64
 MKL95DIR  :=
 MKL95FLAG := #-lmkl_blas95_lp64 -lmkl_lapack95_lp64
-MKL95DEF  := #-DMKL95
+MKL95DEF  := #-D__MKL95__
 
 # NETCDF
 ifeq ($(netcdf),netcdf3)
     NCDIR  := /home/mcuntz/local/netcdf-3.6.3-ifort
     NCFLAG := -lnetcdff -lnetcdf
-    NCDEF  := -DNETCDF -DNETCDF3
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
 else
     NCDIR    := /home/mcuntz/local
     NCFLAG   := -lnetcdf
-    NCDEF    := -DNETCDF
+    NCDEF    := -D__NETCDF__
     NCFDIR   := /home/mcuntz/local/netcdf-fortran-4.4.4-ifort
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /home/mcuntz/local/lib
@@ -103,19 +103,19 @@ PROJ4DIR  := /home/mcuntz/local
 PROJ4FLAG := -lproj
 FPROJDIR  :=
 FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
-FPROJDEF  := #-DFPROJ
+FPROJDEF  := #-D__FPROJ__
 
 # LAPACK
 LAPACKLIB  := /cm/shared/apps/lapack/intel/64/3.3.0
 LAPACKFLAG := -llapack
-LAPACKDEF  := -DLAPACK
+LAPACKDEF  := -D__LAPACK__
 BLASLIB    := /cm/shared/apps/blas/intel/1/lib64
 BLASFLAG   := -lblas
 
 # MPI
 OPENMPIDIR := /cm/shared/apps/openmpi/intel/64/1.4.4
 MPILIB := /cm/shared/apps/openmpi/intel/64/1.4.4/lib64
-OPENMPIDEF := -DMPI
+OPENMPIDEF := -D__MPI__
 
 # Documentation
 DOXYGENDIR :=
