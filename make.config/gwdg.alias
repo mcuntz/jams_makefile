@@ -1,0 +1,11 @@
+# -*- Makefile -*-
+#
+# Set aliases so that one can, for example, use compiler=ifort to invoke intel2017 on mcinra
+#
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
+#
+# Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
+#
+ifneq (,$(findstring $(compiler),intel intel2016 ifort ifort16 ifort2016))
+    icompiler := ifort
+endif
