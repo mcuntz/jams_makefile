@@ -25,6 +25,7 @@ Modified, Matthias Cuntz, Nov 2016 - read/write 'r'/'w' instead of 'rb'/'wb' for
           Matthias Cuntz, Nov 2016 - read list of source file names from file instead of command line
           Matthias Cuntz, Dec 2019 - use codecs module to ignore non-ascii characters in input files
                                    - and allow UTF-8 path and file names
+          Matthias Cuntz, Mar 2020 - Rectified that UTF-8 path and file names worked only for Python2
 """
 
 __all__ = ['make_d']
@@ -304,10 +305,17 @@ def make_d(prefile, opath, srcfilelist, ffile=None):
 
     # If Fortran file ffile not given, assume that preprocessed file is ffile.pre,
     # or any other three letter suffix.
-    if ffile:
-        forfile = ffile.decode('utf-8')
-    else:
-        forfile = prefile[:-4].decode('utf-8')
+    try:
+        if ffile:
+            forfile = ffile.decode('utf-8')
+        else:
+            forfile = prefile[:-4].decode('utf-8')
+    except AttributeError:
+        if ffile:
+            forfile = ffile
+        else:
+            forfile = prefile[:-4]
+
 
     # Get source file names from file list
     srcfiles = []
