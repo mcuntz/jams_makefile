@@ -12,8 +12,8 @@ endif
 ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran92 gcc92))
     icompiler := gnu92
 endif
-ifneq (,$(findstring $(compiler),nag nagfor nagfor62))
-    icompiler := nag62
+ifneq (,$(findstring $(compiler),nag nagfor nagfor70))
+    icompiler := nag70
 endif
 ifneq (,$(findstring $(compiler),intel ifort intel19 ifort19 ifort2019))
     icompiler := intel2019

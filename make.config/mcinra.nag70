@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for NAG compiler 6.2 at Matthias' MacBook Pro at INRA
+# Setup file for NAG compiler 7.0 at Matthias' MacBook Pro at INRA
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
@@ -23,7 +23,8 @@ ifeq ($(release),debug)
     # The compiler switch "-w=ques" turns off the message:
     #   Comment begins with the OpenMP sentinel but the -openmp option was not used
     # but it also turns off
-    #   Intrinsic function CMPLX with double precision argument and no KIND argument returns single precision result
+    #   Intrinsic function CMPLX with double precision argument and no KIND argument
+    #     returns single precision result
     #   KIND argument to intrinsic LBOUND specifies a small integer kind
     #   KIND argument to intrinsic LEN specifies a small integer kind
     #   Expression in OpenMP clause is always .TRUE.
