@@ -1,0 +1,14 @@
+# -*- Makefile -*-
+#
+# Set aliases so that one can, for example, use compiler=ifort to invoke intel2020 on mc16
+#
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
+#
+# Copyright (c) 2011-2020 Matthias Cuntz - mc (at) macu (dot) de
+#
+ifneq (,$(findstring $(compiler),pgi pgi19 pgi1910 pgfortran pgfortran19))
+    icompiler := pgfortran1910
+endif
+ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran102 gcc102))
+    icompiler := gnu102
+endif

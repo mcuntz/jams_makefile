@@ -16,6 +16,7 @@ INTELDIR := $(INTEL)/compiler
 INTELLIB := $(INTELDIR)/lib
 
 # Compiling
+# F90 := INTEL_LICENSE_FILE=/Users/cuntz/bin/licences/ifort_licence_2019.lic.mcinra $(INTELBIN)/ifort
 F90 := $(INTELBIN)/ifort
 FC  := $(F90)
 CC  := /usr/bin/cc  # clang, same as /usr/bin/gcc
