@@ -113,7 +113,7 @@
 # The default $(MAKEDPATH) and $(CONFIGPATH) is make.config.
 # The makefile can use doxygen for html and pdf automatic documentation. It is
 # then using $(DOXCONFIG).
-
+#
 # If this is not available, it uses the perl script f2html for html
 # documentation:
 #     $(TOOLPATH)/f2html, $(TOOLPATH)/f2html.fgenrc
@@ -121,7 +121,6 @@
 #
 # RESTRICTIONS
 # ------------
-
 # 1. The makefile provides dependency generation. This process must be done in
 #    serial. Parallel make (-j) does hence not work from scratch. One can split
 #    dependency generation and compilation by first calling make with a dummy
@@ -196,7 +195,7 @@ CHECKPATH  := ../jams_fortran/test
 TOOLPATH   := tools
 # the doxygen config file
 DOXCONFIG  := ./doxygen.config
-#
+
 PROGNAME := prog # Name of executable
 LIBNAME  := # Name of library, e.g. libminpack.a
 
@@ -205,7 +204,7 @@ LIBNAME  := # Name of library, e.g. libminpack.a
 # Default: $(F90) if source files include fortran files, otherwise $(CC).
 # Possible values: fortran Fortran FORTRAN for For FOR, c C, c++ C++ cxx CXX
 LINKER   :=
-#
+
 # Options
 # Systems: computer (system) name given during installation
 # such as mcair for Matthias' MacBook Air, for example.

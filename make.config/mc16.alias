@@ -12,3 +12,6 @@ endif
 ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran102 gcc102))
     icompiler := gnu102
 endif
+ifneq (,$(findstring $(compiler),nag nagfor nagfor70))
+    icompiler := nag70
+endif

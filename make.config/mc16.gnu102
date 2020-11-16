@@ -1,11 +1,11 @@
 # -*- Makefile -*-
 
 #
-# Setup file for Gnu compiler 9.2 at Matthias' Macbook Pro at INRA
+# Setup file for Gnu compiler 10.2 at Matthias' Macbook Pro 16" at INRAE
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-# Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
+# Copyright (c) 2011-2020 Matthias Cuntz - mc (at) macu (dot) de
 #
 
 # Paths
