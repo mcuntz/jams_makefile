@@ -12,3 +12,6 @@ endif
 ifneq (,$(findstring $(compiler),nag nagfor nagfor70))
     icompiler := nag70
 endif
+ifneq (,$(findstring $(compiler),intel ifort intel20 ifort20 ifort2020))
+    icompiler := intel2020
+endif
