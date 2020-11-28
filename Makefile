@@ -992,7 +992,7 @@ endif
 	        lapack=$(lapack) openmp=$(openmp) \
 	        EXTRA_LIBS="$${libextra}" EXTRA_DEFINES="$${defextra}" EXTRA_INCLUDES="$${incextra}" > /dev/null \
 	    && { cd $${i} ; $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ; cd - > /dev/null 2>&1 ;} ; status=$$? ; \
-	    if [ $${status} != 0 ] ; then echo "$${i} failed!" ; fi ; \
+	    if [ $${status} != 0 ] ; then echo "$${i} failed!" ; else echo "$${i} o.k." ; fi ; \
 	    $(MAKE) -f $(THISMAKEFILE) -s \
 	        MAKEDPATH=$(MAKEDPATH) SRCPATH="$${i}" PROGPATH=$(PROGPATH) \
 	        CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) \
