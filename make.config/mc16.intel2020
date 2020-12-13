@@ -1,0 +1,122 @@
+# -*- Makefile -*-
+
+#
+# Setup file for Intel compiler 2020 at Matthias' MacBook Pro at INRAE
+#
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
+#
+# Copyright (c) 2011-2020 Matthias Cuntz - mc (at) macu (dot) de
+#
+
+# Paths
+INTEL    := /opt/intel/compilers_and_libraries_2020/mac
+INTELBIN := $(INTEL)/bin
+INTELDIR := $(INTEL)
+# INTELINC := $(INTELDIR)/include/intel64
+# INTELLIB := $(INTELDIR)/lib
+
+# Compiling
+# F90 := INTEL_LICENSE_FILE=/Users/cuntz/bin/licences/ifort_licence_2019.lic.mcinra $(INTELBIN)/ifort
+F90 := $(INTELBIN)/ifort
+FC  := $(F90)
+# CC  := /usr/bin/cc  # clang, same as /usr/bin/gcc
+CC  := $(INTELBIN)/icc
+CPP := /usr/bin/cpp  # could be 'gcc -E -cpp' on Linux but does not work on Mac
+ifeq ($(release),debug)
+    F90FLAGS += -check all -warn all -g -debug -traceback -fp-stack-check -O0 # -check all,noarg_temp_created
+    FCFLAGS  += -g -debug -traceback -fp-stack-check -O0
+    CFLAGS   += -g -debug -traceback -fp-stack-check -O0 -Wall -Wcheck
+else
+    F90FLAGS += -O3 # old/deprecated: -vec-report0 -override-limits
+    FCFLAGS  += -O3
+    CFLAGS   += -O3
+endif
+# -xHost displays on this Mac - ifort: command line remark #10382: option '-xHOST' setting '-xCORE-AVX2'
+# disable with -diag-disable=10382  ;   another remark (e.g. #9823) can be disabled with -diag-disable=10382,9823
+F90FLAGS += -fpp -nofixed -assume byterecl -fp-model precise -m64 -ip -xHost -diag-disable=10382
+FCFLAGS  += -assume byterecl -cpp -fp-model precise -m64 -fixed -ip -xHost -diag-disable=10382
+CFLAGS   += -m64 -std=c99
+MODFLAG  := -module # space significant
+DEFINES  += -D__INTEL__ -D__INTEL_COMPILER__
+# OpenMP
+F90OMPFLAG := -fopenmp
+FCOMPFLAG  := -fopenmp
+COMPFLAG   := -fopenmp
+LDOMPFLAG  := -fopenmp
+OMPDEFINE  := -D__OPENMP__
+
+# Linking
+ifeq ($(istatic),static)
+    LIBS += -static-intel
+endif
+# LIBS += -L$(INTELLIB) -limf -lm -lsvml
+# ifneq ($(istatic),static)
+#      LIBS += -lintlc
+# endif
+RPATH += -Wl,-rpath,$(INTELLIB)
+
+# IMSL
+IMSLDIR  :=
+IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
+IMSLDEF  := #-D__IMSL__
+
+# MKL
+MKLDIR := $(INTEL)/mkl
+ifeq ($(openmp),true)
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
+else
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
+endif
+MKLDEF := -D__MKL__
+MKL95DIR  := # /opt/lib/mkl95_lapack/ifort
+MKL95LIB  := $(MKL95DIR)/lib
+MKL95INC  := $(MKL95DIR)/include/intel64/lp64
+MKL95FLAG := -lmkl_lapack95_lp64
+MKL95DEF  := -D__MKL95__
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR  :=
+    NCFLAG := -lnetcdff -lnetcdf
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
+else
+    NCDIR    := /usr/local/opt/netcdf
+    NCFLAG   := -lnetcdf
+    NCDEF    := -D__NETCDF__
+    NCFDIR   := /usr/local/netcdf-fortran-4.5.3-ifort
+    NCFFLAG  := -lnetcdff
+    HDF5LIB  := /usr/local/lib
+    HDF5FLAG := -lhdf5_hl -lhdf5
+    SZLIB    := /usr/local/lib
+    SZFLAG   := -lsz
+    CURLLIB  := /usr/lib
+    CURLFLAG := -lcurl
+    ZFLAG    := -lz
+endif
+
+# PROJ
+PROJ4DIR  := /usr/local/
+PROJ4FLAG := -lproj
+FPROJDIR  :=
+FPROJLIB  :=
+FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
+FPROJDEF  := #-D__FPROJ__
+
+# LAPACK
+LAPACKDIR  :=
+LAPACKFLAG := -framework Accelerate
+LAPACKDEF  := -D__LAPACK__
+
+# MPI
+OPENMPIDIR := /usr/local/openmpi-4.0.5-ifort
+OPENMPIDEF := -D__MPI__
+
+# MPICH
+MPICHDIR :=
+MPICHDEF := -D__MPI__
+
+# Documentation
+DOXYGENDIR := /usr/local/bin
+DOTDIR     := /usr/local/bin
+TEXDIR     := /Library/TeX/texbin
+PERLDIR    := /usr/bin
