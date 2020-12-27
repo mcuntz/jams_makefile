@@ -10,5 +10,5 @@ ifneq (,$(findstring $(compiler),gnu gfortran gcc))
     icompiler := gnu63
 endif
 ifneq (,$(findstring $(compiler),intel intel2018 ifort ifort18 ifort2018))
-    icompiler := intel2018.0
+    icompiler := intel2018.5
 endif
