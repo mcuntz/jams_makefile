@@ -479,7 +479,7 @@ ifeq (False,$(iphony))
     LSRCS1 := $(foreach suff,$(LIBSUFFIXES),$(wildcard $(addsuffix /*$(suff), $(SRCPATH))))
 endif
 LSRCS  := $(foreach f,$(LSRCS1),$(if $(findstring $(f),$(abspath $(EXCLUDE_FILES))),,$(f)))
-LOSRCS := $(foreach suff, $(LIBSUFFIXES), $(patsubst %$(suff), %.o, $(filter %$(suff), $(LSRCS))))
+LOSRCS := $(foreach suff, $(LIBSUFFIXES), $(patsubst %$(suff), %, $(filter %$(suff), $(LSRCS))))
 LOBJS  := $(addprefix -L,$(dir $(SRCPATH))) $(addprefix -l, $(patsubst lib%, %, $(notdir $(LOSRCS))))
 
 #
