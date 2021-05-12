@@ -14,26 +14,32 @@ MODULE mo_linear_algebra
   ! Written  Matthias Cuntz,    May 2014
   ! Modified Matthias Cuntz,    May 2016 - calc single precision via double precision
   ! Modified Sebastian Mueller, Oct 2016 - solver for banded coefficent-matrices and some involved algorithms
+  ! Modified Matthias Cuntz,    Mar 2020 - allocate out of sp routines calling dp routines only if not allocated
+  !                                      - allocate out for Python.
 
   ! License
   ! -------
-  ! This file is part of the JAMS Fortran library.
-
-  ! The JAMS Fortran library is free software: you can redistribute it and/or modify
-  ! it under the terms of the GNU Lesser General Public License as published by
-  ! the Free Software Foundation, either version 3 of the License, or
-  ! (at your option) any later version.
-
-  ! The JAMS Fortran library is distributed in the hope that it will be useful,
-  ! but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  ! GNU Lesser General Public License for more details.
-
-  ! You should have received a copy of the GNU Lesser General Public License
-  ! along with the JAMS Fortran library (cf. gpl.txt and lgpl.txt).
-  ! If not, see <http://www.gnu.org/licenses/>.
-
-  ! Copyright 2014-2016 Matthias Cuntz, Sebastian Mueller
+  ! This file is part of the JAMS Fortran package, distributed under the MIT License.
+  !
+  ! Copyright (c) 2014-2020 Matthias Cuntz, Sebastian Mueller - mc (at) macu (dot) de
+  !
+  ! Permission is hereby granted, free of charge, to any person obtaining a copy
+  ! of this software and associated documentation files (the "Software"), to deal
+  ! in the Software without restriction, including without limitation the rights
+  ! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ! copies of the Software, and to permit persons to whom the Software is
+  ! furnished to do so, subject to the following conditions:
+  !
+  ! The above copyright notice and this permission notice shall be included in all
+  ! copies or substantial portions of the Software.
+  !
+  ! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ! SOFTWARE.
 
   USE mo_kind, ONLY: i4, i8, sp, dp
 
@@ -100,7 +106,6 @@ MODULE mo_linear_algebra
      MODULE PROCEDURE banded_dp, banded_sp
   END INTERFACE banded
 
-
   ! ------------------------------------------------------------------
   !
   !     NAME
@@ -150,7 +155,6 @@ MODULE mo_linear_algebra
   INTERFACE diag
      MODULE PROCEDURE diag_sp, diag_dp, diag_i4, diag_i8, diag_lgt
   END INTERFACE diag
-
 
   ! ------------------------------------------------------------------
   !
@@ -205,7 +209,6 @@ MODULE mo_linear_algebra
      MODULE PROCEDURE inverse_dp, inverse_sp
   END INTERFACE inverse
 
-
   ! ------------------------------------------------------------------
   !
   !     NAME
@@ -257,7 +260,6 @@ MODULE mo_linear_algebra
   INTERFACE min_diag
      MODULE PROCEDURE min_diag_sp, min_diag_dp, min_diag_i4, min_diag_i8, min_diag_lgt
   END INTERFACE min_diag
-
 
   ! ------------------------------------------------------------------
   !
@@ -314,7 +316,6 @@ MODULE mo_linear_algebra
   INTERFACE solve_linear_equations
      MODULE PROCEDURE solve_linear_equations_1_dp, solve_linear_equations_1_sp
   END INTERFACE solve_linear_equations
-
 
   ! ------------------------------------------------------------------
   !
@@ -374,7 +375,6 @@ MODULE mo_linear_algebra
   INTERFACE solve_linear_equations_svd
      MODULE PROCEDURE solve_linear_equations_svd_1_dp, solve_linear_equations_svd_1_sp
   END INTERFACE solve_linear_equations_svd
-
 
   ! ------------------------------------------------------------------
   !
@@ -446,7 +446,6 @@ MODULE mo_linear_algebra
      MODULE PROCEDURE solve_linear_equations_band_1_dp, solve_linear_equations_band_1_sp
   END INTERFACE solve_linear_equations_band
 
-
   PRIVATE
 
   INTERFACE svdksb
@@ -465,7 +464,11 @@ CONTAINS
 
     REAL(dp), DIMENSION(:,:), INTENT(IN)   :: matrix
     INTEGER(i4),              INTENT(IN)   :: l, u
+#ifndef __PYTHON__
     REAL(dp), DIMENSION(:,:), allocatable  :: banded_dp
+#else
+    REAL(dp), DIMENSION(l+u+1,size(matrix,1)) :: banded_dp
+#endif
 
     INTEGER(i4) :: i
 
@@ -474,7 +477,9 @@ CONTAINS
     if (u              >= size(matrix,1)) stop 'banded_dp: u is to big. You need to choose minor diagonals within the matrix.'
     if (l              <  0_i4          ) stop 'banded_dp: l needs to be non-negativ.'
     if (u              <  0_i4          ) stop 'banded_dp: u needs to be non-negativ.'
+#ifndef __PYTHON__
     if (.not. allocated(banded_dp)) allocate(banded_dp(l+u+1,size(matrix,1)))
+#endif
 
     banded_dp = 0.0_dp
 
@@ -494,7 +499,11 @@ CONTAINS
 
     REAL(sp), DIMENSION(:,:), INTENT(IN)   :: matrix
     INTEGER(i4),              INTENT(IN)   :: l, u
+#ifndef __PYTHON__
     REAL(sp), DIMENSION(:,:), allocatable  :: banded_sp
+#else
+    REAL(sp), DIMENSION(l+u+1,size(matrix,1)) :: banded_sp
+#endif
 
     INTEGER(i4) :: i
 
@@ -503,7 +512,9 @@ CONTAINS
     if (u              >= size(matrix,1)) stop 'banded_sp: u is to big. You need to choose minor diagonals within the matrix.'
     if (l              <  0_i4          ) stop 'banded_sp: l needs to be non-negativ.'
     if (u              <  0_i4          ) stop 'banded_sp: u needs to be non-negativ.'
+#ifndef __PYTHON__
     if (.not. allocated(banded_sp)) allocate(banded_sp(l+u+1,size(matrix,1)))
+#endif
 
     banded_sp = 0.0_sp
 
@@ -524,12 +535,18 @@ CONTAINS
     IMPLICIT NONE
 
     REAL(dp), DIMENSION(:,:), INTENT(IN) :: matrix
+#ifndef __PYTHON__
     REAL(dp), DIMENSION(:), allocatable  :: diag_dp
+#else
+    REAL(dp), DIMENSION(size(matrix,1)) :: diag_dp
+#endif
 
     INTEGER(i4) :: i
 
     if (size(matrix,1) /= size(matrix,2)) stop 'diag_dp: array must be squared matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(diag_dp)) allocate(diag_dp(size(matrix,1)))
+#endif
 
     forall(i=1:size(matrix,1)) diag_dp(i) = matrix(i,i)
 
@@ -540,12 +557,18 @@ CONTAINS
     IMPLICIT NONE
 
     REAL(sp), DIMENSION(:,:), INTENT(IN) :: matrix
+#ifndef __PYTHON__
     REAL(sp), DIMENSION(:), allocatable  :: diag_sp
+#else
+    REAL(sp), DIMENSION(size(matrix,1)) :: diag_sp
+#endif
 
     INTEGER(i4) :: i
 
     if (size(matrix,1) /= size(matrix,2)) stop 'diag_sp: array must be squared matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(diag_sp)) allocate(diag_sp(size(matrix,1)))
+#endif
 
     forall(i=1:size(matrix,1)) diag_sp(i) = matrix(i,i)
 
@@ -556,12 +579,18 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER(i4), DIMENSION(:,:), INTENT(IN) :: matrix
+#ifndef __PYTHON__
     INTEGER(i4), DIMENSION(:), allocatable  :: diag_i4
+#else
+    INTEGER(i4), DIMENSION(size(matrix,1)) :: diag_i4
+#endif
 
     INTEGER(i4) :: i
 
     if (size(matrix,1) /= size(matrix,2)) stop 'diag_i4: array must be squared matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(diag_i4)) allocate(diag_i4(size(matrix,1)))
+#endif
 
     forall(i=1:size(matrix,1)) diag_i4(i) = matrix(i,i)
 
@@ -572,12 +601,18 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER(i8), DIMENSION(:,:), INTENT(IN) :: matrix
+#ifndef __PYTHON__
     INTEGER(i8), DIMENSION(:), allocatable  :: diag_i8
+#else
+    INTEGER(i8), DIMENSION(size(matrix,1)) :: diag_i8
+#endif
 
     INTEGER(i8) :: i
 
     if (size(matrix,1) /= size(matrix,2)) stop 'diag_i8: array must be squared matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(diag_i8)) allocate(diag_i8(size(matrix,1)))
+#endif
 
     forall(i=1:size(matrix,1)) diag_i8(i) = matrix(i,i)
 
@@ -588,12 +623,18 @@ CONTAINS
     IMPLICIT NONE
 
     LOGICAL, DIMENSION(:,:), INTENT(IN) :: matrix
+#ifndef __PYTHON__
     LOGICAL, DIMENSION(:), allocatable  :: diag_lgt
+#else
+    LOGICAL, DIMENSION(size(matrix,1)) :: diag_lgt
+#endif
 
     INTEGER(i4) :: i
 
     if (size(matrix,1) /= size(matrix,2)) stop 'diag_lgt: array must be squared matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(diag_lgt)) allocate(diag_lgt(size(matrix,1)))
+#endif
 
     forall(i=1:size(matrix,1)) diag_lgt(i) = matrix(i,i)
 
@@ -607,7 +648,11 @@ CONTAINS
 
     REAL(dp), DIMENSION(:,:), INTENT(IN)  :: matrix
     LOGICAL,  OPTIONAL,       INTENT(IN)  :: condition
+#ifndef __PYTHON__
     REAL(dp), DIMENSION(:,:), allocatable :: inverse_dp
+#else
+    REAL(dp), DIMENSION(size(matrix,2),size(matrix,1)) :: inverse_dp
+#endif
 
     INTEGER(i4) :: i, nn
     real(dp),    dimension(:),   allocatable :: scale_cols    ! scale matrix for better conditioning
@@ -622,7 +667,9 @@ CONTAINS
 
     nn = size(matrix,2)
     if (size(matrix,1) /= nn) stop 'inverse_dp: matrix must be square.'
+#ifndef __PYTHON__
     if (.not. allocated(inverse_dp)) allocate(inverse_dp(nn,nn))
+#endif
     inverse_dp = matrix
 
     if (present(condition)) then
@@ -671,9 +718,15 @@ CONTAINS
 
     REAL(sp), DIMENSION(:,:), INTENT(IN)  :: matrix
     LOGICAL,  OPTIONAL,       INTENT(IN)  :: condition
+#ifndef __PYTHON__
     REAL(sp), DIMENSION(:,:), allocatable :: inverse_sp
+#else
+    REAL(sp), DIMENSION(size(matrix,2),size(matrix,1)) :: inverse_sp
+#endif
 
-    allocate(inverse_sp(size(matrix,2),size(matrix,1)))
+#ifndef __PYTHON__
+    if (.not. allocated(inverse_sp)) allocate(inverse_sp(size(matrix,2),size(matrix,1)))
+#endif
     inverse_sp = real(inverse_dp(real(matrix,dp), condition), sp)
 
   END FUNCTION inverse_sp
@@ -686,11 +739,17 @@ CONTAINS
 
     REAL(dp), DIMENSION(:,:), INTENT(IN) :: matrix
     INTEGER(i4),              INTENT(IN) :: n
+#ifndef __PYTHON__
     REAL(dp), DIMENSION(:), allocatable  :: min_diag_dp
+#else
+    REAL(dp), DIMENSION(size(matrix,1)-abs(n)) :: min_diag_dp
+#endif
 
     if (size(matrix,1) /= size(matrix,2)) stop 'min_diag_dp: array must be squared matrix.'
     if (abs(n)         >= size(matrix,1)) stop 'min_diag_dp: n is to big. You need to choose a minor diagonal within the matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(min_diag_dp)) allocate(min_diag_dp(size(matrix,1) - abs(n)))
+#endif
 
     if (n >= 0_i4) then
         min_diag_dp = diag_dp(matrix(1_i4:size(matrix,1)-n,1_i4+n:size(matrix,1)))
@@ -706,11 +765,17 @@ CONTAINS
 
     REAL(sp), DIMENSION(:,:), INTENT(IN) :: matrix
     INTEGER(i4),              INTENT(IN) :: n
+#ifndef __PYTHON__
     REAL(sp), DIMENSION(:), allocatable  :: min_diag_sp
+#else
+    REAL(sp), DIMENSION(size(matrix,1)-abs(n)) :: min_diag_sp
+#endif
 
     if (size(matrix,1) /= size(matrix,2)) stop 'min_diag_sp: array must be squared matrix.'
     if (abs(n)         >= size(matrix,1)) stop 'min_diag_sp: n is to big. You need to choose a minor diagonal within the matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(min_diag_sp)) allocate(min_diag_sp(size(matrix,1) - abs(n)))
+#endif
 
     if (n >= 0_i4) then
         min_diag_sp = diag_sp(matrix(1_i4:size(matrix,1)-n,1_i4+n:size(matrix,1)))
@@ -726,11 +791,17 @@ CONTAINS
 
     INTEGER(i4), DIMENSION(:,:), INTENT(IN) :: matrix
     INTEGER(i4),                 INTENT(IN) :: n
+#ifndef __PYTHON__
     INTEGER(i4), DIMENSION(:), allocatable  :: min_diag_i4
+#else
+    INTEGER(i4), DIMENSION(size(matrix,1)-abs(n)) :: min_diag_i4
+#endif
 
     if (size(matrix,1) /= size(matrix,2)) stop 'min_diag_i4: array must be squared matrix.'
     if (abs(n)         >= size(matrix,1)) stop 'min_diag_i4: n is to big. You need to choose a minor diagonal within the matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(min_diag_i4)) allocate(min_diag_i4(size(matrix,1) - abs(n)))
+#endif
 
     if (n >= 0_i4) then
         min_diag_i4 = diag_i4(matrix(1_i4:size(matrix,1)-n,1_i4+n:size(matrix,1)))
@@ -746,11 +817,17 @@ CONTAINS
 
     INTEGER(i8), DIMENSION(:,:), INTENT(IN) :: matrix
     INTEGER(i4),                 INTENT(IN) :: n
+#ifndef __PYTHON__
     INTEGER(i8), DIMENSION(:), allocatable  :: min_diag_i8
+#else
+    INTEGER(i8), DIMENSION(size(matrix,1)-abs(n)) :: min_diag_i8
+#endif
 
     if (size(matrix,1) /= size(matrix,2)) stop 'min_diag_i8: array must be squared matrix.'
     if (abs(n)         >= size(matrix,1)) stop 'min_diag_i8: n is to big. You need to choose a minor diagonal within the matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(min_diag_i8)) allocate(min_diag_i8(size(matrix,1) - abs(n)))
+#endif
 
     if (n >= 0_i4) then
         min_diag_i8 = diag_i8(matrix(1_i4:size(matrix,1)-n,1_i4+n:size(matrix,1)))
@@ -766,11 +843,17 @@ CONTAINS
 
     LOGICAL, DIMENSION(:,:), INTENT(IN) :: matrix
     INTEGER(i4),             INTENT(IN) :: n
+#ifndef __PYTHON__
     LOGICAL, DIMENSION(:), allocatable  :: min_diag_lgt
+#else
+    LOGICAL, DIMENSION(size(matrix,1)-abs(n)) :: min_diag_lgt
+#endif
 
     if (size(matrix,1) /= size(matrix,2)) stop 'min_diag_lgt: array must be squared matrix.'
     if (abs(n)         >= size(matrix,1)) stop 'min_diag_lgt: n is to big. You need to choose a minor diagonal within the matrix.'
+#ifndef __PYTHON__
     if (.not. allocated(min_diag_lgt)) allocate(min_diag_lgt(size(matrix,1) - abs(n)))
+#endif
 
     if (n >= 0_i4) then
         min_diag_lgt = diag_lgt(matrix(1_i4:size(matrix,1)-n,1_i4+n:size(matrix,1)))
@@ -789,7 +872,11 @@ CONTAINS
     REAL(dp), DIMENSION(:,:), INTENT(IN) :: lhs
     REAL(dp), DIMENSION(:),   INTENT(IN) :: rhs
     LOGICAL,  OPTIONAL,       INTENT(IN) :: condition
+#ifndef __PYTHON__
     REAL(dp), DIMENSION(:), allocatable  :: solve_linear_equations_1_dp
+#else
+    REAL(dp), DIMENSION(size(lhs,1)) :: solve_linear_equations_1_dp
+#endif
 
     INTEGER(i4) :: ii, nZeilen
     real(dp),    dimension(:,:), allocatable :: ilhs          ! internal lhs
@@ -837,7 +924,9 @@ CONTAINS
     call dgesv(nZeilen, 1, ilhs, nZeilen, ipiv, irhs, nZeilen, info)
     if (info /= 0) stop 'solve_linear_equations_1_dp: Solving of linear system did not work.'
 
+#ifndef __PYTHON__
     if (.not. allocated(solve_linear_equations_1_dp)) allocate(solve_linear_equations_1_dp(nZeilen))
+#endif
     solve_linear_equations_1_dp = irhs
 
     if (icondition) then
@@ -860,9 +949,15 @@ CONTAINS
     REAL(sp), DIMENSION(:,:), INTENT(IN) :: lhs
     REAL(sp), DIMENSION(:),   INTENT(IN) :: rhs
     LOGICAL,  OPTIONAL,       INTENT(IN) :: condition
+#ifndef __PYTHON__
     REAL(sp), DIMENSION(:), allocatable  :: solve_linear_equations_1_sp
+#else
+    REAL(sp), DIMENSION(size(rhs,1)) :: solve_linear_equations_1_sp
+#endif
 
-    allocate(solve_linear_equations_1_sp(size(rhs,1)))
+#ifndef __PYTHON__
+    if (.not. allocated(solve_linear_equations_1_sp)) allocate(solve_linear_equations_1_sp(size(rhs,1)))
+#endif
     solve_linear_equations_1_sp = real(solve_linear_equations_1_dp(real(lhs,dp), real(rhs,dp), condition), sp)
 
   END FUNCTION solve_linear_equations_1_sp
@@ -876,7 +971,11 @@ CONTAINS
     REAL(dp), DIMENSION(:,:), INTENT(IN) :: lhs
     REAL(dp), DIMENSION(:),   INTENT(IN) :: rhs
     LOGICAL,  OPTIONAL,       INTENT(IN) :: condition
+#ifndef __PYTHON__
     REAL(dp), DIMENSION(:), allocatable  :: solve_linear_equations_svd_1_dp
+#else
+    REAL(dp), DIMENSION(size(lhs,1)) :: solve_linear_equations_svd_1_dp
+#endif
 
     INTEGER(i4) :: ii, nZeilen
     real(dp),    dimension(:,:), allocatable :: ilhs          ! internal lhs
@@ -937,7 +1036,9 @@ CONTAINS
     ! write(*,*) 'Matrix condition ', maxval(abs(svdw))/minval(abs(svdw))
     where (svdw < svdtol*maxval(svdw)) svdw = 0.0_dp
 
+#ifndef __PYTHON__
     if (.not. allocated(solve_linear_equations_svd_1_dp)) allocate(solve_linear_equations_svd_1_dp(nZeilen))
+#endif
     ! svdv is V**T from dgesvd, svdksb wants V
     solve_linear_equations_svd_1_dp = svdksb(svdu,svdw,transpose(svdv),irhs)
 
@@ -961,9 +1062,15 @@ CONTAINS
     REAL(sp), DIMENSION(:,:), INTENT(IN) :: lhs
     REAL(sp), DIMENSION(:),   INTENT(IN) :: rhs
     LOGICAL,  OPTIONAL,       INTENT(IN) :: condition
+#ifndef __PYTHON__
     REAL(sp), DIMENSION(:), allocatable  :: solve_linear_equations_svd_1_sp
+#else
+    REAL(sp), DIMENSION(size(rhs,1)) :: solve_linear_equations_svd_1_sp
+#endif
 
-    allocate(solve_linear_equations_svd_1_sp(size(rhs,1)))
+#ifndef __PYTHON__
+    if (.not. allocated(solve_linear_equations_svd_1_sp)) allocate(solve_linear_equations_svd_1_sp(size(rhs,1)))
+#endif
     solve_linear_equations_svd_1_sp = real(solve_linear_equations_svd_1_dp(real(lhs,dp), real(rhs,dp), condition), sp)
 
   END FUNCTION solve_linear_equations_svd_1_sp
@@ -978,7 +1085,11 @@ CONTAINS
     REAL(dp), DIMENSION(:),   INTENT(IN) :: rhs
     INTEGER(i4),              INTENT(IN) :: l, u
     LOGICAL,  OPTIONAL,       INTENT(IN) :: condition
+#ifndef __PYTHON__
     REAL(dp), DIMENSION(:), allocatable  :: solve_linear_equations_band_1_dp
+#else
+    REAL(dp), DIMENSION(size(rhs,1)) :: solve_linear_equations_band_1_dp
+#endif
 
     INTEGER(i4) :: ii, nSpalten, nZeilen
     real(dp),    dimension(:,:), allocatable :: ilhsb         ! internal lhsb
@@ -1023,7 +1134,9 @@ CONTAINS
     call dgbsv(nSpalten, l, u, 1, ilhsb, nZeilen+l, ipiv, irhs, nSpalten, info)
     if (info /= 0) stop 'solve_linear_equations_band_1_dp: Solving of linear system did not work.'
 
+#ifndef __PYTHON__
     if (.not. allocated(solve_linear_equations_band_1_dp)) allocate(solve_linear_equations_band_1_dp(nSpalten))
+#endif
     solve_linear_equations_band_1_dp = irhs
 
     if (icondition) then
@@ -1046,9 +1159,15 @@ CONTAINS
     REAL(sp), DIMENSION(:),   INTENT(IN) :: rhs
     INTEGER(i4),              INTENT(IN) :: l, u
     LOGICAL,  OPTIONAL,       INTENT(IN) :: condition
+#ifndef __PYTHON__
     REAL(sp), DIMENSION(:), allocatable  :: solve_linear_equations_band_1_sp
+#else
+    REAL(sp), DIMENSION(size(rhs,1)) :: solve_linear_equations_band_1_sp
+#endif
 
-    allocate(solve_linear_equations_band_1_sp(size(rhs,1)))
+#ifndef __PYTHON__
+    if (.not. allocated(solve_linear_equations_band_1_sp)) allocate(solve_linear_equations_band_1_sp(size(rhs,1)))
+#endif
     solve_linear_equations_band_1_sp = real(solve_linear_equations_band_1_dp(real(lhsb,dp), real(rhs,dp), l, u, condition), sp)
 
   END FUNCTION solve_linear_equations_band_1_sp

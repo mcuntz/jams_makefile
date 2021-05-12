@@ -182,7 +182,7 @@ SHELL = /bin/bash
 
 # . is current directory, .. is parent directory
 # where are the source files; whitespace separated list
-SRCPATH    := ../jams_fortran/test/test_mo_select_distant_entries
+SRCPATH    := ../jams_fortran/test/test_mo_xor4096_apps
 # where shall be the executable
 PROGPATH   := .
 # where are the $(system).$(compiler) files

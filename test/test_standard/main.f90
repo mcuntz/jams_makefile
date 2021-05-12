@@ -10,14 +10,15 @@
 ! ------------------------------------------------------------------------------
 program standard
 
-  use mo_kind,           only: i4, sp, dp
+  use mo_kind,           only: i4, i8, sp, dp
   use mo_ncread,         only: Get_NcVar, Get_NcDim
   use mo_ncdump,         only: dump_netcdf
   use mo_var2nc,         only: var2nc
   use mo_mainvar,        only: lat, lon, data, t
   use mo_utils,          only: notequal, ne
   use mo_linear_algebra, only: diag, inverse
-  USE mo_cfortran,       ONLY: fctest
+  use mo_cfortran,       only: fctest
+  ! use mo_test_loop,      only: n_save_state, loop
 
   implicit none
 
@@ -52,6 +53,11 @@ program standard
   integer(i4), parameter :: n2 = 3
   real(dp), dimension(d1,d2) :: a
   real(dp), parameter :: c=2.0
+
+  ! ! test loop optimisation in xor4096
+  ! integer(i8)                           :: seed1
+  ! real(dp), dimension(20)            :: rn1
+  ! integer(i8), dimension(n_save_state)  :: save_state1
 
   isgood      = .true.
   allgood     = .true.
@@ -230,5 +236,20 @@ program standard
   ! print*, data11 - reshape(data10, shape(data11), order=(/2,1/))
   ! print*, data11 - transpose(data10)
   ! deallocate(data10, data11)
+
+  ! ! --------------------------------------------------------------------
+  ! ! Test loop optimisation problem in xor4096
+
+  ! seed1 = 123456_i8
+  ! call loop(seed1, rn1(1), save_state=save_state1)
+  ! print*, 'rn1', rn1(1)
+  ! seed1 = 0_i8
+  ! ! do i=1, nn
+  ! !    call loop(seed1, rn1(1), save_state=save_state1)
+  ! !    print*, 'rn1', i, rn1(1)
+  ! ! end do
+  ! i = 1
+  ! print*, 'Huge ', huge(1_i8), huge(1_i8) + int(i, i8)
+  ! print*, 'Huge ', -huge(1_i8), -huge(1_i8) - int(i, i8), -huge(1_i8) - int(i, i8) - int(i, i8)
 
 end program standard

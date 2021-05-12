@@ -4,23 +4,27 @@ module mo_ncdump
 
   ! License
   ! -------
-  ! This file is part of the JAMS Fortran library.
-
-  ! The JAMS Fortran library is free software: you can redistribute it and/or modify
-  ! it under the terms of the GNU Lesser General Public License as published by
-  ! the Free Software Foundation, either version 3 of the License, or
-  ! (at your option) any later version.
-
-  ! The JAMS Fortran library is distributed in the hope that it will be useful,
-  ! but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  ! GNU Lesser General Public License for more details.
-
-  ! You should have received a copy of the GNU Lesser General Public License
-  ! along with the JAMS Fortran library (cf. gpl.txt and lgpl.txt).
-  ! If not, see <http://www.gnu.org/licenses/>.
-
-  ! Copyright 2012-2016 Matthias Cuntz, Stephan Thober
+  ! This file is part of the JAMS Fortran package, distributed under the MIT License.
+  !
+  ! Copyright (c) 2012-2016 Matthias Cuntz, Stephan Thober - mc (at) macu (dot) de
+  !
+  ! Permission is hereby granted, free of charge, to any person obtaining a copy
+  ! of this software and associated documentation files (the "Software"), to deal
+  ! in the Software without restriction, including without limitation the rights
+  ! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ! copies of the Software, and to permit persons to whom the Software is
+  ! furnished to do so, subject to the following conditions:
+  !
+  ! The above copyright notice and this permission notice shall be included in all
+  ! copies or substantial portions of the Software.
+  !
+  ! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ! SOFTWARE.
 
   use mo_kind, only: i4, sp, dp
 
@@ -31,7 +35,7 @@ module mo_ncdump
        NF90_MAX_NAME, NF90_WRITE, nf90_inq_varid, nf90_inquire_variable, &
        nf90_inquire_dimension, nf90_open, NF90_64BIT_OFFSET, &
        nf90_inq_varid
-#ifndef NETCDF3
+#ifndef __NETCDF3__
   use netcdf, only: NF90_NETCDF4
 #endif
 
@@ -97,7 +101,7 @@ module mo_ncdump
 
   private
 
-#ifdef NETCDF3
+#ifdef __NETCDF3__
   INTEGER, PARAMETER :: NF90_NETCDF4 = NF90_64BIT_OFFSET ! to be available for compilation
 #endif
 
@@ -149,7 +153,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -229,7 +233,7 @@ contains
           chunksizes(1:ndim) = dims(1:ndim)
           chunksizes(ndim+1) = 1
           call check(nf90_def_var(ncid, 'var', NF90_FLOAT, dimid, varid(ndim+2) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -305,7 +309,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -385,7 +389,7 @@ contains
           chunksizes(1:ndim) = dims(1:ndim)
           chunksizes(ndim+1) = 1
           call check(nf90_def_var(ncid, 'var', NF90_FLOAT, dimid, varid(ndim+2) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -461,7 +465,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -540,7 +544,7 @@ contains
           chunksizes(1:ndim-1) = dims(1:ndim-1)
           chunksizes(ndim)     = 1
           call check(nf90_def_var(ncid, 'var', NF90_FLOAT, dimid, varid(ndim+1) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -616,7 +620,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -695,7 +699,7 @@ contains
           chunksizes(1:ndim-1) = dims(1:ndim-1)
           chunksizes(ndim)     = 1
           call check(nf90_def_var(ncid, 'var', NF90_FLOAT, dimid, varid(ndim+1) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -771,7 +775,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -791,15 +795,13 @@ contains
        if (idim /= ndim) stop "dump_netcdf_5d_sp: number of variable dimensions /= number of file variable dimensions."
 
        ! inquire dimensions
-       do i=1, ndim
+       do i=1, ndim-1
           call check(nf90_inquire_dimension(ncid, dimid(i), name, dims(i)))
-          if (i < ndim) then
-             if (trim(name) /= dnames(i)) stop "dump_netcdf_5d_sp: dimension name problem."
-             if (dims(i) /= size(arr,i)) stop "dump_netcdf_5d_sp: variable dimension /= file variable dimension."
-          else
-             if (trim(name) /= 'time') stop "dump_netcdf_5d_sp: time name problem."
-          endif
+          if (trim(name) /= dnames(i)) stop "dump_netcdf_5d_sp: dimension name problem."
+          if (dims(i) /= size(arr,i)) stop "dump_netcdf_5d_sp: variable dimension /= file variable dimension."
        enddo
+       call check(nf90_inquire_dimension(ncid, dimid(ndim), name, dims(ndim)))
+       if (trim(name) /= 'time') stop "dump_netcdf_5d_sp: time name problem."
 
        ! append
        start(:)      = 1
@@ -850,7 +852,7 @@ contains
           chunksizes(1:ndim-1) = dims(1:ndim-1)
           chunksizes(ndim)     = 1
           call check(nf90_def_var(ncid, 'var', NF90_FLOAT, dimid, varid(ndim+1) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -926,7 +928,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -1006,7 +1008,7 @@ contains
           chunksizes(1:ndim) = dims(1:ndim)
           chunksizes(ndim+1) = 1
           call check(nf90_def_var(ncid, 'var', NF90_DOUBLE, dimid, varid(ndim+2) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -1082,7 +1084,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -1162,7 +1164,7 @@ contains
           chunksizes(1:ndim) = dims(1:ndim)
           chunksizes(ndim+1) = 1
           call check(nf90_def_var(ncid, 'var', NF90_DOUBLE, dimid, varid(ndim+2) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -1238,7 +1240,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -1318,7 +1320,7 @@ contains
           chunksizes(1:ndim-1) = dims(1:ndim-1)
           chunksizes(ndim)     = 1
           call check(nf90_def_var(ncid, 'var', NF90_DOUBLE, dimid, varid(ndim+1) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -1394,7 +1396,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -1473,7 +1475,7 @@ contains
           chunksizes(1:ndim-1) = dims(1:ndim-1)
           chunksizes(ndim)     = 1
           call check(nf90_def_var(ncid, 'var', NF90_DOUBLE, dimid, varid(ndim+1) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -1549,7 +1551,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -1569,15 +1571,13 @@ contains
        if (idim /= ndim) stop "dump_netcdf_5d_dp: number of variable dimensions /= number of file variable dimensions."
 
        ! inquire dimensions
-       do i=1, ndim
+       do i=1, ndim-1
           call check(nf90_inquire_dimension(ncid, dimid(i), name, dims(i)))
-          if (i < ndim) then
-             if (trim(name) /= dnames(i)) stop "dump_netcdf_5d_dp: dimension name problem."
-             if (dims(i) /= size(arr,i)) stop "dump_netcdf_5d_dp: variable dimension /= file variable dimension."
-          else
-             if (trim(name) /= 'time') stop "dump_netcdf_5d_dp: time name problem."
-          endif
+          if (trim(name) /= dnames(i)) stop "dump_netcdf_5d_dp: dimension name problem."
+          if (dims(i) /= size(arr,i)) stop "dump_netcdf_5d_dp: variable dimension /= file variable dimension."
        enddo
+       call check(nf90_inquire_dimension(ncid, dimid(ndim), name, dims(ndim)))
+       if (trim(name) /= 'time') stop "dump_netcdf_5d_dp: time name problem."
 
        ! append
        start(:)      = 1
@@ -1628,7 +1628,7 @@ contains
           chunksizes(1:ndim-1) = dims(1:ndim-1)
           chunksizes(ndim)     = 1
           call check(nf90_def_var(ncid, 'var', NF90_DOUBLE, dimid, varid(ndim+1) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -1704,7 +1704,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -1784,7 +1784,7 @@ contains
           chunksizes(1:ndim) = dims(1:ndim)
           chunksizes(ndim+1) = 1
           call check(nf90_def_var(ncid, 'var', NF90_INT, dimid, varid(ndim+2) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -1860,7 +1860,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -1940,7 +1940,7 @@ contains
           chunksizes(1:ndim) = dims(1:ndim)
           chunksizes(ndim+1) = 1
           call check(nf90_def_var(ncid, 'var', NF90_INT, dimid, varid(ndim+2) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -2016,7 +2016,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -2095,7 +2095,7 @@ contains
           chunksizes(1:ndim-1) = dims(1:ndim-1)
           chunksizes(ndim)     = 1
           call check(nf90_def_var(ncid, 'var', NF90_INT, dimid, varid(ndim+1) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -2171,7 +2171,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -2250,7 +2250,7 @@ contains
           chunksizes(1:ndim-1) = dims(1:ndim-1)
           chunksizes(ndim)     = 1
           call check(nf90_def_var(ncid, 'var', NF90_INT, dimid, varid(ndim+1) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -2326,7 +2326,7 @@ contains
     LargeFile = .false.
     if (present(lfs)) LargeFile = lfs
     inetcdf4 = .false.
-#ifndef NETCDF3
+#ifndef __NETCDF3__
     if (present(netcdf4)) inetcdf4 = netcdf4
 #endif
     deflate = 1
@@ -2346,15 +2346,13 @@ contains
        if (idim /= ndim) stop "dump_netcdf_5d_i4: number of variable dimensions /= number of file variable dimensions."
 
        ! inquire dimensions
-       do i=1, ndim
+       do i=1, ndim-1
           call check(nf90_inquire_dimension(ncid, dimid(i), name, dims(i)))
-          if (i < ndim) then
-             if (trim(name) /= dnames(i)) stop "dump_netcdf_5d_i4: dimension name problem."
-             if (dims(i) /= size(arr,i)) stop "dump_netcdf_5d_i4: variable dimension /= file variable dimension."
-          else
-             if (trim(name) /= 'time') stop "dump_netcdf_5d_i4: time name problem."
-          endif
+          if (trim(name) /= dnames(i)) stop "dump_netcdf_5d_i4: dimension name problem."
+          if (dims(i) /= size(arr,i)) stop "dump_netcdf_5d_i4: variable dimension /= file variable dimension."
        enddo
+       call check(nf90_inquire_dimension(ncid, dimid(ndim), name, dims(ndim)))
+       if (trim(name) /= 'time') stop "dump_netcdf_5d_i4: time name problem."
 
        ! append
        start(:)      = 1
@@ -2405,7 +2403,7 @@ contains
           chunksizes(1:ndim-1) = dims(1:ndim-1)
           chunksizes(ndim)     = 1
           call check(nf90_def_var(ncid, 'var', NF90_INT, dimid, varid(ndim+1) &
-#ifndef NETCDF3
+#ifndef __NETCDF3__
                , chunksizes=chunksizes, shuffle=.true., deflate_level=deflate))
 #else
           ))
@@ -2438,7 +2436,7 @@ contains
 
   end subroutine dump_netcdf_5d_i4
 
-  
+
   ! -----------------------------------------------------------------------------
   ! PRIVATE PART
   !

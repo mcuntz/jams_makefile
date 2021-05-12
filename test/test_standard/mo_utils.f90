@@ -19,23 +19,27 @@ MODULE mo_utils
 
   ! License
   ! -------
-  ! This file is part of the JAMS Fortran library.
-
-  ! The JAMS Fortran library is free software: you can redistribute it and/or modify
-  ! it under the terms of the GNU Lesser General Public License as published by
-  ! the Free Software Foundation, either version 3 of the License, or
-  ! (at your option) any later version.
-
-  ! The JAMS Fortran library is distributed in the hope that it will be useful,
-  ! but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  ! GNU Lesser General Public License for more details.
-
-  ! You should have received a copy of the GNU Lesser General Public License
-  ! along with the JAMS Fortran library (cf. gpl.txt and lgpl.txt).
-  ! If not, see <http://www.gnu.org/licenses/>.
-
-  ! Copyright 2014 Matthias Cuntz, Juliane Mai
+  ! This file is part of the JAMS Fortran package, distributed under the MIT License.
+  !
+  ! Copyright (c) 2014-2017 Matthias Cuntz, Juliane Mai - mc (at) macu (dot) de
+  !
+  ! Permission is hereby granted, free of charge, to any person obtaining a copy
+  ! of this software and associated documentation files (the "Software"), to deal
+  ! in the Software without restriction, including without limitation the rights
+  ! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ! copies of the Software, and to permit persons to whom the Software is
+  ! furnished to do so, subject to the following conditions:
+  !
+  ! The above copyright notice and this permission notice shall be included in all
+  ! copies or substantial portions of the Software.
+  !
+  ! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ! SOFTWARE.
 
   USE mo_kind, only: sp, dp, i4, i8, spc, dpc
 
@@ -44,9 +48,13 @@ MODULE mo_utils
   PUBLIC :: arange        ! Natural numbers within interval
   PUBLIC :: cumsum        ! Cumulative sum
   PUBLIC :: eq            ! a == b, a .eq. b
+#ifndef __PYTHON__
   PUBLIC :: equal         ! a == b, a .eq. b
+#endif
   PUBLIC :: ge            ! a >= b, a .ge. b
+#ifndef __PYTHON__
   PUBLIC :: greaterequal  ! a >= b, a .ge. b
+#endif
   PUBLIC :: imaxloc       ! maxloc(arr)(1)
   PUBLIC :: iminloc       ! maxloc(arr)(1)
   PUBLIC :: isin          ! .true. if scalar present in array
@@ -55,11 +63,15 @@ MODULE mo_utils
   PUBLIC :: is_nan        ! .true. if IEEE NaN
   PUBLIC :: is_normal     ! .true. if not IEEE Inf and not IEEE NaN
   PUBLIC :: le            ! a <= b, a .le. b
+#ifndef __PYTHON__
   PUBLIC :: lesserequal   ! a <= b, a .le. b
+#endif
   PUBLIC :: linspace      ! Evenly spaced numbers in interval
   PUBLIC :: locate        ! Find closest values in a monotonic series
   PUBLIC :: ne            ! a /= b, a .ne. b
+#ifndef __PYTHON__
   PUBLIC :: notequal      ! a /= b, a .ne. b
+#endif
   PUBLIC :: special_value ! Special IEEE values
   PUBLIC :: swap          ! Swaps arrays or elements of an array
 
@@ -116,7 +128,6 @@ MODULE mo_utils
      MODULE PROCEDURE cumsum_i4, cumsum_i8, cumsum_dp, cumsum_sp, cumsum_dpc, cumsum_spc
   END INTERFACE cumsum
 
-
   ! ------------------------------------------------------------------
   !
   !     NAME
@@ -168,13 +179,26 @@ MODULE mo_utils
   !>        \authors Matthias Cuntz, Juliane Mai
   !>        \date Feb 2014
   !         Modified, Matthias Cuntz, Juliane Mai, Feb 2014 - sp, dp
+  INTERFACE eq
+     MODULE PROCEDURE equal_sp, equal_dp
+  END INTERFACE eq
+
+  INTERFACE ge
+     MODULE PROCEDURE greaterequal_sp, greaterequal_dp
+  END INTERFACE ge
+
+  INTERFACE le
+     MODULE PROCEDURE lesserequal_sp, lesserequal_dp
+  END INTERFACE le
+
+  INTERFACE ne
+     MODULE PROCEDURE notequal_sp, notequal_dp
+  END INTERFACE ne
+
+#ifndef __PYTHON__
   INTERFACE equal
      MODULE PROCEDURE equal_sp, equal_dp
   END INTERFACE equal
-
-  INTERFACE notequal
-     MODULE PROCEDURE notequal_sp, notequal_dp
-  END INTERFACE notequal
 
   INTERFACE greaterequal
      MODULE PROCEDURE greaterequal_sp, greaterequal_dp
@@ -184,21 +208,10 @@ MODULE mo_utils
      MODULE PROCEDURE lesserequal_sp, lesserequal_dp
   END INTERFACE lesserequal
 
-  INTERFACE eq
-     MODULE PROCEDURE equal_sp, equal_dp
-  END INTERFACE eq
-
-  INTERFACE ne
+  INTERFACE notequal
      MODULE PROCEDURE notequal_sp, notequal_dp
-  END INTERFACE ne
-
-  INTERFACE ge
-     MODULE PROCEDURE greaterequal_sp, greaterequal_dp
-  END INTERFACE ge
-
-  INTERFACE le
-     MODULE PROCEDURE lesserequal_sp, lesserequal_dp
-  END INTERFACE le
+  END INTERFACE notequal
+#endif
 
 
   ! ------------------------------------------------------------------
@@ -259,7 +272,6 @@ MODULE mo_utils
   INTERFACE iminloc
      MODULE PROCEDURE iminloc_i4, iminloc_i8, iminloc_sp, iminloc_dp
   END INTERFACE iminloc
-
 
   ! ------------------------------------------------------------------
   !
@@ -324,7 +336,6 @@ MODULE mo_utils
      MODULE PROCEDURE isin_i4, isin_i8, isin_sp, isin_dp, isin_char
   END INTERFACE isin
 
-
   ! ------------------------------------------------------------------
   !
   !     NAME
@@ -384,7 +395,6 @@ MODULE mo_utils
   INTERFACE isinloc
      MODULE PROCEDURE isinloc_i4, isinloc_i8, isinloc_sp, isinloc_dp, isinloc_char
   END INTERFACE isinloc
-
 
   ! ------------------------------------------------------------------
   !
@@ -451,7 +461,6 @@ MODULE mo_utils
      MODULE PROCEDURE is_normal_sp, is_normal_dp
   END INTERFACE is_normal
 
-
   ! ------------------------------------------------------------------
   !
   !     NAME
@@ -506,7 +515,6 @@ MODULE mo_utils
   INTERFACE linspace
      MODULE PROCEDURE linspace_i4, linspace_i8, linspace_dp, linspace_sp
   END INTERFACE linspace
-
 
   ! ------------------------------------------------------------------
   !
@@ -570,7 +578,6 @@ MODULE mo_utils
      MODULE PROCEDURE locate_0d_dp, locate_0d_sp, locate_1d_dp, locate_1d_sp
   END INTERFACE locate
 
-
   ! ------------------------------------------------------------------
   !
   !     NAME
@@ -629,7 +636,6 @@ MODULE mo_utils
   INTERFACE arange
      MODULE PROCEDURE arange_i4, arange_i8, arange_dp, arange_sp
   END INTERFACE arange
-
 
   ! ------------------------------------------------------------------
   !
@@ -699,7 +705,6 @@ MODULE mo_utils
           swap_vec_dp,      swap_vec_sp,      swap_vec_i4,      swap_vec_dpc,      swap_vec_spc,&
           swap_vec_mask_dp, swap_vec_mask_sp, swap_vec_mask_i4, swap_vec_mask_dpc, swap_vec_mask_spc
   END INTERFACE swap
-
 
   ! ------------------------------------------------------------------
   !
@@ -1123,6 +1128,7 @@ CONTAINS
 
   ! ------------------------------------------------------------------
 
+
   function imaxloc_i4(arr, mask)
 
     implicit none
@@ -1202,6 +1208,7 @@ CONTAINS
 
   ! ------------------------------------------------------------------
 
+
   function iminloc_i4(arr, mask)
 
     implicit none
@@ -1280,6 +1287,7 @@ CONTAINS
 
 
   ! ------------------------------------------------------------------
+
 
   function isin_i4(sca, arr, mask)
 
@@ -1387,6 +1395,7 @@ CONTAINS
 
 
   ! ------------------------------------------------------------------
+
 
   function isinloc_i4(sca, arr, mask)
 
@@ -1551,9 +1560,10 @@ CONTAINS
 
   ! ------------------------------------------------------------------
 
+
   ELEMENTAL PURE FUNCTION is_finite_dp(a)
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
   use, intrinsic :: ieee_arithmetic, only: ieee_is_finite
 #endif
 
@@ -1562,7 +1572,7 @@ CONTAINS
     REAL(dp), INTENT(IN) :: a
     LOGICAL              :: is_finite_dp
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
     is_finite_dp = ieee_is_finite(a)
 #else
     is_finite_dp = (.not. ((a > huge(a)) .or. (a < -huge(a)))) .and. (.not. is_nan(a))
@@ -1572,7 +1582,7 @@ CONTAINS
 
   ELEMENTAL PURE FUNCTION is_finite_sp(a)
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
   use, intrinsic :: ieee_arithmetic, only: ieee_is_finite
 #endif
 
@@ -1581,7 +1591,7 @@ CONTAINS
     REAL(sp), INTENT(IN) :: a
     LOGICAL              :: is_finite_sp
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
     is_finite_sp = ieee_is_finite(a)
 #else
     is_finite_sp = (.not. ((a > huge(a)) .or. (a < -huge(a)))) .and. (.not. is_nan(a))
@@ -1592,7 +1602,7 @@ CONTAINS
 
   ELEMENTAL PURE FUNCTION is_nan_dp(a)
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
   use, intrinsic :: ieee_arithmetic, only: isnan => ieee_is_nan
 #endif
 
@@ -1602,7 +1612,7 @@ CONTAINS
     LOGICAL              :: is_nan_dp
 
     ! isnan introduced in gfortran rev 4.2
-#ifdef GFORTRAN41
+#ifdef __GFORTRAN41__
     is_nan_dp = a /= a
 #else
     is_nan_dp = isnan(a)
@@ -1612,7 +1622,7 @@ CONTAINS
 
   ELEMENTAL PURE FUNCTION is_nan_sp(a)
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
   use, intrinsic :: ieee_arithmetic, only: isnan => ieee_is_nan
 #endif
 
@@ -1622,7 +1632,7 @@ CONTAINS
     LOGICAL              :: is_nan_sp
 
     ! isnan introduced in gfortran rev 4.2
-#ifdef GFORTRAN41
+#ifdef __GFORTRAN41__
     is_nan_sp = a /= a
 #else
     is_nan_sp = isnan(a)
@@ -1633,7 +1643,7 @@ CONTAINS
 
   ELEMENTAL PURE FUNCTION is_normal_dp(a)
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
   use, intrinsic :: ieee_arithmetic, only: ieee_is_normal
 #endif
 
@@ -1642,7 +1652,7 @@ CONTAINS
     REAL(dp), INTENT(IN) :: a
     LOGICAL              :: is_normal_dp
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
     is_normal_dp = ieee_is_normal(a)
 #else
     is_normal_dp = is_finite(a)
@@ -1652,7 +1662,7 @@ CONTAINS
 
   ELEMENTAL PURE FUNCTION is_normal_sp(a)
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
   use, intrinsic :: ieee_arithmetic, only: ieee_is_normal
 #endif
 
@@ -1661,7 +1671,7 @@ CONTAINS
     REAL(sp), INTENT(IN) :: a
     LOGICAL              :: is_normal_sp
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
     is_normal_sp = ieee_is_normal(a)
 #else
     is_normal_sp = is_finite(a)
@@ -1671,6 +1681,7 @@ CONTAINS
 
 
   ! ------------------------------------------------------------------
+
 
   function linspace_i4(lower, upper, nstep)
 
@@ -1726,6 +1737,7 @@ CONTAINS
 
 
   ! ------------------------------------------------------------------
+
 
   ! Given an array x(1:N), and given a value y, returns a value j such that y is between
   !  x(j) and x(j+1). x must be monotonically increasing.
@@ -1823,6 +1835,7 @@ CONTAINS
 
 
   ! ------------------------------------------------------------------
+
 
   elemental pure subroutine swap_xy_dp(x,y)
 
@@ -2165,11 +2178,13 @@ CONTAINS
 
   end subroutine swap_vec_mask_spc
 
+
   ! ------------------------------------------------------------------
+
 
   elemental pure function special_value_dp(x, ieee)
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
     use, intrinsic :: ieee_arithmetic, only: ieee_value, &
          IEEE_SIGNALING_NAN, &
          IEEE_QUIET_NAN, &
@@ -2191,12 +2206,12 @@ CONTAINS
 
     ! local
     character(len=len(ieee)) :: ieee_up
-#ifdef GFORTRAN
+#ifdef __GFORTRAN__
     real(dp) :: tmp
 #endif
 
     ieee_up = itoupper(ieee)
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
     select case(trim(ieee_up))
     case('IEEE_SIGNALING_NAN')
        special_value_dp = ieee_value(x, IEEE_SIGNALING_NAN)
@@ -2256,7 +2271,7 @@ CONTAINS
 
   elemental pure function special_value_sp(x, ieee)
 
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
     use, intrinsic :: ieee_arithmetic, only: ieee_value, &
          IEEE_SIGNALING_NAN, &
          IEEE_QUIET_NAN, &
@@ -2278,12 +2293,12 @@ CONTAINS
 
     ! local
     character(len=len(ieee)) :: ieee_up
-#ifdef GFORTRAN
+#ifdef __GFORTRAN__
     real(sp) :: tmp
 #endif
 
     ieee_up = itoupper(ieee)
-#ifndef GFORTRAN
+#ifndef __GFORTRAN__
     select case(trim(ieee_up))
     case('IEEE_SIGNALING_NAN')
        special_value_sp = ieee_value(x, IEEE_SIGNALING_NAN)
@@ -2341,9 +2356,11 @@ CONTAINS
 
   end function special_value_sp
 
+
   ! -----------------------------------------------------------
   ! PRIVATE ROUTINES
   ! -----------------------------------------------------------
+
 
   ! ------------------------------------------------------------------
   !
