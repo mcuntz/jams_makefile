@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 #
-# Setup file for Intel' oneapi framework version 2021.1.1 at Matthias' Macbook Pro 16" at INRAE
+# Setup file for Intel' oneapi framework version 2021.3.0 at Matthias' Macbook Pro 16" at INRAE
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
@@ -9,7 +9,7 @@
 #
 
 # Paths
-INUM     := 2021.1.1
+INUM     := 2021.3.0
 IBASE    := /opt/intel/oneapi
 INTEL    := $(IBASE)/compiler/$(INUM)/mac/
 INTELBIN := $(INTEL)/bin/intel64
@@ -110,11 +110,11 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -D__LAPACK__
 
 # MPI
-OPENMPIDIR := /usr/local/openmpi-4.0.5-ifort
+OPENMPIDIR := /usr/local/openmpi-4.1.1-oneapi
 OPENMPIDEF := -D__MPI__
 
 # MPICH
-MPICHDIR :=
+MPICHDIR := /usr/local/mpich-3.4.2-ifort
 MPICHDEF := -D__MPI__
 
 # Documentation

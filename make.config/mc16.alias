@@ -15,6 +15,6 @@ endif
 ifneq (,$(findstring $(compiler),intel ifort intel20 ifort20 ifort2020))
     icompiler := intel2020
 endif
-ifneq (,$(findstring $(compiler),oneapi oneapi21 oneapi21.1 oneapi21.1.1 oneapi2021 oneapi2021.1))
-    icompiler := oneapi2021.1.1
+ifneq (,$(findstring $(compiler),oneapi oneapi21 oneapi21.3 oneapi21.3.0 oneapi2021 oneapi2021.3))
+    icompiler := oneapi2021.3.0
 endif
