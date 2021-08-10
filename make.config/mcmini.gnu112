@@ -1,0 +1,128 @@
+# -*- Makefile -*-
+
+#
+# Setup file for Gnu compiler 11.2 at Matthias' Mac Mini at INRAE
+#
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
+#
+# Copyright (c) 2011-2021 Matthias Cuntz - mc (at) macu (dot) de
+#
+
+# Paths
+GNUDIR := /opt/homebrew
+GNULIB := $(GNUDIR)/lib
+GNUBIN := $(GNUDIR)/bin
+
+# Compiling
+F90 := $(GNUBIN)/gfortran
+FC  := $(F90)
+CC  := /usr/bin/cc  # clang, same as /usr/bin/gcc
+CXX := /usr/bin/c++ # clang, same as /usr/bin/gcc
+CPP := /usr/bin/cpp # could be 'gcc -E -cpp' on Linux but does not work on Mac
+ifeq ($(release),debug)
+    F90FLAGS += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized -Wno-aggressive-loop-optimizations -fbacktrace # -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal -finit-real=<zero|inf|-inf|nan|snan> # -ffpe-trap=zero,overflow,underflow -finit-real=nan
+    FCFLAGS  += -pedantic-errors -Wall -W -O -g -Wno-maybe-uninitialized -Wno-aggressive-loop-optimizations -fbacktrace
+    CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized
+    CXXFLAGS += -pedantic -Wall -W -O -g -Wno-uninitialized
+else
+    F90FLAGS += -O3 -Wno-aggressive-loop-optimizations
+    FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
+    CFLAGS   += -O3
+    CXXFLAGS += -O3
+endif
+# -frecursive can lead to memory errors with messages like:
+#   "Illegal instruction: 4"  or
+#   "Segmentation fault: 11"
+# The -frecursive flag forces all local variables to be stored on the stack,
+# which might not be large enough.
+# Normally, gfortran would then move it to the (slower) heap giving a warning like:
+#   Warning: Array 'big' at (1) is larger than limit set by '-fmax-stack-var-size=',
+#   moved from stack to static storage. This makes the procedure unsafe when called
+#   recursively, or concurrently from multiple threads. Consider using '-frecursive',
+#   or increase the -fmax-stack-var-size=' limit, or change the code to use an
+#   ALLOCATABLE array. [-Wsurprising]
+# An example are the speed tests in test program for mo_percentile.
+F90FLAGS += -cpp -ffree-form -ffixed-line-length-132 -frecursive
+FCFLAGS  += -ffixed-form -ffixed-line-length-132 -frecursive -x f77-cpp-input
+CFLAGS   +=
+CXXFLAGS +=
+MODFLAG  := -J# space significant
+DEFINES  += -D__GFORTRAN__ -D__gFortran__
+# OpenMP
+F90OMPFLAG := -fopenmp
+FCOMPFLAG  := -fopenmp
+COMPFLAG   := -fopenmp
+CXXOMPFLAG := -fopenmp
+LDOMPFLAG  := -fopenmp
+OMPDEFINE  := -D__OPENMP__
+
+# Linking
+LIBS  += -L$(GNULIB)
+RPATH += -Wl,-rpath,$(GNULIB)
+
+# IMSL
+IMSLDIR  :=
+IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
+IMSLDEF  := #-D__IMSL__
+
+# MKL
+INTEL  := #/opt/intel/compilers_and_libraries_2017/mac
+MKLDIR := #$(INTEL)/mkl
+ifeq ($(openmp),true)
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
+else
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
+endif
+MKLDEF := -D__MKL__
+MKL95DIR  := #/opt/lib/mkl95_lapack/gfortran
+MKL95LIB  := #$(MKL95DIR)/lib
+MKL95INC  := #$(MKL95DIR)/include/intel64/lp64
+MKL95FLAG := -lmkl_lapack95_lp64
+MKL95DEF  := -D__MKL95__
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR  :=
+    NCFLAG := -lnetcdff -lnetcdf
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
+else
+    NCDIR    := /opt/homebrew
+    NCFLAG   := -lnetcdf
+    NCDEF    := -D__NETCDF__
+    NCFDIR   := /usr/local/netcdf-fortran-4.5.3-gfortran
+    NCFFLAG  := -lnetcdff
+    HDF5LIB  := /opt/homebrew/lib
+    HDF5FLAG := -lhdf5_hl -lhdf5
+    SZLIB    := /opt/homebrew/lib
+    SZFLAG   := -lsz
+    CURLLIB  := /usr/lib
+    CURLFLAG := -lcurl
+    ZFLAG    := -lz
+endif
+
+# PROJ
+PROJ4DIR  := /opt/homebrew/
+PROJ4FLAG := -lproj
+FPROJDIR  :=
+FPROJLIB  :=
+FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
+FPROJDEF  := #-D__FPROJ__
+
+# LAPACK
+LAPACKDIR  :=
+LAPACKFLAG := -framework Accelerate
+LAPACKDEF  := -D__LAPACK__
+
+# OPENMPI
+OPENMPIDIR := /usr/local/openmpi-4.1.1-gfortran
+OPENMPIDEF := -D__MPI__
+
+# MPICH
+MPICHDIR := /usr/local/mpich-3.3.1-gfortran
+MPICHDEF := -D__MPI__
+
+# Documentation
+DOXYGENDIR := /opt/homebrew/bin
+DOTDIR     := /opt/homebrew/bin
+TEXDIR     := /Library/TeX/texbin
+PERLDIR    := /usr/bin

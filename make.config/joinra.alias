@@ -10,6 +10,6 @@ ifneq (,$(findstring $(compiler),intel ifort intel15 ifort15 ifort2015))
     icompiler := intel2015
 endif
 ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran49 gcc49))
-    icompiler := gnu49
+    icompiler := gnu102
 endif
 

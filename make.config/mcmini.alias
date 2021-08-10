@@ -1,0 +1,11 @@
+# -*- Makefile -*-
+#
+# Set aliases so that one can, for example, use compiler=gcc to invoke gfortran@11.1 on mcmini
+#
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
+#
+# Copyright (c) 2011-2021 Matthias Cuntz - mc (at) macu (dot) de
+#
+ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran112 gcc112))
+    icompiler := gnu112
+endif
