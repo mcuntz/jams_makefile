@@ -108,11 +108,11 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -D__LAPACK__
 
 # MPI
-OPENMPIDIR := /usr/local/openmpi-4.0.5-ifort
+OPENMPIDIR := /usr/local/openmpi-4.1.1-ifort
 OPENMPIDEF := -D__MPI__
 
 # MPICH
-MPICHDIR :=
+MPICHDIR := /usr/local/mpich-3.4.2-ifort
 MPICHDEF := -D__MPI__
 
 # Documentation

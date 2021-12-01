@@ -1,11 +1,11 @@
 # -*- Makefile -*-
 
 #
-# Setup file for Gnu compiler 10.2 at Matthias' Macbook Pro 16" at INRAE
+# Setup file for Gnu compiler 11.2 at Matthias' Macbook Pro 13" at INRA
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-# Copyright (c) 2011-2020 Matthias Cuntz - mc (at) macu (dot) de
+# Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
 #
 
 # Paths
@@ -25,8 +25,8 @@ ifeq ($(release),debug)
     CFLAGS   += -pedantic -Wall -W -O -g -Wno-uninitialized
     CXXFLAGS += -pedantic -Wall -W -O -g -Wno-uninitialized
 else
-    F90FLAGS += -O3 -Wno-aggressive-loop-optimizations
-    FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
+    F90FLAGS += -O3 # -Wno-aggressive-loop-optimizations
+    FCFLAGS  += -O3 # -Wno-aggressive-loop-optimizations
     CFLAGS   += -O3
     CXXFLAGS += -O3
 endif
@@ -114,15 +114,15 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -D__LAPACK__
 
 # OPENMPI
-OPENMPIDIR := /usr/local/openmpi-4.1.1-gfortran
+OPENMPIDIR := /usr/local/openmpi-4.1.2-gfortran
 OPENMPIDEF := -D__MPI__
 
 # MPICH
-MPICHDIR := /usr/local/mpich-3.4.1-gfortran
+MPICHDIR := /usr/local/mpich-3.4.2-gfortran
 MPICHDEF := -D__MPI__
 
 # Documentation
 DOXYGENDIR := /usr/local/bin
 DOTDIR     := /usr/local/bin
 TEXDIR     := /Library/TeX/texbin
-PERLDIR    := /usr/local/bin
+PERLDIR    := /usr/bin

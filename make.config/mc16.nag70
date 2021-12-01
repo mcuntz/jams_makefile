@@ -121,7 +121,7 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -D__LAPACK__
 
 # MPI
-OPENMPIDIR := #/usr/local/openmpi-2.0.1-nagfor
+OPENMPIDIR := /usr/local/openmpi-4.1.1-nagfor
 OPENMPIDEF := -D__MPI__
 
 # MPICH
