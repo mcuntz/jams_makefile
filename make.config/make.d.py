@@ -1,91 +1,102 @@
 #!/usr/bin/env python
 from __future__ import print_function
 """
-usage: make.d.py [-h] [-f FortranFile] InputFile OutputPath FilesWithSourceFileList
+usage: make.d.py [-h] [-f OriginalFortranFile] InputFile OutputPath FilesWithSourceFileList
 
 Make dependency files for Fortran90 projects.
 
 positional arguments:
   InputFile OutputPath FilesWithSourceFileList
-                        Preprocessed input file, relative output directory
-                        (script assumes compilation into
-                        dirname(InputFile)/opath), file(s) with list(s) of all source files.
+      Preprocessed input file, relative output directory
+      (script assumes compilation into dirname(InputFile)/OutputPath),
+      file(s) with list(s) of all source files.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f FortranFile, --ffile FortranFile
-                        Not preprocessed Fortran source filename. If missing
-                        InputFile[:-4] is assumed.
+  -f OriginalFortranFile, --ffile OriginalFortranFile
+      Not preprocessed Fortran source filename. If missing
+      InputFile is used.
 
 
 History
 -------
-Written,  Matthias Cuntz, Mar 2016
-Modified, Matthias Cuntz, Nov 2016 - read/write 'r'/'w' instead of 'rb'/'wb' for Python3
-          Matthias Cuntz, Nov 2016 - read list of source file names from file instead of command line
-          Matthias Cuntz, Dec 2019 - use codecs module to ignore non-ascii characters in input files
-                                   - and allow UTF-8 path and file names
-          Matthias Cuntz, Mar 2020 - Rectified that UTF-8 path and file names worked only for Python2
+    * Written Mar 2016,Matthias Cuntz
+    * Use read/write 'r'/'w' instead of 'rb'/'wb' for Python3,
+      Nov 2016, Matthias Cuntz
+    * Read list of source file names from file instead of command line,
+      Nov 2016, Matthias Cuntz
+    * Use codecs module to ignore non-ascii characters in input files,
+      Dec 2019, Matthias Cuntz
+    * Allow UTF-8 in path and file names, Dec 2019, Matthias Cuntz
+    * Rectified that UTF-8 path and file names worked only for Python2
+      Mar 2020, Matthias Cuntz
+    * numpydoc and flake8, Dec 2021
+    * numpydoc and flake8, Dec 2021
+
 """
+
 
 __all__ = ['make_d']
 
+
 def make_dict(modfile, srcfiles):
     """
-    Makes module dictionary file from Fortran90 source files with entries such as
-    FortranFile: mo_mod1 mo_mod2
+    List of files and the modules they provide
 
+    Makes a file that lists all Fortran90 source files and the modules they
+    provide in the form
+    .. code-block::
 
-    Definition
+       FortranFile: mo_mod1 mo_mod2
+
+    Parameters
     ----------
-    def make_dict(modfile, srcfiles):
+    modfile : str
+        Output filename with list entries
+    srcfiles : list of str
+        List with Fortran90 files
 
-
-    Input
-    -----
-    modfile   dictionary filename
-    srcfiles  list with Fortran90 files
-
-
-    Output
-    ------
-    dictionary file with entries such as
-    FortranFile: mo_mod1 mo_mod2
-
-
-    Restrictions
-    ------------
-    Script assumes that the keyword 'module' and the module name are on the same line.
-    That means it does not allow to start a Fortran90 module like this:
-        module &
-            mo_name ! this is weird coding style
-
-
-    History
+    Returns
     -------
-    Written,  Matthias Cuntz, Mar 2016
-    Modified, Matthias Cuntz, Nov 2016 - write 'w' instead of 'wb' for Python3
-              Matthias Cuntz, Dec 2019 - use codecs module to ignore non-ascii text in files
+    modfile with entries such as
+    .. code-block::
+
+       FortranFile: mo_mod1 mo_mod2
+
+
+    Notes
+    -----
+    Script assumes that the keyword 'module' and the module name are on the
+    same line in the Fortran files. That means it does not allow to start a
+    Fortran90 module like this:
+    .. code-block:: f90
+
+        module &
+            mo_name ! this is a weird coding style
+
     """
     import os
     import re
     import codecs
 
-    if not os.path.exists(os.path.dirname(modfile)): os.mkdir(os.path.dirname(modfile))
+    if not os.path.exists(os.path.dirname(modfile)):
+        os.mkdir(os.path.dirname(modfile))
     of = codecs.open(modfile, 'w', encoding='utf-8')
     for ff in srcfiles:
-        # Go through line by line, remove comments and strings because the latter can include ';'.
+        # Go through line by line,
+        # remove comments and strings because the latter can include ';'.
         # Then split at at ';', if given.
-        # The stripped line should start with 'module ' and there should be nothing after the module name,
+        # The stripped line should start with 'module ' and there should
+        # be nothing after the module name,
         # as for example in lines such as 'module procedure ...'
         olist = list()
         fi = codecs.open(ff, 'r', encoding='ascii', errors='ignore')
         for line in fi:
-            ll = line.rstrip().lower()   # everything lower case
-            ll = re.sub('!.*$', '', ll)  # remove F90 comment
-            ll = re.sub('^c.*$', '', ll) # remove F77 comments
-            ll = re.sub('".*?"', '', ll) # remove "string"
-            ll = re.sub("'.*?'", '', ll) # remove 'string'
+            ll = line.rstrip().lower()    # everything lower case
+            ll = re.sub('!.*$', '', ll)   # remove F90 comment
+            ll = re.sub('^c.*$', '', ll)  # remove F77 comments
+            ll = re.sub('".*?"', '', ll)  # remove "string"
+            ll = re.sub("'.*?'", '', ll)  # remove 'string'
             # check if several commands are on one line
             if ';' in ll:
                 lll = ll.split(';')
@@ -93,10 +104,11 @@ def make_dict(modfile, srcfiles):
                 lll = [ll]
                 for il in lll:
                     iil = il.strip()
-                    # Line should start with 'module ' and there should be nothing after the module name
+                    # Line should start with 'module ' and there should be
+                    # nothing after the module name
                     if iil.startswith('module '):
-                        imod = iil[7:].strip()     # remove 'module '
-                        if len(imod.split()) == 1: # not 'module procedure'
+                        imod = iil[7:].strip()      # remove 'module '
+                        if len(imod.split()) == 1:  # not 'module procedure'
                             olist.append(imod)
         fi.close()
         # Line into dictionary file
@@ -112,38 +124,32 @@ def make_dict(modfile, srcfiles):
 
 def get_dict(modfile):
     """
-    Return dictionary from dictionary file produced by make_dict
-    with module names as keys and filenames as values.
+    Return dictionary from file produced by make_dict
 
+    It return dictionary with module names as keys and filenames as values.
 
-    Definition
+    Parameters
     ----------
-    def get_dict(modfile):
+    modfile : str
+        File with entries such as
+        .. code-block::
 
+           FortranFile: mo_mod1 mo_mod2
 
-    Input
-    -----
-    modfile   dictionary input file with entries such as
-              FortranFile: mo_mod1 mo_mod2
-
-
-    Output
-    ------
-    Dictionary with module names as keys and filenames as values,
-    e.g. dict['mo_kind'] = '/path/mo_kind.f90'
-
-
-    History
+    Returns
     -------
-    Written,  Matthias Cuntz, Mar 2016
-    Modified, Matthias Cuntz, Nov 2016 - read 'r' instead of 'rb' for Python3
+    dict
+        Dictionary with module names as keys and filenames as values,
+        e.g. dict['mo_kind'] = '/path/mo_kind.f90'
+
     """
     import codecs
 
     odict = dict()
     of = codecs.open(modfile, 'r', encoding='utf-8')
     for line in of:
-        # Dictionary lines should be like: /path/filename.suffix: mo_mod1 mo_mod2
+        # Dictionary lines should be like:
+        # /path/filename.suffix: mo_mod1 mo_mod2
         ll = line.rstrip().split(':')
         fname = ll[0]
         mods = ll[1].strip().split(' ')
@@ -156,44 +162,34 @@ def get_dict(modfile):
 
 def used_mods(ffile):
     """
-    Get list of modules used in one Fortran90 file.
+    List of modules used in one Fortran90 file
 
-
-    Definition
+    Parameters
     ----------
-    def used_mods(ffile):
+    ffile : str
+        Fortran90 file name
 
-
-    Input
-    -----
-    ffile   Fortran90 file name
-
-
-    Output
-    ------
-    List of modules used
-
-
-    History
+    Returns
     -------
-    Written,  Matthias Cuntz, Mar 2016
-    Modified, Matthias Cuntz, Nov 2016 - read 'r' instead of 'rb' for Python3
-              Matthias Cuntz, Dec 2019 - use codecs module to ignore non-ascii text in files
+    List of modules used in `ffile`
+
     """
     import re
     import codecs
 
-    # Go through line by line, remove comments and strings because the latter can include ';'.
+    # Go through line by line,
+    # remove comments and strings because the latter can include ';'.
     # Then split at at ';', if given.
-    # The stripped line should start with 'use ' and after module name should only be ', only: ...'
+    # The stripped line should start with 'use '
+    # and after module name should only be ', only: ...'
     olist = list()
     of = codecs.open(ffile, 'r', encoding='ascii', errors='ignore')
     for line in of:
-        ll = line.rstrip().lower()   # everything lower case
-        ll = re.sub('!.*$', '', ll)  # remove F90 comment
-        ll = re.sub('^c.*$', '', ll) # remove F77 comments
-        ll = re.sub('".*?"', '', ll) # remove "string"
-        ll = re.sub("'.*?'", '', ll) # remove 'string'
+        ll = line.rstrip().lower()    # everything lower case
+        ll = re.sub('!.*$', '', ll)   # remove F90 comment
+        ll = re.sub('^c.*$', '', ll)  # remove F77 comments
+        ll = re.sub('".*?"', '', ll)  # remove "string"
+        ll = re.sub("'.*?'", '', ll)  # remove 'string'
         # check if several commands are on one line
         if ';' in ll:
             lll = ll.split(';')
@@ -201,10 +197,12 @@ def used_mods(ffile):
             lll = [ll]
         for il in lll:
             iil = il.strip()
-            # Line should start with 'use ' and after module name should only be ', only: ...'
+            # Line should start with 'use '
+            # and after module name should only be ', only: ...'
             if iil.startswith('use '):
-                imod = iil[4:]                  # remove 'use '
-                imod = re.sub(',.*$', '', imod) # remove after , if: use mod, only: func
+                imod = iil[4:]                   # remove 'use '
+                # remove after ',' if: use mod, only: func
+                imod = re.sub(',.*$', '', imod)
                 olist.append(imod.strip())
     of.close()
 
@@ -213,36 +211,28 @@ def used_mods(ffile):
 
 def f2suff(forfile, opath, suff):
     """
-    Construct outputfile in opath with new suffix.
+    Construct output filename in opath with new suffix
 
-
-    Definition
+    Parameters
     ----------
-    def f2suff(forfile, opath, suff):
+    forfile : str
+        Fortran90 file name
+    opath : str
+        Relative output path.
+        Script assumes output path: dirname(forfile)/opath
+    suff : str
+        Suffix of input file will be replaced by suff
 
-
-    Input
-    -----
-    forfile   Fortran90 file name
-    opath     relative output path
-              Script assumes output path: dirname(forfile)/opath
-    suff      Input file sufix will be replaced by suff
-
-
-    Output
-    ------
-    Name of output file in opath and new suffix
-
-
-    History
+    Returns
     -------
-    Written,  Matthias Cuntz, Mar 2016
+    Name of output file in opath having new suffix
+
     """
     import os
 
     idir  = os.path.dirname(forfile)
     ifile = os.path.basename(forfile)
-    odir  = idir +'/' + opath
+    odir  = idir + '/' + opath
     ofile = ifile[0:ifile.rfind('.')] + '.' + suff
 
     return odir + '/' + ofile
@@ -265,62 +255,48 @@ def f2o(forfile, opath):
 # main
 def make_d(prefile, opath, srcfilelist, ffile=None):
     """
-    Make dependency files for Fortran90 projects.
+    Make dependency files for Fortran90 projects
 
-
-    Definition
+    Parameters
     ----------
-    def make_d(prefile, opath, srcfilelist, ffile=None):
+    prefile : str
+        Preprocessed Fortran input file
+    opath : str
+        Relative output directory.
+        Script assumes compilation into dirname(prefile)/opath
+    srcfilelist : list of str
+        File(s) with list(s) of all source files
+    ffile : str, optional
+        Not-preprocessed Fortran file name.
+        If not given prefile will be used.
 
-
-    Input
-    -----
-    prefile       Preprocessed input file
-    opath         Relative output directory
-                  Script assumes compilation into dirname(InputFile)/opath
-    srcfilelist   File(s) with list(s) of all source files
-
-
-    Optional Input
-    --------------
-    ffile         Not-preprocessed Fortran file name
-                  If not given prefile[:-4] will be assumed.
-
-
-    Output
-    ------
-    Dictionary file of modules found in source files: dirname(FirstFortranFile)/opath/make.d.dict
-    Dependency file dirname(FortranFile)/opath/basename(FortranFile).d
-
-
-    History
+    Returns
     -------
-    Written,  Matthias Cuntz, Mar 2016
-    Modified, Matthias Cuntz, Nov 2016 - write 'w' instead of 'wb' for Python3
-              Matthias Cuntz, Nov 2016 - read list of source file names from file instead of command line
-              Matthias Cuntz, Dec 2019 - use codecs module to allow UTF-8 path and file names
+    modules file, dependency file
+        file with list of modules used in source files
+        dirname(srcfilelist[0])/opath/make.d.dict,
+        dependency file dirname(ffile)/opath/basename(ffile).d
+
     """
     import os
     import codecs
 
-    # If Fortran file ffile not given, assume that preprocessed file is ffile.pre,
-    # or any other three letter suffix.
+    # If original Fortran source file ffile not given, use prefile.
     try:
         if ffile:
             forfile = ffile.decode('utf-8')
         else:
-            forfile = prefile[:-4].decode('utf-8')
+            forfile = prefile.decode('utf-8')
     except AttributeError:
         if ffile:
             forfile = ffile
         else:
-            forfile = prefile[:-4]
-
+            forfile = prefile
 
     # Get source file names from file list
     srcfiles = []
     for ff in srcfilelist:
-        fs = codecs.open(ff,'r',encoding='utf-8')
+        fs = codecs.open(ff, 'r', encoding='utf-8')
         srcfiles.extend(fs.read().split('\n'))
         fs.close()
     srcfiles = [ ss for ss in srcfiles if ss.strip() != '' ]
@@ -328,7 +304,8 @@ def make_d(prefile, opath, srcfilelist, ffile=None):
     # Only one dictionary file for all files in first object directory
     firstdir = os.path.dirname(srcfiles[0])
     modfile  = firstdir + '/' + opath + '/' + 'make.d.dict'
-    if not os.path.exists(modfile): make_dict(modfile, srcfiles)
+    if not os.path.exists(modfile):
+        make_dict(modfile, srcfiles)
 
     # Dictionary keys are module names, value is module filename.
     moddict = get_dict(modfile)
@@ -337,23 +314,25 @@ def make_d(prefile, opath, srcfilelist, ffile=None):
     imods = used_mods(prefile)
 
     # Query dictionary for filenames of modules used in fortran file.
-    # Remove own file name for circular dependencies if more than one module in fortran file.
+    # Remove own file name for circular dependencies if more than one
+    # module in fortran file.
     if imods:
         imodfiles = list()
         for d in imods:
-            if d in moddict: # otherwise external module such as netcdf
-                if moddict[d] != forfile: imodfiles.append(moddict[d])
+            if d in moddict:  # otherwise external module such as netcdf
+                if moddict[d] != forfile:
+                    imodfiles.append(moddict[d])
     else:
         imodfiles = []
 
     # Write output .d file
-    dfile = f2d(forfile,opath)
-    ofile = f2o(forfile,opath)
+    dfile = f2d(forfile, opath)
+    ofile = f2o(forfile, opath)
     df = codecs.open(dfile, 'w', encoding='utf-8')
     print(dfile, ':', forfile, file=df)
     print(ofile, ':', dfile, end='', file=df)
     for im in imodfiles:
-        print('', f2o(im,opath), end='', file=df)
+        print('', f2o(im, opath), end='', file=df)
     print('', file=df)
     df.close()
 
@@ -363,14 +342,17 @@ if __name__ == '__main__':
     import sys
 
     if sys.version.split()[0] < '2.7':
-        import optparse # deprecated with Python rev 2.7
+        import optparse  # deprecated with Python rev 2.7
 
         ffile = None
-        usage = "Make dependency files for Fortran90 projects.\nUsage: %prog [options] InputFile OutputPath FilesWithSourceFileList"
+        usage = ('Make dependency files for Fortran90 projects.\n'
+                 'Usage: %prog [options] InputFile OutputPath'
+                 ' FilesWithSourceFileList')
         parser = optparse.OptionParser(usage=usage)
-        parser.add_option('-f', '--ffile', action='store',
-                          default=ffile, dest='ffile', metavar='FortranFile',
-                          help='Not preprocessed Fortran source filename. If missing InputFile[:-4] is assumed.')
+        hstr = ('Original, not preprocessed Fortran source filename;'
+                ' if missing, InputFile is used.')
+        parser.add_option('-f', '--ffile', action='store', default=ffile,
+                          dest='ffile', metavar='FortranFile', help=hstr)
 
         (options, args) = parser.parse_args()
         ffile = options.ffile
@@ -379,13 +361,22 @@ if __name__ == '__main__':
         import argparse
 
         ffile = None
-        parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
-                                         description='Make dependency files for Fortran90 projects.')
-        parser.add_argument('-f', '--ffile', action='store',
-                            default=ffile, dest='ffile', metavar='FortranFile',
-                            help='Not preprocessed Fortran source filename. If missing InputFile[:-4] is assumed.')
-        parser.add_argument('files', nargs='*', default=None, metavar='InputFile OutputPath FilesWithSourceFileList',
-                           help='Preprocessed input file, relative output directory (script assumes compilation into dirname(InputFile)/opath), file(s) with list(s) of all source files.')
+        parser = argparse.ArgumentParser(
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            description='Make dependency files for Fortran90 projects.')
+        hstr = ('original, not preprocessed Fortran source filename;'
+                ' if missing, InputFile is used.')
+        parser.add_argument(
+            '-f', '--ffile', action='store', default=ffile, dest='ffile',
+            metavar='FortranFile', help=hstr)
+        hstr = ('preprocessed input file, relative output directory'
+                ' (script assumes compilation into'
+                ' dirname(FortranFile)/OutputPath),'
+                ' file(s) with list(s) of all source files.')
+        parser.add_argument(
+            'files', nargs='*', default=None,
+            metavar='InputFile OutputPath FilesWithSourceFileList',
+            help=hstr)
 
         args  = parser.parse_args()
         ffile = args.ffile
@@ -393,7 +384,8 @@ if __name__ == '__main__':
 
     if len(allin) < 3:
         print('Arguments: ', allin)
-        raise IOError('Script needs: InputFile OutputPath FilesWithSourceFileList.')
+        estr = 'Script needs: InputFile OutputPath FilesWithSourceFileList.'
+        raise IOError(estr)
 
     prefile  = allin[0]
     opath    = allin[1]
