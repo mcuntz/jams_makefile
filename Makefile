@@ -182,7 +182,7 @@ SHELL = /bin/bash
 
 # . is current directory, .. is parent directory
 # where are the source files; whitespace separated list
-SRCPATH    := ../jams_fortran/test/test_mo_netcdf
+SRCPATH    := ../jams_fortran/test/test_mo_utils
 # where shall be the executable
 PROGPATH   := .
 # where are the $(system).$(compiler) files
@@ -521,6 +521,7 @@ OBJPATH := $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)), $(SRCPATH))
 
 # Files with lists of file names
 OBJPATH1 := $(addsuffix /.$(strip $(icompiler)).$(strip $(irelease)), $(SRCPATH1))
+MAKEDICT := $(addsuffix /$(MAKEDSCRIPT:.py=.dict), $(OBJPATH1))
 SRCSFILE  := $(OBJPATH1)/make.d.srcs
 OBJSFILE  := $(OBJPATH1)/make.d.objs
 DOBJSFILE := $(OBJPATH1)/make.d.dobjs
@@ -781,13 +782,21 @@ $(LIBNAME): $(OBJS) $(FOBJS) $(COBJS) $(CXXOBJS)
 	$(AR) $(ARFLAGS) $(LIBNAME) $(OBJS) $(FOBJS) $(COBJS) $(CXXOBJS)
 	$(RANLIB) $(LIBNAME)
 
+# make all .d for the non-pre-processed Fortran source files
+$(MAKEDICT):
+	@if [[ ! -f $(MAKEDICT) ]] ; then \
+	$(MAKEDPROG) .$(strip $(icompiler)).$(strip $(irelease)) $(SRCSFILE) $(FSRCSFILE) ; fi
+
 # Get dependencies
-$(DOBJS):
+$(DOBJS): $(MAKEDICT)
 	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
 	@nobj=$$(grep -n -w -F $@  $(DOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(SRCSFILE)) ; \
 	$(CPP) -C -P $(DEFINES) $(INCLUDES) $$src > $$src.pre 2>/dev/null ; \
-	$(MAKEDPROG) -f $$src -i $$src.pre .$(strip $(icompiler)).$(strip $(irelease)) $(SRCSFILE) $(FSRCSFILE) ; \
+  dd=$$(diff -B $$src -i $$src.pre) ; \
+	if [[ -n $$dd ]] ; then \
+	echo $$src $$dd ; \
+	$(MAKEDPROG) -f $$src -i $$src.pre .$(strip $(icompiler)).$(strip $(irelease)) $(SRCSFILE) $(FSRCSFILE) ; fi ; \
 	\rm $$src.pre
 
 $(FDOBJS):
@@ -1034,7 +1043,7 @@ dependencies:
 	    obj=$$(sed -n $${nobj}p $(CXXOBJSFILE)) ; \
 	    if [ $${src} -nt $${obj} ] ; then rm $${i} ; fi ; \
 	done
-	@rm -f $(addsuffix /$(MAKEDSCRIPT:.py=.dict), $(OBJPATH))
+	@rm -f $(MAKEDICT)
 
 doxygen:
 	cat $(DOXCONFIG) | \
