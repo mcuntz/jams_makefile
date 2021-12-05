@@ -343,6 +343,12 @@ override CHECKPATH  := $(abspath $(CHECKPATH:~%=${HOME}%))
 override DOXCONFIG  := $(abspath $(DOXCONFIG:~%=${HOME}%))
 # $(info "DOXCONFIG: "$(DOXCONFIG))
 
+# check that all source paths exist
+allexist := $(shell for pp in $(SRCPATH) ; do if [[ ! -d $$pp ]] ; then echo 'Not' ; fi ; done)
+ifneq ($(allexist),)
+    $(error Error: Not all SRCPATH exist: $(SRCPATH))
+endif
+
 # Only Prog or Lib
 ifneq ($(and $(strip $(PROGNAME)),$(strip $(LIBNAME))),)
     $(error Error: only one of PROGNAME or LIBNAME can be given.)
@@ -537,7 +543,7 @@ CXXDOBJSFILE := $(OBJPATH1)/make.d.cxxdobjs
 LSRCSFILE := $(OBJPATH1)/make.d.lsrcs
 LOBJSFILE := $(OBJPATH1)/make.d.lobjs
 ifeq (False,$(iphonyall))
-    $(shell if [[ ! -d $(OBJPATH1) ]] ; then mkdir -p $(OBJPATH1) ; fi)
+    $(shell for dd in $(OBJPATH) ; do if [[ ! -d $$dd ]] ; then mkdir -p $$dd ; fi ; done)
     $(shell if [[ -f $(SRCSFILE) ]]   ; then rm $(SRCSFILE)   ; fi ; echo $(SRCS)   | tr ' ' '\n' >> $(SRCSFILE))
     $(shell if [[ -f $(OBJSFILE) ]]   ; then rm $(OBJSFILE)   ; fi ; echo $(OBJS)   | tr ' ' '\n' >> $(OBJSFILE))
     $(shell if [[ -f $(DOBJSFILE) ]]  ; then rm $(DOBJSFILE)  ; fi ; echo $(DOBJS)  | tr ' ' '\n' >> $(DOBJSFILE))
@@ -787,20 +793,17 @@ $(MAKEDICT):
 	@if [[ ! -f $(MAKEDICT) ]] ; then \
 	$(MAKEDPROG) .$(strip $(icompiler)).$(strip $(irelease)) $(SRCSFILE) $(FSRCSFILE) ; fi
 
-# Get dependencies
+# Get dependencies, retreat pre-processed files if needed
 $(DOBJS): $(MAKEDICT)
-	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
 	@nobj=$$(grep -n -w -F $@  $(DOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(SRCSFILE)) ; \
 	$(CPP) -C -P $(DEFINES) $(INCLUDES) $$src > $$src.pre 2>/dev/null ; \
-  dd=$$(diff -B $$src -i $$src.pre) ; \
+  dd=$$(diff -B -q $$src -i $$src.pre) ; \
 	if [[ -n $$dd ]] ; then \
-	echo $$src $$dd ; \
 	$(MAKEDPROG) -f $$src -i $$src.pre .$(strip $(icompiler)).$(strip $(irelease)) $(SRCSFILE) $(FSRCSFILE) ; fi ; \
 	\rm $$src.pre
 
 $(FDOBJS):
-	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
 	@nobj=$$(grep -n -w -F $@ $(FDOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(FSRCSFILE)) ; \
 	obj=$$(sed -n $${nobj}p $(FOBJSFILE)) ; \
@@ -808,14 +811,12 @@ $(FDOBJS):
 	echo "$$obj $$dobj : $$src" > $$dobj
 
 $(CDOBJS):
-	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
 	@nobj=$$(grep -n -w -F $@ $(CDOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(CSRCSFILE)) ; \
 	pobj=$(dir $@) ; psrc=$(dir $$src) ; \
 	$(CC) -E $(DEFINES) $(INCLUDES) -MM $$src | sed "s|.*:|$(patsubst %.d,%.o,$@) $@ :|" > $@
 
 $(CXXDOBJS):
-	@if [[ ! -d $(dir $@) ]] ; then mkdir -p $(dir $@) ; fi
 	@nobj=$$(grep -n -w -F $@ $(CXXDOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(CXXSRCSFILE)) ; \
 	pobj=$(dir $@) ; psrc=$(dir $$src) ; \
