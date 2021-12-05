@@ -642,18 +642,18 @@ ifneq (,$(filter $(imsl),vendor imsl))
     SDIRS += IMSLDIR
 endif
 # function (=) used below to set flag if given
-if_flag   = $(if $($(dir:DIR=FLAG)),$($(dir:DIR=FLAG)))
+if_flag = $(if $($(dir:DIR=FLAG)),$($(dir:DIR=FLAG)))
 # include flags such as -I/usr/local/include
 INCLUDES += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=INC)),-I$($(dir:DIR=INC)),$(if $($(dir)),-I$($(dir))/include)))
 # lib flags such as -L/usr/local/lib -lcurl
-iLIBS    += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=LIB)),-L$($(dir:DIR=LIB)) $(if_flag),$(if $($(dir)),-L$($(dir))/lib $(if_flag))))
+iLIBS += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=LIB)),-L$($(dir:DIR=LIB)) $(if_flag),$(if $($(dir)),-L$($(dir))/lib $(if_flag))))
 # lib flags that do not have a directory such as -lz or -framework Accelerate
-iLIBS    += $(foreach dir,$(SDIRS),$(if $(or $($(dir)),$($(dir:DIR=LIB))),,$(if_flag)))
+iLIBS += $(foreach dir,$(SDIRS),$(if $(or $($(dir)),$($(dir:DIR=LIB))),,$(if_flag)))
 # rpath
-WL       := -Wl,-rpath,
-RPATH    += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=LIB)),$(WL)$($(dir:DIR=LIB)),$(if $($(dir)),$(WL)$($(dir))/lib)))
+WL    := -Wl,-rpath,
+RPATH += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=LIB)),$(WL)$($(dir:DIR=LIB)),$(if $($(dir)),$(WL)$($(dir))/lib)))
 # defines
-DEFINES  += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=DEF)),$($(dir:DIR=DEF))))
+DEFINES += $(foreach dir,$(SDIRS),$(if $($(dir:DIR=DEF)),$($(dir:DIR=DEF))))
 
 # --- MPI ---------------------------------------------------
 MPI_F90FLAGS :=
@@ -726,7 +726,7 @@ ifeq ($(irelease),debug)
     DEFINES += -D__DEBUG__
 endif
 
-# Mac OS X is special, there is (almost) no static linking; otherwise close static group
+# End group for cyclic search in static linking
 ifeq ($(istatic),static)
     iLIBS += -Wl,--end-group
 endif
@@ -787,7 +787,7 @@ $(DOBJS):
 	@nobj=$$(grep -n -w -F $@  $(DOBJSFILE) | sed 's/:.*//') ; \
 	src=$$(sed -n $${nobj}p $(SRCSFILE)) ; \
 	$(CPP) -C -P $(DEFINES) $(INCLUDES) $$src > $$src.pre 2>/dev/null ; \
-	$(MAKEDPROG) -f $$src $$src.pre .$(strip $(icompiler)).$(strip $(irelease)) $(SRCSFILE) $(FSRCSFILE) ; \
+	$(MAKEDPROG) -f $$src -i $$src.pre .$(strip $(icompiler)).$(strip $(irelease)) $(SRCSFILE) $(FSRCSFILE) ; \
 	\rm $$src.pre
 
 $(FDOBJS):

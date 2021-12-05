@@ -1,21 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
 """
-usage: make.d.py [-h] [-f OriginalFortranFile] InputFile OutputPath FilesWithSourceFileList
-
-Make dependency files for Fortran90 projects.
-
-positional arguments:
-  InputFile OutputPath FilesWithSourceFileList
-      Preprocessed input file, relative output directory
-      (script assumes compilation into dirname(InputFile)/OutputPath),
-      file(s) with list(s) of all source files.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -f OriginalFortranFile, --ffile OriginalFortranFile
-      Not preprocessed Fortran source filename. If missing
-      InputFile is used.
 
 
 History
@@ -252,23 +237,77 @@ def f2o(forfile, opath):
     return f2suff(forfile, opath, 'o')
 
 
-# main
-def make_d(prefile, opath, srcfilelist, ffile=None):
+def make_one_d(prefile, ffile, opath, moddict):
     """
     Make dependency files for Fortran90 projects
 
     Parameters
     ----------
     prefile : str
-        Preprocessed Fortran input file
+        (Pre-processed) Fortran input file.
+    ffile : str
+        Original Fortran file name.
     opath : str
         Relative output directory.
-        Script assumes compilation into dirname(prefile)/opath
+        Script assumes compilation into dirname(ffile)/opath
+    moddict : dict
+        Dictionary keys are module names, values are module filenames
+
+    Returns
+    -------
+    dependency file written dirname(ffile)/opath/basename(ffile).d
+
+    """
+    import codecs
+
+    # List of modules used in input file
+    imods = used_mods(prefile)
+
+    # Query dictionary for filenames of modules used in fortran file.
+    # Remove own file name for circular dependencies if more than one
+    # module in fortran file.
+    if imods:
+        imodfiles = list()
+        for d in imods:
+            if d in moddict:  # otherwise external module such as netcdf
+                if moddict[d] != ffile:
+                    imodfiles.append(moddict[d])
+    else:
+        imodfiles = []
+
+    # Write output .d file
+    dfile = f2d(ffile, opath)
+    ofile = f2o(ffile, opath)
+    df = codecs.open(dfile, 'w', encoding='utf-8')
+    print(dfile, ':', ffile, file=df)
+    print(ofile, ':', dfile, end='', file=df)
+    for im in imodfiles:
+        print('', f2o(im, opath), end='', file=df)
+    print('', file=df)
+    df.close()
+
+    return
+
+
+# main
+def make_d(opath, srcfilelist, prefile=None, ffile=None):
+    """
+    Make dependency files for Fortran90 projects
+
+    Parameters
+    ----------
+    opath : str
+        Relative output directory.
+        Script assumes compilation into dirname(ffile)/opath
     srcfilelist : list of str
         File(s) with list(s) of all source files
+    prefile : str, optional
+        (Pre-processed) Fortran input file.
+        If missing, all files in `srcfilelist` will be treated.
     ffile : str, optional
-        Not-preprocessed Fortran file name.
-        If not given prefile will be used.
+        Not-pre-processed Fortran file name.
+        If not given, prefile will be used.
+        Ignored if prefile is not given.
 
     Returns
     -------
@@ -281,19 +320,7 @@ def make_d(prefile, opath, srcfilelist, ffile=None):
     import os
     import codecs
 
-    # If original Fortran source file ffile not given, use prefile.
-    try:
-        if ffile:
-            forfile = ffile.decode('utf-8')
-        else:
-            forfile = prefile.decode('utf-8')
-    except AttributeError:
-        if ffile:
-            forfile = ffile
-        else:
-            forfile = prefile
-
-    # Get source file names from file list
+    # File names of source files from file list(s)
     srcfiles = []
     for ff in srcfilelist:
         fs = codecs.open(ff, 'r', encoding='utf-8')
@@ -301,40 +328,35 @@ def make_d(prefile, opath, srcfilelist, ffile=None):
         fs.close()
     srcfiles = [ ss for ss in srcfiles if ss.strip() != '' ]
 
-    # Only one dictionary file for all files in first object directory
+    # Only one file with list of files and their modules provided
+    # put into first object directory
     firstdir = os.path.dirname(srcfiles[0])
     modfile  = firstdir + '/' + opath + '/' + 'make.d.dict'
     if not os.path.exists(modfile):
         make_dict(modfile, srcfiles)
 
-    # Dictionary keys are module names, value is module filename.
+    # Dictionary keys are module names, values are module filenames.
     moddict = get_dict(modfile)
 
-    # List of modules used in input file
-    imods = used_mods(prefile)
+    if prefile is not None:
+        # If original Fortran source file ffile not given, use prefile.
+        try:
+            if ffile:
+                forfile = ffile.decode('utf-8')
+            else:
+                forfile = prefile.decode('utf-8')
+        except AttributeError:
+            if ffile:
+                forfile = ffile
+            else:
+                forfile = prefile
 
-    # Query dictionary for filenames of modules used in fortran file.
-    # Remove own file name for circular dependencies if more than one
-    # module in fortran file.
-    if imods:
-        imodfiles = list()
-        for d in imods:
-            if d in moddict:  # otherwise external module such as netcdf
-                if moddict[d] != forfile:
-                    imodfiles.append(moddict[d])
+        make_one_d(prefile, forfile, opath, moddict)
     else:
-        imodfiles = []
+        for dd in srcfiles:
+            make_one_d(dd, dd, opath, moddict)
 
-    # Write output .d file
-    dfile = f2d(forfile, opath)
-    ofile = f2o(forfile, opath)
-    df = codecs.open(dfile, 'w', encoding='utf-8')
-    print(dfile, ':', forfile, file=df)
-    print(ofile, ':', dfile, end='', file=df)
-    for im in imodfiles:
-        print('', f2o(im, opath), end='', file=df)
-    print('', file=df)
-    df.close()
+    return
 
 
 if __name__ == '__main__':
@@ -344,53 +366,68 @@ if __name__ == '__main__':
     if sys.version.split()[0] < '2.7':
         import optparse  # deprecated with Python rev 2.7
 
-        ffile = None
-        usage = ('Make dependency files for Fortran90 projects.\n'
-                 'Usage: %prog [options] InputFile OutputPath'
-                 ' FilesWithSourceFileList')
+        prefile = None
+        ffile   = None
+        usage  = ('Make dependency files for Fortran90 projects.\n'
+                  'Usage: %prog [options] InputFile OutputPath'
+                  ' FilesWithSourceFileList')
         parser = optparse.OptionParser(usage=usage)
-        hstr = ('Original, not preprocessed Fortran source filename;'
-                ' if missing, InputFile is used.')
+        hstr = ('(pre-processed) Fortran source filename;'
+                ' if missing, all files in FilesWithSourceFileList'
+                '  will be treated.')
+        parser.add_option(
+            '-i', '--inputfile', action='store', default=prefile,
+            dest='prefile', metavar='InputFile', help=hstr)
+        hstr = ('Original, not pre-processed Fortran source filename;'
+                ' if missing, InputFile is used;'
+                ' ignored if InputFile is not given.')
         parser.add_option('-f', '--ffile', action='store', default=ffile,
                           dest='ffile', metavar='FortranFile', help=hstr)
 
         (options, args) = parser.parse_args()
-        ffile = options.ffile
-        allin = args
+        prefile = options.prefile
+        ffile   = options.ffile
+        allin   = args
     else:
         import argparse
 
-        ffile = None
-        parser = argparse.ArgumentParser(
+        prefile = None
+        ffile   = None
+        parser  = argparse.ArgumentParser(
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description='Make dependency files for Fortran90 projects.')
-        hstr = ('original, not preprocessed Fortran source filename;'
-                ' if missing, InputFile is used.')
+        hstr = ('(pre-processed) Fortran source filename;'
+                ' if missing, all files in FilesWithSourceFileList'
+                '  will be treated.')
+        parser.add_argument(
+            '-i', '--inputfile', action='store', default=prefile,
+            dest='prefile', metavar='InputFile', help=hstr)
+        hstr = ('original, not pre-processed Fortran source filename;'
+                ' if missing, InputFile is used;'
+                ' ignored if no InputFile given.')
         parser.add_argument(
             '-f', '--ffile', action='store', default=ffile, dest='ffile',
-            metavar='FortranFile', help=hstr)
-        hstr = ('preprocessed input file, relative output directory'
-                ' (script assumes compilation into'
-                ' dirname(FortranFile)/OutputPath),'
+            metavar='OriginalFortranFile', help=hstr)
+        hstr = ('relative output directory (script assumes compilation into'
+                ' dirname(OriginalFortranFile)/OutputPath),'
                 ' file(s) with list(s) of all source files.')
         parser.add_argument(
             'files', nargs='*', default=None,
-            metavar='InputFile OutputPath FilesWithSourceFileList',
-            help=hstr)
+            metavar='OutputPath FilesWithSourceFileList', help=hstr)
 
-        args  = parser.parse_args()
-        ffile = args.ffile
-        allin = args.files
+        args    = parser.parse_args()
+        prefile = args.prefile
+        ffile   = args.ffile
+        allin   = args.files
 
-    if len(allin) < 3:
+    if len(allin) < 2:
         print('Arguments: ', allin)
-        estr = 'Script needs: InputFile OutputPath FilesWithSourceFileList.'
+        estr = 'Script needs: OutputPath FilesWithSourceFileList.'
         raise IOError(estr)
 
-    prefile  = allin[0]
-    opath    = allin[1]
-    srcfilelist = allin[2:]
+    opath    = allin[0]
+    srcfilelist = allin[1:]
 
     del parser, args
 
-    make_d(prefile, opath, srcfilelist, ffile=ffile)
+    make_d(opath, srcfilelist, prefile=prefile, ffile=ffile)
