@@ -15,8 +15,12 @@ History
     * Allow UTF-8 in path and file names, Dec 2019, Matthias Cuntz
     * Rectified that UTF-8 path and file names worked only for Python2
       Mar 2020, Matthias Cuntz
-    * numpydoc and flake8, Dec 2021
-    * numpydoc and flake8, Dec 2021
+    * numpydoc and flake8, Dec 2021, Matthias Cuntz
+    * Added make_one_d, Dec 2021, Matthias Cuntz
+    * prefile optional; treat all files in srcfilelist in not given,
+      Dec 2021, Matthias Cuntz
+    * Need to put .f90-file as dependency of .o files now that the .d
+      files are not updated every time, Dec 2021, Matthias Cuntz
 
 """
 
@@ -280,7 +284,7 @@ def make_one_d(prefile, ffile, opath, moddict):
     ofile = f2o(ffile, opath)
     df = codecs.open(dfile, 'w', encoding='utf-8')
     print(dfile, ':', ffile, file=df)
-    print(ofile, ':', dfile, end='', file=df)
+    print(ofile, ':', ffile + ' ' + dfile, end='', file=df)
     for im in imodfiles:
         print('', f2o(im, opath), end='', file=df)
     print('', file=df)
