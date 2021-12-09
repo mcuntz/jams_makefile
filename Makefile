@@ -433,7 +433,7 @@ endif
 
 # System specific files
 ifeq (False,$(iphony))
-    SSRCS := $(foreach suff,$(system),$(wildcard $(addsuffix /*$(suff), $(SRCPATH))))
+    SSRCS := $(foreach suff,$(system),$(wildcard $(addsuffix /*.$(suff), $(SRCPATH))))
 endif
 SOBJS := $(foreach suff, $(system), $(patsubst %.$(suff), %, $(filter %$(suff), $(SSRCS))))
 
