@@ -154,7 +154,7 @@
 # -------
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-# Copyright (c) 2011-2020 Matthias Cuntz - mc (at) macu (dot) de
+# Copyright (c) 2011-2021 Matthias Cuntz - mc (at) macu (dot) de
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -182,7 +182,7 @@ SHELL = /bin/bash
 
 # . is current directory, .. is parent directory
 # where are the source files; whitespace separated list
-SRCPATH    := ../jams_fortran/test/test_mo_utils
+SRCPATH    := ../jams_fortran/test/test_mo_ansi_colors
 # where shall be the executable
 PROGPATH   := .
 # where are the $(system).$(compiler) files
@@ -218,7 +218,7 @@ compiler := gnu
 release  := debug
 # netCDF versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
 netcdf   := netcdf4
-# LAPACK (Linear Algebra Pack): true, [anything else]
+# LAPACK (Linear Algebra Pack): true, mkl, [anything else]
 lapack   := true
 # MKL (Intel's Math Kernel Library): mkl, mkl95, [anything else]
 mkl      :=
@@ -302,6 +302,7 @@ EXTRA_LDFLAGS  :=
 EXTRA_LIBS     :=
 EXTRA_CFLAGS   :=
 EXTRA_CXXFLAGS :=
+EXTRA_DIRS :=
 
 # Intel F2003 -assume realloc-lhs
 INTEL_EXCLUDE  :=
@@ -616,7 +617,17 @@ else
 endif
 
 # --- INCLUDES/LIBS/FLAGS/DEFINES/RPATH --------------------------
-SDIRS :=
+SDIRS := $(EXTRA_DIRS)
+ifeq ($(lapack),true)
+    ifeq (,$(filter $(mkl),mkl mkl95))
+        SDIRS += LAPACKDIR
+        SDIRS += BLASDIR
+    endif
+else ifeq ($(lapack),mkl)
+    ifeq (,$(filter $(mkl),mkl mkl95))
+        override mkl := mkl
+    endif
+endif
 ifneq (,$(filter $(mkl),mkl mkl95))
     # First mkl95 then mkl for .mod files other then intel
     ifeq ($(mkl),mkl95)
@@ -633,10 +644,6 @@ endif
 ifeq ($(proj),true)
     SDIRS += PROJ4DIR FPROJDIR
 endif
-ifeq ($(lapack),true)
-    SDIRS += LAPACKDIR
-    SDIRS += BLASDIR
-endif
 ifneq (,$(filter $(mpi),openmpi mpich))
     ifeq ($(netcdf),openmpi)
         SDIRS += OPENMPIDIR
@@ -648,6 +655,7 @@ endif
 ifneq (,$(filter $(imsl),vendor imsl))
     SDIRS += IMSLDIR
 endif
+
 # function (=) used below to set flag if given
 if_flag = $(if $($(dir:DIR=FLAG)),$($(dir:DIR=FLAG)))
 # include flags such as -I/usr/local/include
