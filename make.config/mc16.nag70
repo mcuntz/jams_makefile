@@ -45,7 +45,8 @@ else
     CFLAGS   += -O3
     CXXFLAGS += -O3
 endif
-F90FLAGS += -fpp -colour -unsharedf95 -kind=byte -ideclient -ieee=full -free # -ieee=stop -ieee=full -mismatch -mismatch-all
+# netcdf now done with CMAKE using default -kind=sequential
+F90FLAGS += -fpp -colour -unsharedf95 -ideclient -ieee=full -free # -ieee=stop -ieee=full -mismatch -mismatch-all -kind=byte
 ifneq ($(openmp),true)
     F90FLAGS += -not_openmp # since build 6210
 endif
