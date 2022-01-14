@@ -182,7 +182,7 @@ SHELL = /bin/bash
 
 # . is current directory, .. is parent directory
 # where are the source files; whitespace separated list
-SRCPATH    := ../jams_fortran/test/test_mo_ansi_colors
+SRCPATH    := ../jams_fortran/test/test_mo_mtclim
 # where shall be the executable
 PROGPATH   := .
 # where are the $(system).$(compiler) files
@@ -1011,16 +1011,16 @@ endif
 	        EXTRA_LIBS="$${libextra}" EXTRA_DEFINES="$${defextra}" EXTRA_INCLUDES="$${incextra}" > /dev/null \
 	    && { cd $${i} ; $(PROGNAME) 2>&1 | grep -E '(o\.k\.|failed)' ; cd - > /dev/null 2>&1 ;} ; status=$$? ; \
 	    if [ $${status} != 0 ] ; then echo "$${i} failed!" ; else echo "$${i} o.k." ; fi ; \
-	    $(MAKE) -f $(THISMAKEFILE) -s \
-	        MAKEDPATH=$(MAKEDPATH) SRCPATH="$${i}" PROGPATH=$(PROGPATH) \
-	        CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) \
-	        system=$(system) release=$(irelease) compiler=$(compiler) clean ; \
 	    if [ "$${j}z" != "z" ] ; then \
 	        $(MAKE) -f $(THISMAKEFILE) -s \
 	            MAKEDPATH=$(MAKEDPATH) SRCPATH="$${i}"/../../$${ldir} PROGPATH=$(PROGPATH) \
 	            CONFIGPATH=$(CONFIGPATH) PROGNAME= LIBNAME=$${lname} \
 	            system=$(system) release=$(irelease) compiler=$(compiler) clean ; \
 	    fi ; \
+	    $(MAKE) -f $(THISMAKEFILE) -s \
+	        MAKEDPATH=$(MAKEDPATH) SRCPATH="$${i}" PROGPATH=$(PROGPATH) \
+	        CONFIGPATH=$(CONFIGPATH) PROGNAME=$(PROGNAME) \
+	        system=$(system) release=$(irelease) compiler=$(compiler) clean ; \
 	done
 
 test: check
