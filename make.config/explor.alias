@@ -6,9 +6,12 @@
 #
 # Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
 #
-ifneq (,$(findstring $(compiler),gnu gfortran gcc))
-    icompiler := gnu63
+ifneq (,$(findstring $(compiler),gccconda condagcc))
+    icompiler := conda
 endif
-ifneq (,$(findstring $(compiler),intel intel2018 ifort ifort18 ifort2018))
-    icompiler := intel2018.5
+ifneq (,$(findstring $(compiler),gnu gfortran gcc gnu12 gcc12 gfortran12))
+    icompiler := gnu121
+endif
+ifneq (,$(findstring $(compiler),intel intel2019 ifort ifort19 ifort2019))
+    icompiler := intel2019.4
 endif

@@ -1,0 +1,128 @@
+# -*- Makefile -*-
+
+#
+# Setup file for Intel compiler 2018.0.128 on explor.univ-lorraine.fr
+#
+# This file is part of the JAMS Makefile system, distributed under the MIT License.
+#
+# Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
+#
+
+# Paths
+# INTEL    := /opt/soft/all/intel/compilers_and_libraries_2018.0.128/linux/
+INTEL    := /soft/env/soft/all/intel/2020.0/compilers_and_libraries_2020.0.166/linux/
+INTELLIB := $(INTEL)/compiler/lib/intel64
+INTELBIN := $(INTEL)/bin/intel64
+
+# Compiling
+F90 := $(INTELBIN)/ifort
+FC  := $(F90)
+CC  := $(INTELBIN)/icc
+CPP := /usr/bin/cpp
+ifeq ($(release),debug)
+    F90FLAGS += -warn all -g -debug -traceback -fp-stack-check -O0 -debug
+    F90FLAGS += -check all
+    # F90FLAGS += -check all,noarg_temp_created
+    FCFLAGS  += -g -debug -traceback -fp-stack-check -O0 -debug
+    CFLAGS   += -g -debug -traceback -fp-stack-check -O0 -debug -Wall -Wcheck
+else
+    # -fast (=-ipo -O3 -static) Multifile interprocedure optimization
+    # -vec-report1 to see vectorized loops; -vec-report2 to see also non-vectorized loops
+    F90FLAGS += -O3 -qopt-report=0 -qopt-report-phase=vec -qoverride-limits
+    FCFLAGS  += -O3 -qopt-report=0 -qopt-report-phase=vec -qoverride-limits
+    CFLAGS   += -O3
+endif
+F90FLAGS += -nofixed -assume byterecl -fpp -fp-model source -m64 -assume realloc-lhs # precise -> source: suppress warning, computation identical
+MODFLAG  := -module # space significant
+FCFLAGS  += -assume byterecl -fpp -fp-model source -m64 -fixed
+CFLAGS   += -m64 -std=c99
+DEFINES  += -D__INTEL__ -D__INTEL_COMPILER__
+# OpenMP
+F90OMPFLAG := -openmp
+FCOMPFLAG  := -openmp
+COMPFLAG   := -openmp
+LDOMPFLAG  := -openmp
+OMPDEFINE  := -D__OPENMP__
+
+
+# Linking
+ifeq ($(istatic),static)
+    LIBS += -static-intel
+endif
+LIBS += -L$(INTELLIB) -limf -lm -lsvml
+ifneq ($(istatic),static)
+     LIBS += -lintlc
+endif
+RPATH += -Wl,-rpath,$(INTELLIB)
+iLDPATH = $(INTEL)/compiler/lib/intel64:$(INTEL)/compiler/lib/intel64_lin:$(INTEL)/ipp/lib/intel64:$(INTEL)/compiler/lib/intel64_lin:$(INTEL)/tbb/lib/intel64/gcc4.7:/opt/soft/all/intel/debugger_2017/iga/lib:/opt/soft/all/intel/debugger_2017/libipt/intel64/lib:$(INTEL)/daal/lib/intel64_lin:$(INTEL)/daal/../tbb/lib/intel64_lin/gcc4.4
+ifneq ($(LDPATH),)
+    LDPATH += :$(iLDPATH)
+else
+    LDPATH := $(iLDPATH)
+endif
+
+# IMSL
+IMSLDIR :=
+
+# MKL
+MKLDIR := $(INTEL)/mkl
+MKLINC := $(MKLDIR)/include
+MKLLIB := $(MKLDIR)/lib/intel64_lin
+ifeq ($(openmp),true)
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
+else
+    MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_sequential #-lpthread
+endif
+MKLDEF := -D__MKL__
+MKL95DIR  := $(MKLDIR)
+MKL95INC  := $(MKL95DIR)/include/intel64/lp64
+MKL95LIB  := $(MKL95DIR)/lib/intel64_lin
+MKL95FLAG := -lmkl_blas95_lp64 -lmkl_lapack95_lp64
+MKL95DEF  := -D__MKL95__
+
+# NETCDF
+ifeq ($(netcdf),netcdf3)
+    NCDIR  := /home/oqx29/zzy20/local/netcdf-3.6.3-ifort2018.0
+    NCFLAG := -lnetcdff -lnetcdf
+    NCDEF  := -D__NETCDF__ -D__NETCDF3__
+else
+    NCDIR    := /home/oqx29/zzy20/local
+    NCFLAG   := -lnetcdf
+    NCDEF    := -D__NETCDF__
+    NCFDIR   := /home/oqx29/zzy20/local/netcdf-fortran-4.4.4-ifort2018.0
+    NCFFLAG  := -lnetcdff
+    HDF5LIB  := /home/oqx29/zzy20/local
+    HDF5FLAG := -lhdf5_hl -lhdf5
+    SZLIB    := /home/oqx29/zzy20/local
+    SZFLAG   := -lsz
+    ZLIB     := /usr/lib64
+    ZFLAG    := -lz
+endif
+
+# PROJ
+PROJ4DIR  := #/usr/local/proj/4.7.0
+PROJ4FLAG := #-lproj
+FPROJDIR  :=
+FPROJFLAG := #-lfproj4 $(FPROJLIB)/proj4.o
+FPROJDEF  := #-D__FPROJ__
+
+# LAPACK
+LAPACKDIR  := #/usr/local/lapack/3.5.0-1_gcc_4.8.1_CentOS6
+LAPACKFLAG := #-lblas -llapack
+LAPACKDEF  := #-D__LAPACK__
+
+# MPI
+OPENMPIDIR := /opt/soft/hf/openmpi-3.0.0-intel18
+OPENMPIDEF := -D__MPI__
+
+# Documentation
+DOXYGENDIR :=
+DOTDIR     :=
+TEXDIR     :=
+PERLDIR    := /usr/bin
+iiLDPATH :=
+ifneq ($(LDPATH),)
+    LDPATH += :$(iiLDPATH)
+else
+    LDPATH := $(iiLDPATH)
+endif
