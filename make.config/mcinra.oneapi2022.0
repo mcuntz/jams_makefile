@@ -1,19 +1,21 @@
 # -*- Makefile -*-
 
 #
-# Setup file for Intel compiler 2020 at Matthias' MacBook Pro at INRAE
+# Setup file for Intel's oneapi framework version 2022.0 at Matthias' Macbook Pro 13" at INRAE
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-# Copyright (c) 2011-2020 Matthias Cuntz - mc (at) macu (dot) de
+# Copyright (c) 2011-2022 Matthias Cuntz - mc (at) macu (dot) de
 #
 
 # Paths
-INTEL    := /opt/intel/compilers_and_libraries_2020/mac
-INTELBIN := $(INTEL)/bin
+INUM     := 2022.0.0
+IBASE    := /opt/intel/oneapi
+INTEL    := $(IBASE)/compiler/$(INUM)/mac/
+INTELBIN := $(INTEL)/bin/intel64
 INTELDIR := $(INTEL)
-# INTELINC := $(INTELDIR)/include/intel64
-INTELLIB := $(INTELDIR)/lib
+INTELINC := $(INTELDIR)/compiler/include
+INTELLIB := $(INTELDIR)/compiler/lib
 
 # Compiling
 # F90 := INTEL_LICENSE_FILE=/Users/cuntz/bin/licences/ifort_licence_2019.lic.mcinra $(INTELBIN)/ifort
@@ -36,6 +38,7 @@ endif
 F90FLAGS += -fpp -nofixed -assume byterecl -fp-model precise -m64 -ip -xHost -diag-disable=10382
 FCFLAGS  += -assume byterecl -cpp -fp-model precise -m64 -fixed -ip -xHost -diag-disable=10382
 CFLAGS   += -m64 -std=c99
+LDFLAGS  += -no-ipo
 MODFLAG  := -module # space significant
 DEFINES  += -D__INTEL__ -D__INTEL_COMPILER__
 # OpenMP
@@ -55,13 +58,17 @@ endif
 # endif
 RPATH += -Wl,-rpath,$(INTELLIB)
 
+# Apple developer tools
+SDKDIR := /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr
+EXTRA_DIRS += SDKDIR
+
 # IMSL
 IMSLDIR  :=
 IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpistub -limslsuperlu
 IMSLDEF  := #-D__IMSL__
 
 # MKL
-MKLDIR := $(INTEL)/mkl
+MKLDIR := $(IBASE)/mkl/latest
 ifeq ($(openmp),true)
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
 else
@@ -83,13 +90,13 @@ else
     NCDIR    := /usr/local/opt/netcdf
     NCFLAG   := -lnetcdf
     NCDEF    := -D__NETCDF__
-    NCFDIR   := /usr/local/netcdf-fortran-4.5.3-ifort
+    NCFDIR   := /usr/local/netcdf-fortran-4.5.3-oneapi
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
     SZLIB    := /usr/local/lib
     SZFLAG   := -lsz
-    CURLLIB  := /usr/lib
+    CURLLIB  := $(SDKDIR)/lib
     CURLFLAG := -lcurl
     ZFLAG    := -lz
 endif
@@ -108,7 +115,7 @@ LAPACKFLAG := -framework Accelerate
 LAPACKDEF  := -D__LAPACK__
 
 # MPI
-OPENMPIDIR := /usr/local/openmpi-4.1.1-ifort
+OPENMPIDIR := /usr/local/openmpi-4.1.1-oneapi
 OPENMPIDEF := -D__MPI__
 
 # MPICH

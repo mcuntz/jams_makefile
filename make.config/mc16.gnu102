@@ -5,7 +5,7 @@
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-# Copyright (c) 2011-2020 Matthias Cuntz - mc (at) macu (dot) de
+# Copyright (c) 2011-2022 Matthias Cuntz - mc (at) macu (dot) de
 #
 
 # Paths
@@ -66,8 +66,8 @@ IMSLFLAG := #-limsl -limslscalar -limsllapack -limslblas -limsls_err -limslmpist
 IMSLDEF  := #-D__IMSL__
 
 # MKL
-INTEL  := #/opt/intel/compilers_and_libraries_2017/mac
-MKLDIR := #$(INTEL)/mkl
+IBASE  := /opt/intel/oneapi
+MKLDIR := $(IBASE)/mkl/latest
 ifeq ($(openmp),true)
     MKLFLAG := -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread #-lpthread
 else

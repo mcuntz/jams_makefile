@@ -4,17 +4,8 @@
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-# Copyright (c) 2011-2021 Matthias Cuntz - mc (at) macu (dot) de
+# Copyright (c) 2011-2022 Matthias Cuntz - mc (at) macu (dot) de
 #
 ifneq (,$(findstring $(compiler),gnu gfortran gcc gfortran112 gcc112))
     icompiler := gnu112
-endif
-ifneq (,$(findstring $(compiler),nag nagfor nagfor70))
-    icompiler := nag70
-endif
-ifneq (,$(findstring $(compiler),intel ifort intel19 ifort19 ifort2019))
-    icompiler := intel2019
-endif
-ifneq (,$(findstring $(compiler),oneapi oneapi22 oneapi22.1 oneapi2022 oneapi2022.1))
-    icompiler := oneapi2022.1
 endif

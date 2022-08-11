@@ -5,11 +5,11 @@
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-# Copyright (c) 2011-2021 Matthias Cuntz - mc (at) macu (dot) de
+# Copyright (c) 2011-2022 Matthias Cuntz - mc (at) macu (dot) de
 #
 
 # Paths
-INUM     := 2022.0.0
+INUM     := 2022.1.0
 IBASE    := /opt/intel/oneapi
 INTEL    := $(IBASE)/compiler/$(INUM)/mac/
 INTELBIN := $(INTEL)/bin/intel64
@@ -38,6 +38,7 @@ endif
 F90FLAGS += -fpp -nofixed -assume byterecl -fp-model precise -m64 -ip -xHost -diag-disable=10382
 FCFLAGS  += -assume byterecl -cpp -fp-model precise -m64 -fixed -ip -xHost -diag-disable=10382
 CFLAGS   += -m64 -std=c99
+LDFLAGS  += -no-ipo
 MODFLAG  := -module # space significant
 DEFINES  += -D__INTEL__ -D__INTEL_COMPILER__
 # OpenMP
