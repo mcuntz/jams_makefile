@@ -89,7 +89,7 @@ else
     NCDIR    := /usr/local/opt/netcdf
     NCFLAG   := -lnetcdf
     NCDEF    := -D__NETCDF__
-    NCFDIR   := /usr/local/netcdf-fortran-4.5.3-oneapi
+    NCFDIR   := /usr/local/netcdf-fortran-4.6.0-oneapi
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
     HDF5FLAG := -lhdf5_hl -lhdf5

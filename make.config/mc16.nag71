@@ -97,7 +97,7 @@ else
     NCDIR    := /usr/local
     NCFLAG   := -lnetcdf
     NCDEF    := -D__NETCDF__
-    NCFDIR   := /usr/local/netcdf-fortran-4.5.3-nagfor
+    NCFDIR   := /usr/local/netcdf-fortran-4.6.0-nagfor
     NCFFLAG  := -lnetcdff
     HDF5LIB  := /usr/local/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
