@@ -21,6 +21,8 @@ History
       Dec 2021, Matthias Cuntz
     * Need to put .f90-file as dependency of .o files now that the .d
       files are not updated every time, Dec 2021, Matthias Cuntz
+    * Allow more general use statements in Fortran files,
+      Sep 2022, Matthias Cuntz
 
 """
 
@@ -169,8 +171,10 @@ def used_mods(ffile):
     # Go through line by line,
     # remove comments and strings because the latter can include ';'.
     # Then split at at ';', if given.
-    # The stripped line should start with 'use '
-    # and after module name should only be ', only: ...'
+    # The stripped line should start with 'use '.
+    # After use should be the "module_name", ', intrinsic :: module_name', or
+    # ', non_intrinsic :: module_name'. We allow also to use ":: module_name"
+    # After module name should only be ', only: ...' or ', a ==> b'
     olist = list()
     of = codecs.open(ffile, 'r', encoding='ascii', errors='ignore')
     for line in of:
@@ -186,13 +190,21 @@ def used_mods(ffile):
             lll = [ll]
         for il in lll:
             iil = il.strip()
-            # Line should start with 'use '
-            # and after module name should only be ', only: ...'
+            # line should start with 'use '
             if iil.startswith('use '):
-                imod = iil[4:]                   # remove 'use '
-                # remove after ',' if: use mod, only: func
-                imod = re.sub(',.*$', '', imod)
-                olist.append(imod.strip())
+                iil = iil[4:].strip()  # remove 'use '
+                # skip intrinsic modules
+                if 'intrinsic' in iil:
+                    if 'non_intrinsic' in iil:
+                        iil = re.sub(', *non_intrinsic', '', iil)
+                        iil = iil.strip()
+                    else:
+                        continue  # skip to next in lll
+                if iil.startswith('::'):
+                    iil = iil[2:].strip()  # remove ':: '
+                # remove after ',' if rename-list or only-list
+                iil = re.sub(',.*$', '', iil)
+                olist.append(iil.strip())
     of.close()
 
     return olist
