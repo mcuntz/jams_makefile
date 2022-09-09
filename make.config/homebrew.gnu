@@ -5,11 +5,13 @@
 #
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-# Copyright (c) 2011-2019 Matthias Cuntz - mc (at) macu (dot) de
+# Copyright (c) 2011-2022 Matthias Cuntz - mc (at) macu (dot) de
 #
 
 # Paths
-GNUDIR := /usr/local
+BREWDIR := $(shell if [[ -d /opt/homebrew ]] ; then echo '/opt/homebrew' ; else echo '/usr/local' ; fi)
+
+GNUDIR := $(BREWDIR)
 GNULIB := $(GNUDIR)/lib
 GNUBIN := $(GNUDIR)/bin
 
@@ -27,8 +29,8 @@ else
     FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
     CFLAGS   += -O3
 endif
-F90FLAGS += -cpp -ffree-form -ffixed-line-length-132
-FCFLAGS  += -ffixed-form -ffixed-line-length-132
+F90FLAGS += -cpp -ffree-form -ffree-line-length-none # -ffixed-line-length-132
+FCFLAGS  += -ffixed-form -ffree-line-length-none # -ffixed-line-length-132
 CFLAGS   +=
 MODFLAG  := -J# space significant
 DEFINES  += -D__GFORTRAN__ -D__gFortran__
@@ -69,14 +71,14 @@ ifeq ($(netcdf),netcdf3)
     NCFLAG := -lnetcdff -lnetcdf
     NCDEF  := -D__NETCDF__ -D__NETCDF3__
 else
-    NCDIR    := /usr/local
+    NCDIR    := $(BREWDIR)
     NCFLAG   := -lnetcdf
     NCDEF    := -D__NETCDF__
     NCFDIR   :=
     NCFFLAG  := -lnetcdff
-    HDF5LIB  := /usr/local/lib
+    HDF5LIB  := $(BREWDIR)/lib
     HDF5FLAG := -lhdf5_hl -lhdf5
-    SZLIB    := /usr/local/lib
+    SZLIB    := $(BREWDIR)/lib
     SZFLAG   := -lsz
     CURLLIB  := /usr/lib
     CURLFLAG := -lcurl
@@ -84,7 +86,7 @@ else
 endif
 
 # PROJ
-PROJ4DIR  := /usr/local/
+PROJ4DIR  := $(BREWDIR)
 PROJ4FLAG := -lproj
 FPROJDIR  :=
 FPROJLIB  :=
@@ -102,6 +104,6 @@ OPENMPIDEF  := -D__MPI__
 
 # Documentation
 DOXYGENDIR :=
-DOTDIR     := /usr/local/bin
+DOTDIR     := $(BREWDIR)/bin
 TEXDIR     := /Library/TeX/texbin
 PERLDIR    := /usr/bin

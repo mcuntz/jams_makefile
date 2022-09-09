@@ -42,8 +42,8 @@ endif
 #   or increase the -fmax-stack-var-size=' limit, or change the code to use an
 #   ALLOCATABLE array. [-Wsurprising]
 # An example are the speed tests in test program for mo_percentile.
-F90FLAGS += -cpp -ffree-form -ffixed-line-length-132 -frecursive
-FCFLAGS  += -ffixed-form -ffixed-line-length-132 -frecursive -x f77-cpp-input
+F90FLAGS += -cpp -ffree-form -frecursive -ffixed-line-length-132 # -ffree-line-length-none
+FCFLAGS  += -ffixed-form -frecursive -x f77-cpp-input -ffixed-line-length-132 # -ffree-line-length-none
 CFLAGS   +=
 CXXFLAGS +=
 MODFLAG  := -J# space significant
