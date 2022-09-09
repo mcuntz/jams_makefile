@@ -182,7 +182,7 @@ SHELL = /bin/bash
 
 # . is current directory, .. is parent directory
 # where are the source files; whitespace separated list
-SRCPATH    := ../jams_fortran/test/test_cfortran
+SRCPATH    := ./test/test_standard
 # where shall be the executable
 PROGPATH   := .
 # where are the $(system).$(compiler) files
@@ -190,7 +190,7 @@ CONFIGPATH := make.config
 # where is the make.d.py script
 MAKEDPATH  := $(CONFIGPATH)
 # path for $(CHECKPATH)/test* and $(CHECKPATH)/check* directories if target is check
-CHECKPATH  := ../jams_fortran/test
+CHECKPATH  := ../test
 # tools such as f2html
 TOOLPATH   := tools
 # the doxygen config file
@@ -289,7 +289,7 @@ static   := shared
 # NAG debug: -C=undefined -C=intovf
 #     -C=undefined is also checking 0-strings.
 #         Function nonull in JAMS mo_string_utils will stop with error.
-#     -C=undefined must be used on all routines, i.e. also on netcdf for example.
+#     -C=undefined must be used on all routines, i.e. also on all libraries such as netcdf.
 #         This means that all tests do not work which use netcdf and/or lapack.
 #     -C=intovf    check integer overflow, which is intentional in JAMS mo_xor4096.
 
