@@ -29,8 +29,8 @@ else
     FCFLAGS  += -O3 -Wno-aggressive-loop-optimizations
     CFLAGS   += -O3
 endif
-F90FLAGS += -cpp -ffree-form -ffree-line-length-none # -ffixed-line-length-132
-FCFLAGS  += -ffixed-form -ffree-line-length-none # -ffixed-line-length-132
+F90FLAGS += -cpp -ffree-form -ffixed-line-length-132 # -ffree-line-length-none
+FCFLAGS  += -ffixed-form -ffixed-line-length-132 # -ffree-line-length-none
 CFLAGS   +=
 MODFLAG  := -J# space significant
 DEFINES  += -D__GFORTRAN__ -D__gFortran__
