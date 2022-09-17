@@ -126,8 +126,8 @@
 #    dependency generation and compilation by first calling make with a dummy
 #    target, which creates all dependencies, and then second calling parallel
 #    make with the -j switch, i.e.
-#        make      system=mcinra compiler=intel release=release  dum
-#        make -j 8 system=mcinra compiler=intel release=release
+#        make system=mcinra compiler=intel release=release dummy
+#        make system=mcinra compiler=intel release=release -j 8
 #
 # 2. The static switch is maintained like a red-headed stepchild. Libraries
 #    might be not ordered correctly if static linking and
@@ -154,7 +154,7 @@
 # -------
 # This file is part of the JAMS Makefile system, distributed under the MIT License.
 #
-# Copyright (c) 2011-2021 Matthias Cuntz - mc (at) macu (dot) de
+# Copyright (c) 2011-2022 Matthias Cuntz - mc (at) macu (dot) de
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -176,16 +176,16 @@
 
 SHELL = /bin/bash
 
-#
-# --- SWITCHES -------------------------------------------------------
-#
+# ----------------------------------------------------------
+# START OF USER SECTION
+# ----------------------------------------------------------
 
 # . is current directory, .. is parent directory
 # where are the source files; whitespace separated list
 SRCPATH    := ./test/test_standard
-# where shall be the executable
+# where to place the executable
 PROGPATH   := .
-# where are the $(system).$(compiler) files
+# where are the $(system).$(compiler) config files
 CONFIGPATH := make.config
 # where is the make.d.py script
 MAKEDPATH  := $(CONFIGPATH)
@@ -207,14 +207,14 @@ LINKER   :=
 
 # Options
 # Systems: computer (system) name given during installation
-# such as mcair for Matthias' MacBook Air, for example.
+# such as mcair for Matthias' MacBook Air.
 # Look in $(MAKEDPATH) or type 'make info' for available computer systems.
 system   := mcinra
-# Compiler: e.g. gnuX where X stands for version number, e.g. intel13;
+# Compiler: e.g. gnu or gnuX where X stands for version number, e.g. gnu102;
 #   look at $(MAKEDPATH)/$(system).alias for shortcuts
 #   such as gnu for gnuX or type 'make info'
 compiler := gnu
-# Releases: debug, release, true (last two are equal)
+# Releases: debug, release, true (the last two are equal)
 release  := debug
 # netCDF versions (Network Common Data Form): netcdf3, netcdf4, [anything else]
 netcdf   := netcdf4
@@ -228,97 +228,74 @@ proj     :=
 imsl     :=
 # OpenMP parallelization: true, [anything else]
 openmp   :=
-# MPI parallelization - experimental: openmpi mpich [anything else]
+# MPI parallelization - experimental: openmpi, mpich, [anything else]
 mpi      :=
-# Linking: static, shared, dynamic (last two are equal)
+# Linking: static, shared, dynamic (the last two are equal)
 static   := shared
 
 # The Makefile sets the following variables depending on the above options:
 # FC, FCFLAGS, F90, F90FLAGS, CC, CFLAGS, CPP, DEFINES, INCLUDES, LD, LDFLAGS,
-# LIBS Flags, defines, etc. will be set incremental. They will be initialised
-# with the following EXTRA_* variables. This allows for example to set an extra
-# compiler option or define a preprocessor variable such as: EXTRA_DEFINES :=
-# -DNOGUI -DDPREC
+# LIBS.
+# Flags, defines, etc. will be set incremental. They will be initialised
+# with the following EXTRA_* variables, which are not in the config files.
+# This allows for example to set an extra compiler option or define a
+# preprocessor variable such as: EXTRA_DEFINES := -DNOGUI -DDPREC
 
-# The Makefile compiles all files found in the source directories.
-# If you want excludes files from compilation, set EXCLUDE_FILES, e.g.
-# make EXCLUDE_FILES="*mpi*.f90"
+# Fortran 77 compiler flags, such as -ffixed-form
+EXTRA_FCFLAGS :=
+# Fortran 90 compiler flags, such as -ffree-form
+EXTRA_F90FLAGS :=
+# Preprocessor flags, such as -DgFortran
+EXTRA_DEFINES :=
+# Include directives, such as -I/usr/local/include
+EXTRA_INCLUDES :=
+# Linker flags, such as -ipo (interprocedural optimization)
+EXTRA_LDFLAGS :=
+# External library flags, -L/usr/local/lib -lcurl
+EXTRA_LIBS :=
+# C-compiler flags, such as -std=c99
+EXTRA_CFLAGS :=
+# C++-compiler flags, such as -fstrict-enums
+EXTRA_CXXFLAGS :=
+# Base variable for extra library, such as HOMEBREWDIR
+# This will search for the variables
+# HOMEBREWDIR, HOMEBREWINC, HOMEBREWFLAG, HOMEBREWDEF,
+# which content will be added to the compilation flags, linker flags.
+# If *DIR is found but not *INC or *LIB, the standard directories
+# include and lib will be used in directory *DIR
+EXTRA_DIRS :=
 
-# Specific notes
-# If you encounter error messages during linking such as
-#     ... relocation truncated to fit: R_X86_64_PC32 against ...
-# then you ran out of memory address space, i.e. some hard-coded numbers in the
-# code got too big. Check that you have set the 64-bit addressing model in the
-# F90FLAGS and LDFAGS: -m64
-
-# On *nix systems, you can set the addressing model with -mcmodel=medium
-# (F90FLAGS and LDFAGS) for gfortran and intel.
-# Intel might also need -shared-intel at the LDFLAGS, i.e.
-#     EXTRA_F90FLAGS := -mcmodel=medium
-#     EXTRA_LDFLAGS  := -mcmodel=medium -shared-intel
-#
-# If you encouter the following error with the intel compiler (compiler bug):
+# In Fortran 2003, arrays can be (re-)allocated as a result of a function.
+# The Intel compiler adds this feature with the compiler option:  -assume realloc-lhs
+# If you encouter the following error with the Intel compiler (compiler bug):
 #      0_10708
 #     : catastrophic error: **Internal compiler error: internal abort**
 #     Please report this error along with the circumstances in which it occurred
 #     in a Software Problem Report.
 #     Note: File and line given may not be explicit cause of this error.
-# then you probably assume the F2003 feature that arrays can be (re-)allocated
-# as a result of a function.
-# Add the affected file to the list
-#     INTEL_EXCLUDE
-# below. This will not set the compiler flag -assume realloc-lhs.
+# This comes often from this feature.
+# Add the affected file to the list INTEL_EXCLUDE to compile it without the delete
+# realloc-lhs flag.
 # If this does not work, try to reduce the optimisation in the make.config files
 # (e.g. -O1)
+INTEL_EXCLUDE :=
 
-# Specific notes on optimisation and debugging
-# INTEL optimisation: -fast (=-ipo -O3 -static)
-#     -fast             Multifile interprocedure optimization
-# INTEL debug: -fpe=0 -fpe-all=0 -no-ftz -ftrapuv
-#     -fpe=0 -fpe-all=0  errors on all floating point exceptions except underflow.
-#     -no-ftz            catches then also all underflows.
-#     -ftrapuv           sets undefined numbers to arbitrary values so that
-#                        floating point exceptions kick in.
-# SUN optimisation: -xipo=2
-#     -xipo=n 0 disables interprocedural analysis,
-#             1 enables inlining across source files,
-#             2 adds whole-program detection and analysis.
-# SUN debug: -ftrap=%all, %none, common, [no%]invalid, [no%]overflow, [no%]underflow,
-#                   [no%]division, [no%]inexact.
-#     -ftrap=%n  Set floating-point trapping mode.
-# NAG debug: -C=undefined -C=intovf
-#     -C=undefined is also checking 0-strings.
-#         Function nonull in JAMS mo_string_utils will stop with error.
-#     -C=undefined must be used on all routines, i.e. also on all libraries such as netcdf.
-#         This means that all tests do not work which use netcdf and/or lapack.
-#     -C=intovf    check integer overflow, which is intentional in JAMS mo_xor4096.
-
-# Special compilation flags
-EXTRA_FCFLAGS  :=
-EXTRA_F90FLAGS :=
-EXTRA_DEFINES  :=
-EXTRA_INCLUDES :=
-EXTRA_LDFLAGS  :=
-EXTRA_LIBS     :=
-EXTRA_CFLAGS   :=
-EXTRA_CXXFLAGS :=
-EXTRA_DIRS :=
-
-# Intel F2003 -assume realloc-lhs
-INTEL_EXCLUDE  :=
+# The Makefile compiles all files found in the source directories.
+# If you want excludes files from compilation, set EXCLUDE_FILES, e.g.
+# make EXCLUDE_FILES="*mpi*.f90"
 
 # Exclude specific files from compilation
-EXCLUDE_FILES  :=
+EXCLUDE_FILES :=
 
 # Fortran 90 suffixes: .f90 .F90 .f95 .F95 .f03 .F03 .f08 .F08
 F90SUFFIXES := .f90 .F90 .f95 .F95 .f03 .F03 .f08 .F08
 # Fortran 77 suffixes: .f .F .for .FOR .f77 .F77 .ftn .FTN
 F77SUFFIXES := .f .F .for .FOR .f77 .F77 .ftn .FTN
 # C suffixes: .c .C .cc .CC
-CSUFFIXES   := .c .C .cc .CC
+CSUFFIXES := .c .C .cc .CC
 # C++ suffixes: .cpp .CPP .cxx .CXX .cp .CP .c++ .C++
 # often .C and .cc are also taken as C++, e.g. in gcc compiler suite
-CXXSUFFIXES   := .cpp .CPP .cxx .CXX .cp .CP .c++ .C++
+CXXSUFFIXES := .cpp .CPP .cxx .CXX .cp .CP .c++ .C++
 # Library suffixes: .a .so .dylib
 LIBSUFFIXES := .a .so .dylib
 
@@ -395,6 +372,16 @@ ifneq ($(strip $(MAKECMDGOALS)),)
         iphonyall := True
     endif
 endif
+
+# ToDo: modules
+# 1. set default system: modules
+# 2. get SRCS1, FSRCS1, ...
+# 3. search compiler
+# search for the first instance of a program in PATH
+# pathsearch = $(firstword $(wildcard $(addsuffix /$(1),$(subst :, ,$(PATH)))))
+# gives /bin/ls
+# LS := $(call pathsearch,ls)
+# 4. load modules config file which searches directories
 
 #
 # --- CHECK SYSTEM ----------------------------------------------
@@ -576,7 +563,7 @@ ifeq ($(strip $(MAKEINC)),)
 endif
 include $(MAKEINC)
 
-# Always use -DCFORTRAN for mixed C and Fortran compilations
+# Always use -D__CFORTRAN__ for mixed C and Fortran compilations
 DEFINES += -D__CFORTRAN__
 
 # Start group for cyclic search in static linking

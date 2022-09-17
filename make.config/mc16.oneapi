@@ -25,10 +25,17 @@ FC  := $(F90)
 CC  := $(INTELBIN)/icc
 CPP := /usr/bin/cpp  # could be 'gcc -E -cpp' on Linux but does not work on Mac
 ifeq ($(release),debug)
+    # debug: -fpe=0 -fpe-all=0 -no-ftz -ftrapuv
+    #     -fpe=0 -fpe-all=0  errors on all floating point exceptions except underflow.
+    #     -no-ftz            catches then also all underflows.
+    #     -ftrapuv           sets undefined numbers to arbitrary values so that
+    #                        floating point exceptions kick in.
     F90FLAGS += -check all -warn all -g -debug -traceback -fp-stack-check -O0 # -check all,noarg_temp_created
     FCFLAGS  += -g -debug -traceback -fp-stack-check -O0
     CFLAGS   += -g -debug -traceback -fp-stack-check -O0 -Wall -Wcheck
 else
+    # optimisation: -fast (=-ipo -O3 -static)
+    #     -fast             Multifile interprocedure optimization
     F90FLAGS += -O3 # old/deprecated: -vec-report0 -override-limits
     FCFLAGS  += -O3
     CFLAGS   += -O3

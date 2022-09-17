@@ -31,6 +31,11 @@ ifeq ($(release),debug)
     #   	Ordinary assignment of pointer function fname reference to pointer variable vname
     #   	Last statement of DO loop body is an unconditional jump
     #   	Array constructor has a polymorphic element but the constructor value will not be polymorphic
+    # -C=undefined is also checking 0-strings.
+    #     Function nonull in JAMS mo_string_utils will stop with error.
+    # -C=undefined must be used on all routines, i.e. also on all libraries such as netcdf.
+    #     This means that all tests do not work which use netcdf and/or lapack.
+    # -C=intovf    check integer overflow, which is intentional in JAMS mo_xor4096.
     F90FLAGS += -C -C=dangling -g -nan -O0 -strict95 -w=unreffed # -w=ques -g90
     ifneq ($(openmp),true)
         F90FLAGS += -gline
